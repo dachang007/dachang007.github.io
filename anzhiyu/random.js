@@ -1,4 +1,4 @@
-var posts=["2025/02/18/Java回顾-JVM虚拟机/","2025/02/18/Java回顾-基础篇/","2025/02/18/Java回顾-并发篇/","2025/02/18/Java回顾-框架篇/","2025/02/18/Java8新特性/","2025/02/18/java9/"];function toRandomPost(){
+var posts=["2025/02/18/Java8新特性/","2025/02/18/Java回顾-JVM虚拟机/","2025/02/18/Java回顾-基础篇/","2025/02/18/Java回顾-并发篇/","2025/02/18/Java设计模式-单例模式/","2025/02/18/Java回顾-框架篇/","2025/02/18/java9/"];function toRandomPost(){
     pjax.loadUrl('/'+posts[Math.floor(Math.random() * posts.length)]);
   };var friend_link_list=[];
     var refreshNum = 1;
