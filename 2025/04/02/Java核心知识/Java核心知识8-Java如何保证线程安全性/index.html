@@ -1,0 +1,610 @@
+<!DOCTYPE html><html lang="zh-cn" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>Java核心系列8：Java如何保证线程安全性 | 数根朽木，</title><meta name="keywords" content="Java基础,Java核心,JavaSE,线程安全"><meta name="author" content="dachang"><meta name="copyright" content="dachang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#F9F9F9"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="Java核心系列8：Java如何保证线程安全性"><meta name="application-name" content="Java核心系列8：Java如何保证线程安全性"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#F9F9F9"><meta property="og:type" content="article"><meta property="og:title" content="Java核心系列8：Java如何保证线程安全性"><meta property="og:url" content="https://yeoh.de5.net/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%868-Java%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/index.html"><meta property="og:site_name" content="数根朽木，"><meta property="og:description" content="1 Java内存模型（JMM） 如何解决并发问题维度1：使用关键字、属性进行优化 JMM本质实际就是：Java 内存模型规范了 JVM 如何提供按需禁用缓存和编译优化的方法。这些方法包括了：  volatile、synchronized 和 final 关键字 Happens-Before 规则"><meta property="og:locale" content="zh-cn"><meta property="og:image" content="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPHaUeniRmu8VmXdRdOwZJvuRr3qAQAAt4LaxunpzhWwB3-eqHKUV0BAAMCAAN4AAM2BA.png"><meta property="article:author" content="dachang"><meta property="article:tag" content="blog, coding, technology, personal"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPHaUeniRmu8VmXdRdOwZJvuRr3qAQAAt4LaxunpzhWwB3-eqHKUV0BAAMCAAN4AAM2BA.png"><meta name="description" content="1 Java内存模型（JMM） 如何解决并发问题维度1：使用关键字、属性进行优化 JMM本质实际就是：Java 内存模型规范了 JVM 如何提供按需禁用缓存和编译优化的方法。这些方法包括了：  volatile、synchronized 和 final 关键字 Happens-Before 规则"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="https://yeoh.de5.net/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%868-Java%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: undefined,
+  diytitle: undefined,
+  LA51: {"enable":true,"ck":null,"LingQueMonitorID":null},
+  greetingBox: undefined,
+  twikooEnvId: 'https://twikoo-kohl-zeta.vercel.app',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: undefined,
+  friends_vue_info: undefined,
+  navMusic: false,
+  mainTone: undefined,
+  authorStatus: undefined,
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"该文章距离上次更新已经过去","messageNext":"天了，文章内容可能已经过时，注意甄别。"},
+  highlight: {"plugin":"highlight.js","highlightCopy":false,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: dachang","link":"链接: ","source":"来源: 数根朽木，","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'mediumZoom',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: true,
+  islazyload: false,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '数根朽木，',
+  title: 'Java核心系列8：Java如何保证线程安全性',
+  postAI: '',
+  pageFillDescription: '1 Java内存模型（JMM） 如何解决并发问题, 2.1 关键字 volatile、synchronized 和 final, 2.1.1 volatile, 2.1.2 synchronized, 2.1.3 final, 2.2 Happens-Before 规则, 2.2.1 程序顺序规则（Program Order Rule）, 2.2.2 管程锁定规则（Monitor Lock Rule）, 2.2.3 volatile变量规则（Volatile Variable Rule）, 2.2.4 线程启动规则（Thread Start Rule）, 2.2.5 线程加入规则(（Thread Join Rule）, 2.2.6 线程终止规则（Thread Termination Rule）, 2.2.7 线程中断规则（ Thread Interruption Rule）, 2.2.8 对象终结规则（Finalizer Rule）, 2.2.9 传递性（Transitivity）, 3 线程安全性能讨论, 3.1 不可变（Immutable）, 3.2 绝对线程安全（Absolute Thread Safety）, 3.3 相对线程安全（Relative Thread Safety）, 3.4 线程兼容（Thread Compatibility）, 3.5 线程对立（Thread Hostility）, 4 如何实现线程安全, 4.1 synchronized关键字x2FReentrantLock特性, 4.2 非阻塞同步, 4.3 无同步方案, 5 总结内存模型如何解决并发问题维度使用关键字属性进行优化本质实际就是内存模型规范了如何提供按需禁用缓存和编译优化的方法这些方法包括了和关键字规则维度从顺序一致性可见性有序性原子性角度顺序一致性一个线程中的所有操作按照程序的顺序执行不受其他线程的影响原子性程序中对数据的读和写操作是原子性操作即这些操作是不可被中断的要么执行要么不执行否则会产生问题通过下面的案例可以看出哪些是原子操作哪些是非原子操作个动作线程直接将值赋给也就是直接写到内存中个动作先定义再读取的值最后赋值给个动作读取的值进行加操作然后新值重新写入新的值从上面的案例中可以看中只有第一个例子才是具备原子性的因为他只有一个存的动作至于其他的例子包含读取操作赋值等多个动作有一个动作失败则不成立所以基本读取和赋值内存模型可以保证原子性操作如果要实现更大范围步骤更多的操作的原子性则需要通过或者来实现和的存在是为了够保证任一时刻只有一个线程能够执行该代码块这样也就解决了原子性可见性提供了关键字来保证可见性使用来修饰共享变量可以保证修改的值立即更新到主存中这样其他线程读取数据时始终都会从内存中读取到新值而普通的共享变量不能保证可见性因为修改之后不确定什么时候被写入主存当其他去读取时内存中很有可能还是原来的旧值所以无法保证可见性另外通过关键字和功能也能够保证可见性因为能限制同一时刻只有一个线程获取锁然后执行同步代码且在释放之前会将变量的修改更新到主存中所以实时可见有序性在里面可以通过关键字来保证一定的有序性另外通过关键字和功能也能够保证可见性因为能限制同一时刻只有一个线程获取锁然后执行同步代码相当于是让线程顺序执行同步代码自然就保证了有序性注是通过规则来保证操作有序性关键字和在中和是三个非常重要的关键字它们都与并发编程密切相关下面是对这三个关键字的详细介绍是中的一种修饰符它用于声明一个共享变量以确保多个线程对该变量的访问是可见的和有序的关键字的作用是禁止指令重排和强制刷新缓存以保证操作的顺序性和可见性当一个变量被声明为时它表示该变量的值可能会被意想不到地改变编译器和处理器会注意到这个变量的特殊性并采取相应的措施来保证多个线程对该变量的访问是正确的具体来说关键字会禁止编译器对变量进行优化每次读取该变量时都会直接从它的内存地址中读取而不是从寄存器或缓存中读取同时关键字也会强制处理器在每个操作该变量的指令之后立即刷新缓存以保证其他线程能够看到最新的值需要注意的是虽然关键字可以保证可见性和有序性但它并不能保证原子性也就是说如果一个操作包含多个步骤而这些步骤不能被一个指令替换那么这个操作就不能被保证为原子性在这种情况下需要使用锁或者其他同步机制来保证原子性是中的一种关键字它用于实现同步代码块和方法关键字可以保证同一时刻只有一个线程能够执行被修饰的代码块或方法关键字会创建一个锁对象或锁标识符当一个线程获取了这个锁对象或锁标识符后其他线程就不能再获取这个锁对象或锁标识符直到第一个线程释放了这个锁对象或锁标识符关键字可以保证多个线程对共享变量的访问是互斥的也就是说在同一时刻只有一个线程能够访问共享变量这样可以避免多个线程同时修改共享变量而导致数据不一致的问题同时关键字还可以保证多个线程之间的操作是有序的即一个线程在执行代码块或方法之前必须等待其他线程完成之前的操作需要注意的是关键字虽然可以保证互斥性和有序性但它并不能保证原子性也就是说如果一个操作包含多个步骤而这些步骤不能被一个指令替换那么这个操作就不能被保证为原子性在这种情况下需要使用其他同步机制来保证原子性是中的一种修饰符它用于声明一个最终变量或方法关键字表示该变量或方法不能被修改或重写具体来说关键字可以用于声明一个常量该常量的值不能被修改也可以用于声明一个方法该方法不能被重写关键字在并发编程中也有着重要的作用关键字可以保证一个共享变量的值只被一个线程修改这样可以避免多个线程同时修改共享变量而导致数据不一致的问题同时关键字还可以保证一个方法的执行不会被其他线程中断或干扰这样可以保证方法的原子性和可见性需要注意的是关键字并不能保证多个线程之间的操作是有序的也就是说在一个线程中执行方法时其他线程可能会同时执行自己的操作而这些操作之间是没有顺序关系的在这种情况下需要使用其他同步机制来保证操作的顺序性规则上面提到了可以用和来保证有序性除此之外在中还有规则用来确定并发操作之间的顺序关系规则定义了以下几种顺序关系程序顺序规则在一个程序中按照代码的顺序先执行的操作后执行的操作这意味着在程序中如果一个操作先于另一个操作执行那么这个操作的结果对后续操作是可见的管程锁定规则一个操作先行发生于后面对同一个锁的操作变量规则对一个变量的写操作先行发生于后面对这个变量的读操作先写后读线程启动规则对象的方法调用先行发生于此线程的每一个动作线程加入规则对象的结束先行发生于方法返回线程终止规则线程中的所有操作都先行发生于对此线程的终止检测我们可以通过方法和的返回值等手段检测线程是否已经终止执行线程中断规则对线程方法的调用先行发生于被中断线程的代码检测到中断事件的发生可以通过方法检测到是否有中断发生对象终结规则一个对象的初始化完成构造函数执行结束先行发生于它的方法的开始传递性如果操作先行发生于操作操作先行发生于操作那就可以得出操作先行发生于操作的结论线程安全性能讨论在多线程环境中一个类或者一个函数不管在何种运行时环境或交替执行方式都能保证正确的行为被安全的调用就说明线程是安全的这个正确的行为通常包括原子性可见性和有序性但是线程安全不是非真即假共享数据按照安全程度的强弱顺序可以分成以下五类不可变绝对线程安全相对线程安全线程兼容线程对立按照线程安全性的强弱顺序不可变绝对线程安全相对线程安全线程兼容线程对立不可变不可变的对象在创建后其状态就不能被修改因此它们自然是线程安全的任何线程在任何时候访问这些对象都会看到相同的数据多线程环境下应当尽量使对象成为不可变来满足线程安全不可变的类型包括关键字修饰的基本数据类型枚举类型部分子类如和等数值包装类型和等大数据类型但同为的原子类和则是可变的对于集合类型可以使用方法来获取一个不可变的集合可以是执行时抛出异常不可变状态还可以这么理解外部无法对数据状态进行修改比如在这个例子中是不可变的因为它的构造函数是私有的外部无法修改其状态因此多个线程同时访问和获取对象的值时不会出现数据不一致的问题绝对线程安全绝对线程安全的对象无论运行时环境如何调用者都不需要任何额外的同步措施这通常需要付出较大的代价来实现在这个例子中的每个方法都使用了关键字进行同步这保证了无论多少个线程同时访问的对象每个线程的操作都会被串行执行不会出现数据竞争的问题相对线程安全相对线程安全的对象需要保证单个操作是线程安全的在调用的时候不需要做额外的保障措施但在连续调用时可能需要额外的同步措施来保证调用的正确性语言中大部分的线程安全类都属于这种类型例如的方法包装的集合等以为例因为它的每个方法都是同步的但是如果多个线程连续调用的不同方法如和仍然可能出现竞态条件为了避免这种情况调用者需要在外部进行额外的同步在下面代码中如果中的一个元素被线程删除而线程试图获取一个已经被删除的元素那么就会抛出如果要保证上面的代码能正确执行下去就需要对删除元素和获取元素的代码进行同步独立线程执行删除操作独立线程执行读取操作线程兼容线程兼容的对象本身不是线程安全的但可以通过在调用端添加额外的同步措施来保证在多线程环境下的安全使用中大部分的类都是属于线程兼容的比如类就不是线程安全的如果多个线程同时修改可能会导致数据不一致但是如果调用者在修改时使用块或其他同步机制进行同步就可以保证线程安全在这个例子中的方法没有使用关键字进行同步因此如果多个线程同时修改的对象可能会导致数据不一致线程对立线程对立的对象无论如何都无法在多线程环境下并发使用即使采取了同步措施一个典型的例子是中的类这个类用于生成随机数并且每个线程都有其自己的随机数生成器实例由于每个线程使用不同的实例因此无需担心线程安全问题但是如果尝试在没有正确初始化的情况下跨线程使用它就可能导致问题这种情况下即使添加了同步措施也无法保证线程安全如何实现线程安全关键字特性关键字在中关键字是一种内置的同步机制用于控制多个线程对共享资源的访问它用于在并发环境中保护代码块确保同一时刻只有一个线程可以执行该代码块关键字可以应用于方法或代码块当它应用于方法时它将锁住该方法的对象当它应用于代码块时它将锁住指定的锁对象上面这个例子中方法使用了关键字这意味着在任何时刻只有一个线程可以执行该方法如果有其他线程试图同时执行该方法它们将会被阻塞直到当前线程完成该方法的执行特性是中的一个可重入锁它是一种比关键字更灵活的线程同步机制允许一个线程多次获取同一个锁而不会产生死锁它也支持公平锁和非公平锁可以根据实际需求进行选择下面是一个使用的示例在上面的这个例子中我们定义了一个和一个计数器方法使用获取锁然后增加计数器的值最后使用释放锁方法直接返回计数器的值无需获取锁这种方式比使用关键字更灵活因为它可以细粒度地控制需要同步的代码块而不是整个方法后续的章节会详细的介绍关键字和特性敬请期待非阻塞同步在中互斥同步最主要的问题就是线程阻塞和唤醒所带来的开销导致的性能问题这种同步也称为阻塞同步是一种悲观的并发策略无论共享数据是否真的会出现竞争它都要进行加锁这样用户态核心态转换维护锁计数器和阻塞检查线程唤醒等操作都会产生大量的开销非阻塞同步是指在多线程环境下不需要使用阻塞等待的方式来实现同步控制线程可以一直进行计算操作而不会被阻塞下面介绍几种手段实现非阻塞同步随着硬件指令集水平的发展我们经常使用基于冲突检测的乐观并发策略先执行操作如果没有其它线程争用共享数据那操作就成功了否则采取补偿措施始终重试直至成功这种乐观的并发策略的许多实现都不需要将线程阻塞因此这种同步操作称为非阻塞同步乐观锁需要操作和冲突检测这两个步骤具备原子性这里就不能再使用互斥同步来保证了只能靠硬件来完成硬件支持的原子性操作最典型的是比较并交换操作包含三个操作数内存位置预期原值和新值如果内存位置的值与预期原值相匹配则将内存位置的值更新为否则不进行任何操作在并发环境中操作可以保证数据的一致性和线程安全性是中的一个原子整数类它提供了原子操作的更新方法可以在多线程环境下安全地更新共享的整数变量的更新方法包括等它们使用了类的操作保证对共享变量的操作是原子性的以下代码使用了执行了计数操作启动个线程每个线程将计数器加等待所有线程执行完毕输出计数器的值在这个示例中我们使用来维护一个计数器的值并启动了个线程每个线程将计数器加次由于提供了原子操作的更新方法因此即使多个线程同时更新计数器的值也不会出现线程安全问题最后我们输出计数器的值可以看到它应该是个线程每个线程执行次计数器加操作如果某个线程将变量更改为后再更改为那么另一个等待操作的线程会认为该变量没有发生过改变仍然是然后执行操作这样就可能导致数据的不一致包提供了一个带有标记的原子引用类来解决这个问题它可以通过控制变量值的版本来保证的正确性大部分情况下问题不会影响程序并发的正确性如果需要解决问题改用传统的互斥同步可能会比原子类更高效另外引入了一种新的原子类和它们内部采用了分段化的思想来解决高并发下的问题它们将内部变量分为一个数组每个线程更新自己的分段最后再合并结果这种方式既解决了问题又提高了并发性能无同步方案换一个思路如果没有方法的计算不涉及共享数据不需要进行同步是不是就不需要任何同步措施去保证正确性也就没有线程安全的问题栈封闭多个线程访问同一个方法的局部变量时不会出现线程安全问题因为局部变量存储在虚拟机栈中属于线程私有的线程本地存储如果一段代码中所需要的数据必须与其他代码共享那就看看这些共享数据的代码是否能保证在同一个线程中执行如果能保证我们就可以把共享数据的可见范围限制在同一个线程之内这样无须同步也能保证线程之间不出现数据争用的问题可重入代码可以在代码执行的任何时刻中断它转而去执行另外一段代码包括递归调用它本身而在控制权返回后原来的程序不会出现任何错误这块简单介绍后续会有专门的章节进行学习总结了解了多线程产生的原因以及线程不安全的原因从可见性原子性和有序性来阐述并发状态下线程不安全的原因分析了是怎么解决并发问题的',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-04-02 20:15:09',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#1F1F1F')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#F9F9F9')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><div class="back-home-button"><i class="anzhiyufont anzhiyu-icon-grip-vertical"></i><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网站项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="个人博客"><img class="back-menu-item-icon" src="/favicon.ico" alt="个人博客"/><span class="back-menu-item-text">个人博客</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线简历"><img class="back-menu-item-icon" src="/favicon.ico" alt="在线简历"/><span class="back-menu-item-text">在线简历</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">建设工具</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线图床"><img class="back-menu-item-icon" src="/img/image.ico" alt="在线图床"/><span class="back-menu-item-text">在线图床</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="在线烟花模拟器"><img class="back-menu-item-icon" src="/img/Clash.Mini.png" alt="在线烟花模拟器"/><span class="back-menu-item-text">在线烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="烟花模拟器"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMMZ7Qfv1Xv2qvgqSVN7kNhRO_uzfgAAlvAMRtiZKBVrGT1Z6RPiX4BAAMCAANtAAM2BA.png" alt="烟花模拟器"/><span class="back-menu-item-text">烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://pay.totalh.net/" title="三合一收款码"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAM8Z7WNYNdWdrYsas5PPFT8Di3493sAAgLKMRsEtalVDcfaakgTXPkBAAMCAAN4AAM2BA.png" alt="三合一收款码"/><span class="back-menu-item-text">三合一收款码</span></a></div></div></div></div><a id="site-name" href="/" accesskey="h"><div class="title">数根朽木，</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a><div id="he-plugin-simple"></div><script>var WIDGET = {
+  "CONFIG": {
+    "modules": "0124",
+    "background": "2",
+    "tmpColor": "FFFFFF",
+    "tmpSize": "16",
+    "cityColor": "FFFFFF",
+    "citySize": "16",
+    "aqiColor": "E8D87B",
+    "aqiSize": "16",
+    "weatherIconSize": "24",
+    "alertIconSize": "18",
+    "padding": "10px 10px 10px 10px",
+    "shadow": "0",
+    "language": "auto",
+    "borderRadius": "20",
+    "fixed": "true",
+    "vertical": "top",
+    "horizontal": "left",
+    "left": "20",
+    "top": "7.1",
+    "key": "df245676fb434a0691ead1c63341cd94"
+  }
+}
+</script><link rel="stylesheet" href="https://widget.qweather.net/simple/static/css/he-simple.css?v=1.4.0"/><script src="https://widget.qweather.net/simple/static/js/he-simple.js?v=1.4.0"></script></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 博客文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 全部文章</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 文章分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 所有标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 网站工具</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 图床工具</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="http://greatree.hidns.co"><i class="anzhiyufont anzhiyu-icon-artstation faa-tada" style="font-size: 0.9em;"></i><span> 烟花模拟器</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://suburl.v1.mk"><i class="anzhiyufont anzhiyu-icon-envelope faa-tada" style="font-size: 0.9em;"></i><span> 订阅转换</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><span> 在线简历生成</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于我</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 在线简历</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><i class="anzhiyufont anzhiyu-icon-shoe-prints1 faa-tada" style="font-size: 0.9em;"></i><span> 随便逛逛</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button only-home" id="travellings_button" title="随机前往一个开往项目网站"><a class="site-page" onclick="anzhiyu.totraveling()" title="随机前往一个开往项目网站" href="javascript:void(0);" rel="external nofollow" data-pjax-state="external"><i class="anzhiyufont anzhiyu-icon-train"></i></a></div><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Boolean-filter/" style="font-size: 1.05rem;">Boolean filter<sup>2</sup></a><a href="/tags/DNS%E6%B3%84%E9%9C%B2/" style="font-size: 1.05rem;">DNS泄露<sup>1</sup></a><a href="/tags/Fake-IP/" style="font-size: 1.05rem;">Fake IP<sup>1</sup></a><a href="/tags/JVM%E8%99%9A%E6%8B%9F%E6%9C%BA/" style="font-size: 1.05rem;">JVM虚拟机<sup>1</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>1</sup></a><a href="/tags/JavaSE/" style="font-size: 1.05rem;">JavaSE<sup>11</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 1.05rem;">Java基础<sup>11</sup></a><a href="/tags/Java%E6%A0%B8%E5%BF%83/" style="font-size: 1.05rem;">Java核心<sup>14</sup></a><a href="/tags/Java%E7%89%88%E6%9C%AC%E6%96%B0%E7%89%B9%E6%80%A7/" style="font-size: 1.05rem;">Java版本新特性<sup>2</sup></a><a href="/tags/MQ/" style="font-size: 1.05rem;">MQ<sup>2</sup></a><a href="/tags/MySQL/" style="font-size: 1.05rem;">MySQL<sup>10</sup></a><a href="/tags/OOM/" style="font-size: 1.05rem;">OOM<sup>1</sup></a><a href="/tags/RabbitMQ/" style="font-size: 1.05rem;">RabbitMQ<sup>2</sup></a><a href="/tags/Redis/" style="font-size: 1.05rem;">Redis<sup>5</sup></a><a href="/tags/Redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/" style="font-size: 1.05rem;">Redis内存淘汰策略<sup>1</sup></a><a href="/tags/Redis%E5%8E%9F%E7%90%86/" style="font-size: 1.05rem;">Redis原理<sup>1</sup></a><a href="/tags/Redis%E7%BC%93%E5%AD%98/" style="font-size: 1.05rem;">Redis缓存<sup>1</sup></a><a href="/tags/RocketMQ/" style="font-size: 1.05rem;">RocketMQ<sup>2</sup></a><a href="/tags/SSM/" style="font-size: 1.05rem;">SSM<sup>1</sup></a><a href="/tags/Spring/" style="font-size: 1.05rem;">Spring<sup>1</sup></a><a href="/tags/SpringBoot/" style="font-size: 1.05rem;">SpringBoot<sup>1</sup></a><a href="/tags/kafka/" style="font-size: 1.05rem;">kafka<sup>2</sup></a><a href="/tags/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" style="font-size: 1.05rem;">单例模式<sup>1</sup></a><a href="/tags/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/" style="font-size: 1.05rem;">布隆过滤器<sup>2</sup></a><a href="/tags/%E6%8E%A5%E5%8F%A3%E8%B6%85%E6%97%B6/" style="font-size: 1.05rem;">接口超时<sup>1</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/" style="font-size: 1.05rem;">消息中间件<sup>2</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" style="font-size: 1.05rem;">消息队列<sup>1</sup></a><a href="/tags/%E7%BA%BF%E4%B8%8A%E4%BA%8B%E6%95%85/" style="font-size: 1.05rem;">线上事故<sup>1</sup></a><a href="/tags/%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/" style="font-size: 1.05rem;">缓存雪崩<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96/" style="font-size: 1.05rem;">网络优化<sup>1</sup></a><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 1.05rem;">设计模式<sup>1</sup></a><a href="/tags/%E8%BF%90%E7%BB%B4%E8%B0%83%E4%BC%98/" style="font-size: 1.05rem;">运维调优<sup>3</sup></a><a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" style="font-size: 1.05rem;">高并发<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/05/"><span class="card-archive-list-date">五月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/04/"><span class="card-archive-list-date">四月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">15</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/03/"><span class="card-archive-list-date">三月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">12</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/02/"><span class="card-archive-list-date">二月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">10</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java%E6%A0%B8%E5%BF%83%E7%B3%BB%E5%88%97/" itemprop="url">Java核心系列</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/Java%E6%A0%B8%E5%BF%83/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>Java核心</span></a><a class="article-meta__tags" href="/tags/Java%E5%9F%BA%E7%A1%80/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>Java基础</span></a><a class="article-meta__tags" href="/tags/JavaSE/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>JavaSE</span></a></span></div></div><h1 class="post-title" itemprop="name headline">Java核心系列8：Java如何保证线程安全性</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-04-02T12:15:09.000Z" title="发表于 2025-04-02 20:15:09">2025-04-02</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-04-02T12:15:09.000Z" title="更新于 2025-04-02 20:15:09">2025-04-02</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-wordcount"><i class="anzhiyufont anzhiyu-icon-file-word post-meta-icon" title="文章字数"></i><span class="post-meta-label" title="文章字数">字数总计:</span><span class="word-count" title="文章字数">5.8k</span><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-clock post-meta-icon" title="阅读时长"></i><span class="post-meta-label" title="阅读时长">阅读时长:</span><span>19分钟</span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为深圳"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>深圳</span></div></div></div><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPHaUeniRmu8VmXdRdOwZJvuRr3qAQAAt4LaxunpzhWwB3-eqHKUV0BAAMCAAN4AAM2BA.png"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="https://yeoh.de5.net/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%868-Java%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/"><header><a class="post-meta-categories" href="/categories/Java%E6%A0%B8%E5%BF%83%E7%B3%BB%E5%88%97/" itemprop="url">Java核心系列</a><a href="/tags/Java%E6%A0%B8%E5%BF%83/" tabindex="-1" itemprop="url">Java核心</a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" tabindex="-1" itemprop="url">Java基础</a><a href="/tags/JavaSE/" tabindex="-1" itemprop="url">JavaSE</a><h1 id="CrawlerTitle" itemprop="name headline">Java核心系列8：Java如何保证线程安全性</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">dachang</span><time itemprop="dateCreated datePublished" datetime="2025-04-02T12:15:09.000Z" title="发表于 2025-04-02 20:15:09">2025-04-02</time><time itemprop="dateCreated datePublished" datetime="2025-04-02T12:15:09.000Z" title="更新于 2025-04-02 20:15:09">2025-04-02</time></header><h1 id="1-Java内存模型（JMM）-如何解决并发问题"><a href="#1-Java内存模型（JMM）-如何解决并发问题" class="headerlink" title="1 Java内存模型（JMM） 如何解决并发问题"></a>1 Java内存模型（JMM） 如何解决并发问题</h1><p><strong>维度1：使用关键字、属性进行优化</strong></p>
+<p>JMM本质实际就是：Java 内存模型规范了 JVM 如何提供按需禁用缓存和编译优化的方法。这些方法包括了：</p>
+<ul>
+<li>volatile、synchronized 和 final 关键字</li>
+<li>Happens-Before 规则</li>
+</ul>
+<p><strong>维度2：从 顺序一致性、可见性、有序性、原子性角度</strong></p>
+<ul>
+<li>顺序一致性</li>
+</ul>
+<p>一个线程中的所有操作按照程序的顺序执行，不受其他线程的影响。</p>
+<ul>
+<li>原子性</li>
+</ul>
+<p>Java程序中，对数据的读和写操作是原子性操作，即这些操作是不可被中断的，要么执行，要么不执行，否则会产生问题。<br>通过下面的案例可以看出，哪些是原子操作，哪些是非原子操作：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1个动作，线程直接将值赋给idx，也就是直接写到内存中</span></span><br><span class="line">idx = <span class="number">100</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 3个动作：先定义 jdx，再读取idx的值，最后赋值给jdx</span></span><br><span class="line">jdx := idx</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3个动作：读取jdx的值，进行加1操作，然后新值重新写入新的值</span></span><br><span class="line">jdx ++</span><br></pre></td></tr></table></figure>
+
+<p>从上面的案例中可以看中，只有第一个例子才是具备原子性的，因为他只有一个存的动作。至于其他的例子，包含读取、操作、赋值等多个动作，有一个动作失败则不成立。</p>
+<p>所以，基本读取和赋值，Java内存模型可以保证原子性操作，如果要实现更大范围、步骤更多的操作的原子性，则需要通过synchronized或者Lock来实现。</p>
+<p>synchronized和Lock的存在是为了够保证任一时刻只有一个线程能够执行该代码块，这样也就解决了原子性。</p>
+<ul>
+<li>可见性</li>
+</ul>
+<p>Java提供了volatile关键字来保证可见性，使用volatile来修饰共享变量，可以保证修改的值立即更新到主存中。这样其他线程读取数据时，始终都会从内存中读取到新值。</p>
+<p>而普通的共享变量不能保证可见性，因为修改之后，不确定什么时候被写入主存，当其他Thread去读取时，内存中很有可能还是原来的旧值，所以无法保证可见性。</p>
+<p>另外，通过synchronized关键字和Lock功能也能够保证可见性，因为能限制同一时刻只有一个线程获取锁然后执行同步代码，且在释放之前会将变量的修改更新到主存中。所以实时可见。</p>
+<ul>
+<li>有序性</li>
+</ul>
+<p>在Java里面，可以通过volatile关键字来保证一定的“有序性”。</p>
+<p>另外，通过synchronized关键字和Lock功能也能够保证可见性，因为能限制同一时刻只有一个线程获取锁然后执行同步代码，相当于是让线程顺序执行同步代码，自然就保证了有序性。</p>
+<p>注：JMM是通过Happens-Before 规则来保证Thread操作有序性。</p>
+<h2 id="2-1-关键字-volatile、synchronized-和-final"><a href="#2-1-关键字-volatile、synchronized-和-final" class="headerlink" title="2.1 关键字: volatile、synchronized 和 final"></a>2.1 关键字: volatile、synchronized 和 final</h2><p>在Java中，volatile、synchronized和final是三个非常重要的关键字，它们都与并发编程密切相关。下面是对这三个关键字的详细介绍：</p>
+<h3 id="2-1-1-volatile"><a href="#2-1-1-volatile" class="headerlink" title="2.1.1 volatile"></a>2.1.1 volatile</h3><p>volatile是Java中的一种修饰符，它用于声明一个共享变量，以确保多个线程对该变量的访问是可见的和有序的。volatile关键字的作用是禁止指令重排和强制刷新缓存，以保证操作的顺序性和可见性。</p>
+<p>当一个变量被声明为volatile时，它表示该变量的值可能会被意想不到地改变。编译器和处理器会注意到这个变量的特殊性，并采取相应的措施来保证多个线程对该变量的访问是正确的。具体来说，volatile关键字会禁止编译器对volatile变量进行优化，每次读取该变量时都会直接从它的内存地址中读取，而不是从寄存器或缓存中读取。同时，volatile关键字也会强制处理器在每个操作该变量的指令之后立即刷新缓存，以保证其他线程能够看到最新的值。</p>
+<p>需要注意的是，虽然volatile关键字可以保证可见性和有序性，但它并不能保证原子性。也就是说，如果一个操作包含多个步骤，而这些步骤不能被一个指令替换，那么这个操作就不能被保证为原子性。在这种情况下，需要使用锁或者其他同步机制来保证原子性。</p>
+<h3 id="2-1-2-synchronized"><a href="#2-1-2-synchronized" class="headerlink" title="2.1.2 synchronized"></a>2.1.2 synchronized</h3><p>synchronized是Java中的一种关键字，它用于实现同步代码块和方法。synchronized关键字可以保证同一时刻只有一个线程能够执行被synchronized修饰的代码块或方法。synchronized关键字会创建一个锁对象或锁标识符，当一个线程获取了这个锁对象或锁标识符后，其他线程就不能再获取这个锁对象或锁标识符，直到第一个线程释放了这个锁对象或锁标识符。</p>
+<p>synchronized关键字可以保证多个线程对共享变量的访问是互斥的，也就是说在同一时刻只有一个线程能够访问共享变量。这样可以避免多个线程同时修改共享变量而导致数据不一致的问题。同时，synchronized关键字还可以保证多个线程之间的操作是有序的，即一个线程在执行synchronized代码块或方法之前必须等待其他线程完成之前的操作。</p>
+<p>需要注意的是，synchronized关键字虽然可以保证互斥性和有序性，但它并不能保证原子性。也就是说，如果一个操作包含多个步骤，而这些步骤不能被一个指令替换，那么这个操作就不能被保证为原子性。在这种情况下，需要使用其他同步机制来保证原子性。</p>
+<h3 id="2-1-3-final"><a href="#2-1-3-final" class="headerlink" title="2.1.3 final"></a>2.1.3 final</h3><p>final是Java中的一种修饰符，它用于声明一个最终变量或方法。final关键字表示该变量或方法不能被修改或重写。具体来说，final关键字可以用于声明一个常量，该常量的值不能被修改；也可以用于声明一个方法，该方法不能被重写。</p>
+<p>final关键字在并发编程中也有着重要的作用。final关键字可以保证一个共享变量的值只被一个线程修改，这样可以避免多个线程同时修改共享变量而导致数据不一致的问题。同时，final关键字还可以保证一个方法的执行不会被其他线程中断或干扰，这样可以保证方法的原子性和可见性。</p>
+<p>需要注意的是，final关键字并不能保证多个线程之间的操作是有序的。也就是说，在一个线程中执行final方法时，其他线程可能会同时执行自己的操作，而这些操作之间是没有顺序关系的。在这种情况下，需要使用其他同步机制来保证操作的顺序性。</p>
+<h2 id="2-2-Happens-Before-规则"><a href="#2-2-Happens-Before-规则" class="headerlink" title="2.2 Happens-Before 规则"></a>2.2 Happens-Before 规则</h2><p>上面提到了可以用 volatile 和 synchronized 来保证有序性。除此之外，在JVM 中还有Happens-Before规则，用来确定并发操作之间的顺序关系。</p>
+<p>Happens-Before规则定义了以下几种顺序关系：</p>
+<h3 id="2-2-1-程序顺序规则（Program-Order-Rule）"><a href="#2-2-1-程序顺序规则（Program-Order-Rule）" class="headerlink" title="2.2.1 程序顺序规则（Program Order Rule）"></a>2.2.1 程序顺序规则（Program Order Rule）</h3><p>在一个程序中，按照代码的顺序，先执行的操作Happens-Before后执行的操作。这意味着在程序中，如果一个操作先于另一个操作执行，那么这个操作的结果对后续操作是可见的。</p>
+<p><img src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPMaUep0s9i6B7J4M0_5mE3hgMmkgMAAuULaxunpzhWEIJNAd4lSE8BAAMCAAN4AAM2BA.png" alt="程序顺序规则"></p>
+<h3 id="2-2-2-管程锁定规则（Monitor-Lock-Rule）"><a href="#2-2-2-管程锁定规则（Monitor-Lock-Rule）" class="headerlink" title="2.2.2 管程锁定规则（Monitor Lock Rule）"></a>2.2.2 管程锁定规则（Monitor Lock Rule）</h3><p>一个unlock操作先行发生于后面对同一个锁的lock操作。<br><img src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPLaUepsGjsjrpgPnxIYsLvGgLsCdwAAuQLaxunpzhWXx3hv6JOovgBAAMCAAN5AAM2BA.png" alt="管程锁定规则"></p>
+<h3 id="2-2-3-volatile变量规则（Volatile-Variable-Rule）"><a href="#2-2-3-volatile变量规则（Volatile-Variable-Rule）" class="headerlink" title="2.2.3 volatile变量规则（Volatile Variable Rule）"></a>2.2.3 volatile变量规则（Volatile Variable Rule）</h3><p>对一个 volatile 变量的写操作先行发生于后面对这个变量的读操作，先写后读。<br><img src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPKaUepjPks8Y6U1Ty5ZCn-a8R-M3kAAuMLaxunpzhW-spg20adwdgBAAMCAAN5AAM2BA.png" alt="volatile变量规则"></p>
+<h3 id="2-2-4-线程启动规则（Thread-Start-Rule）"><a href="#2-2-4-线程启动规则（Thread-Start-Rule）" class="headerlink" title="2.2.4 线程启动规则（Thread Start Rule）"></a>2.2.4 线程启动规则（Thread Start Rule）</h3><p>Thread 对象的 start() 方法调用先行发生于此线程的每一个动作。<br><img src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPJaUepceFgT1znaYKlNU4R0FNmaIUAAuELaxunpzhWFVMao-WL6a4BAAMCAAN5AAM2BA.png" alt="线程启动规则"></p>
+<h3 id="2-2-5-线程加入规则-（Thread-Join-Rule）"><a href="#2-2-5-线程加入规则-（Thread-Join-Rule）" class="headerlink" title="2.2.5 线程加入规则(（Thread Join Rule）"></a>2.2.5 线程加入规则(（Thread Join Rule）</h3><p>Thread 对象的结束先行发生于 join() 方法返回。<br><img src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPIaUepPEETisPsjID9A7_DlUmKBRsAAuALaxunpzhWNpI2Dr_LHlEBAAMCAAN5AAM2BA.png" alt="线程加入规则"></p>
+<h3 id="2-2-6-线程终止规则（Thread-Termination-Rule）"><a href="#2-2-6-线程终止规则（Thread-Termination-Rule）" class="headerlink" title="2.2.6 线程终止规则（Thread Termination Rule）"></a>2.2.6 线程终止规则（Thread Termination Rule）</h3><p>线程中的所有操作都先行发生于对此线程的终止检测，我们可以通过Thread.join()方法和Thread.isAlive()的返回值等手段检测线程是否已经终止执行</p>
+<h3 id="2-2-7-线程中断规则（-Thread-Interruption-Rule）"><a href="#2-2-7-线程中断规则（-Thread-Interruption-Rule）" class="headerlink" title="2.2.7 线程中断规则（ Thread Interruption Rule）"></a>2.2.7 线程中断规则（ Thread Interruption Rule）</h3><p>对线程 interrupt() 方法的调用先行发生于被中断线程的代码检测到中断事件的发生，可以通过 interrupted() 方法检测到是否有中断发生。</p>
+<h3 id="2-2-8-对象终结规则（Finalizer-Rule）"><a href="#2-2-8-对象终结规则（Finalizer-Rule）" class="headerlink" title="2.2.8 对象终结规则（Finalizer Rule）"></a>2.2.8 对象终结规则（Finalizer Rule）</h3><p>一个对象的初始化完成(构造函数执行结束)先行发生于它的 finalize() 方法的开始。</p>
+<h3 id="2-2-9-传递性（Transitivity）"><a href="#2-2-9-传递性（Transitivity）" class="headerlink" title="2.2.9 传递性（Transitivity）"></a>2.2.9 传递性（Transitivity）</h3><p>如果操作A先行发生于操作B，操作B先行发生于操作C，那就可以得出操作A先行发生于操作C的结论。</p>
+<h1 id="3-线程安全性能讨论"><a href="#3-线程安全性能讨论" class="headerlink" title="3 线程安全性能讨论"></a>3 线程安全性能讨论</h1><p>在多线程环境中，一个类或者一个函数不管在何种运行时环境或交替执行方式，都能保证正确的行为，被安全的调用，就说明线程是安全的。</p>
+<p>这个“正确的行为”通常包括原子性、可见性和有序性。</p>
+<p>但是线程安全不是非真即假，共享数据按照安全程度的强弱顺序可以分成以下五类:</p>
+<ul>
+<li>不可变</li>
+<li>绝对线程安全</li>
+<li>相对线程安全</li>
+<li>线程兼容</li>
+<li>线程对立</li>
+</ul>
+<p>按照线程安全性的强弱顺序，不可变 &gt; 绝对线程安全 &gt; 相对线程安全 &gt; 线程兼容 &gt; 线程对立。</p>
+<h2 id="3-1-不可变（Immutable）"><a href="#3-1-不可变（Immutable）" class="headerlink" title="3.1 不可变（Immutable）"></a>3.1 不可变（Immutable）</h2><p>不可变的对象在创建后其状态就不能被修改，因此它们自然是线程安全的。任何线程在任何时候访问这些对象，都会看到相同的数据。</p>
+<p>多线程环境下，应当尽量使对象成为不可变，来满足线程安全。</p>
+<p>不可变的类型包括:</p>
+<ul>
+<li>final 关键字修饰的基本数据类型</li>
+<li>String</li>
+<li>枚举类型</li>
+<li>Number 部分子类，如 Long 和 Double 等数值包装类型，BigInteger 和 BigDecimal 等大数据类型。但同为 Number 的原子类 AtomicInteger 和 AtomicLong 则是可变的</li>
+</ul>
+<p>对于集合类型，可以使用 Collections.unmodifiableXXX() 方法来获取一个不可变的集合。</p>
+<blockquote>
+<p>XXX 可以是Map、List、Set</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ImmutableClass</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        Map&lt;String, Integer&gt; testMap = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        Map&lt;String, Integer&gt; testUnmodifiable = Collections.unmodifiableMap(testMap);</span><br><span class="line">        testUnmodifiable.put(<span class="string">&quot;input-a&quot;</span>, <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行时抛出异常</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Exception in thread <span class="string">&quot;main&quot;</span> java.lang.UnsupportedOperationException</span><br><span class="line">    at java.util.Collections$testUnmodifiable.put(Collections.java:<span class="number">1523</span>)</span><br><span class="line">    at ImmutableExample.main(ImmutableClass.java:<span class="number">9</span>)</span><br></pre></td></tr></table></figure>
+
+<p>不可变状态还可以这么理解，外部无法对数据状态进行修改，比如</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ImmutableClass</span> &#123;  </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">int</span> value;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ImmutableClass</span><span class="params">(<span class="type">int</span> value)</span> &#123;  </span><br><span class="line">        <span class="built_in">this</span>.value = value;  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getValue</span><span class="params">()</span> &#123;  </span><br><span class="line">        <span class="keyword">return</span> value;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，ImmutableClass是不可变的，因为它的构造函数是私有的，外部无法修改其状态。因此，多个线程同时访问和获取ImmutableClass对象的值时，不会出现数据不一致的问题。</p>
+<h2 id="3-2-绝对线程安全（Absolute-Thread-Safety）"><a href="#3-2-绝对线程安全（Absolute-Thread-Safety）" class="headerlink" title="3.2 绝对线程安全（Absolute Thread Safety）"></a>3.2 绝对线程安全（Absolute Thread Safety）</h2><p>绝对线程安全的对象无论运行时环境如何，调用者都不需要任何额外的同步措施。这通常需要付出较大的代价来实现。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ThreadSafeClass</span> &#123;  </span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> value;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">setValue</span><span class="params">(<span class="type">int</span> value)</span> &#123;  </span><br><span class="line">        <span class="built_in">this</span>.value = value;  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="type">int</span> <span class="title function_">getValue</span><span class="params">()</span> &#123;  </span><br><span class="line">        <span class="keyword">return</span> value;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，ThreadSafeClass的每个方法都使用了synchronized关键字进行同步。这保证了无论多少个线程同时访问ThreadSafeClass的对象，每个线程的操作都会被串行执行，不会出现数据竞争的问题。</p>
+<h2 id="3-3-相对线程安全（Relative-Thread-Safety）"><a href="#3-3-相对线程安全（Relative-Thread-Safety）" class="headerlink" title="3.3 相对线程安全（Relative Thread Safety）"></a>3.3 相对线程安全（Relative Thread Safety）</h2><p>相对线程安全的对象需要保证单个操作是线程安全的，在调用的时候不需要做额外的保障措施。但在连续调用时可能需要额外的同步措施来保证调用的正确性。</p>
+<p>Java 语言中，大部分的线程安全类都属于这种类型，例如 Vector、HashTable、Collections 的 synchronizedCollection() 方法包装的集合等。</p>
+<p>以Hashtable为例，因为它的每个方法都是同步的。但是，如果多个线程连续调用Hashtable的不同方法（如put和get），仍然可能出现竞态条件。为了避免这种情况，调用者需要在外部进行额外的同步。</p>
+<p>在下面代码中，如果Vector中的一个元素被线程A删除，而线程B试图获取一个已经被删除的元素，那么就会抛出 ArrayIndexOutOfBoundsException。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">VectorUnsafeExample</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Vector&lt;Integer&gt; vector = <span class="keyword">new</span> <span class="title class_">Vector</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) &#123;</span><br><span class="line">                vector.add(i);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="type">ExecutorService</span> <span class="variable">executorService</span> <span class="operator">=</span> Executors.newCachedThreadPool();</span><br><span class="line">            executorService.execute(() -&gt; &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; vector.size(); i++) &#123;</span><br><span class="line">                    vector.remove(i);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">            executorService.execute(() -&gt; &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; vector.size(); i++) &#123;</span><br><span class="line">                    vector.get(i);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">            executorService.shutdown();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">Exception in thread <span class="string">&quot;Thread-159738&quot;</span> java.lang.ArrayIndexOutOfBoundsException: Array index out of range: <span class="number">3</span></span><br><span class="line">    at java.util.Vector.remove(Vector.java:<span class="number">831</span>)</span><br><span class="line">    at VectorUnsafeExample.lambda$main$<span class="number">0</span>(VectorUnsafeExample.java:<span class="number">14</span>)</span><br><span class="line">    at VectorUnsafeExample$$Lambda$<span class="number">1</span>/<span class="number">713338599.</span>run(Unknown Source)</span><br><span class="line">    at java.lang.Thread.run(Thread.java:<span class="number">745</span>)</span><br></pre></td></tr></table></figure>
+
+<p>如果要保证上面的代码能正确执行下去，就需要对删除元素和获取元素的代码进行同步。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"># 独立线程A执行删除操作</span><br><span class="line">executorService.execute(() -&gt; &#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (vector) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; vector.size(); i++) &#123;</span><br><span class="line">            vector.remove(i);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"># 独立线程B执行读取操作</span><br><span class="line">executorService.execute(() -&gt; &#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (vector) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; vector.size(); i++) &#123;</span><br><span class="line">            vector.get(i);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-4-线程兼容（Thread-Compatibility）"><a href="#3-4-线程兼容（Thread-Compatibility）" class="headerlink" title="3.4 线程兼容（Thread Compatibility）"></a>3.4 线程兼容（Thread Compatibility）</h2><p>线程兼容的对象本身不是线程安全的，但可以通过在调用端添加额外的同步措施来保证在多线程环境下的安全使用。<br>Java API 中大部分的类都是属于线程兼容的，比如ArrayList类就不是线程安全的。如果多个线程同时修改ArrayList，可能会导致数据不一致。但是，如果调用者在修改ArrayList时使用synchronized块或其他同步机制进行同步，就可以保证线程安全。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ThreadCompatibleClass</span> &#123;  </span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> value;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setValue</span><span class="params">(<span class="type">int</span> value)</span> &#123;  </span><br><span class="line">        <span class="built_in">this</span>.value = value;  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getValue</span><span class="params">()</span> &#123;  </span><br><span class="line">        <span class="keyword">return</span> value;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，ThreadCompatibleClass的方法没有使用synchronized关键字进行同步。因此，如果多个线程同时修改ThreadCompatibleClass的对象，可能会导致数据不一致。</p>
+<h2 id="3-5-线程对立（Thread-Hostility）"><a href="#3-5-线程对立（Thread-Hostility）" class="headerlink" title="3.5 线程对立（Thread Hostility）"></a>3.5 线程对立（Thread Hostility）</h2><p>线程对立的对象无论如何都无法在多线程环境下并发使用，即使采取了同步措施。</p>
+<p>一个典型的例子是Java中的ThreadLocalRandom类。这个类用于生成随机数，并且每个线程都有其自己的随机数生成器实例。由于每个线程使用不同的实例，因此无需担心线程安全问题。但是，如果尝试在没有正确初始化ThreadLocalRandom的情况下跨线程使用它，就可能导致问题。</p>
+<p>这种情况下，即使添加了同步措施也无法保证线程安全。</p>
+<h1 id="4-如何实现线程安全"><a href="#4-如何实现线程安全" class="headerlink" title="4 如何实现线程安全"></a>4 如何实现线程安全</h1><h2 id="4-1-synchronized关键字-ReentrantLock特性"><a href="#4-1-synchronized关键字-ReentrantLock特性" class="headerlink" title="4.1 synchronized关键字&#x2F;ReentrantLock特性"></a>4.1 synchronized关键字&#x2F;ReentrantLock特性</h2><ul>
+<li>synchronized关键字</li>
+</ul>
+<p>在Java中，synchronized关键字是一种内置的同步机制，用于控制多个线程对共享资源的访问。它用于在并发环境中保护代码块，确保同一时刻只有一个线程可以执行该代码块。</p>
+<p>synchronized关键字可以应用于方法或代码块。当它应用于方法时，它将锁住该方法的对象。当它应用于代码块时，它将锁住指定的锁对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SynchronizedExample</span> &#123;  </span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> <span class="variable">count</span> <span class="operator">=</span> <span class="number">0</span>;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">incrementCount</span><span class="params">()</span> &#123;  </span><br><span class="line">        count++;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面这个例子中，incrementCount()方法使用了synchronized关键字。这意味着在任何时刻，只有一个线程可以执行该方法。如果有其他线程试图同时执行该方法，它们将会被阻塞，直到当前线程完成该方法的执行。</p>
+<ul>
+<li>ReentrantLock特性</li>
+</ul>
+<p>ReentrantLock 是 Java 中的一个可重入锁，它是一种比 synchronized 关键字更灵活的线程同步机制。ReentrantLock 允许一个线程多次获取同一个锁，而不会产生死锁。它也支持公平锁和非公平锁，可以根据实际需求进行选择。</p>
+<p>下面是一个使用 ReentrantLock 的示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.concurrent.locks.ReentrantLock;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ReentrantLockExample</span> &#123;  </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">ReentrantLock</span> <span class="variable">lock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReentrantLock</span>();  </span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> <span class="variable">count</span> <span class="operator">=</span> <span class="number">0</span>;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">incrementCount</span><span class="params">()</span> &#123;  </span><br><span class="line">        lock.lock();  </span><br><span class="line">        <span class="keyword">try</span> &#123;  </span><br><span class="line">            count++;  </span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;  </span><br><span class="line">            lock.unlock();  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getCount</span><span class="params">()</span> &#123;  </span><br><span class="line">        <span class="keyword">return</span> count;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在上面的这个例子中，我们定义了一个 ReentrantLock 和一个计数器 count。</p>
+<p>incrementCount() 方法使用 lock.lock() 获取锁，然后增加计数器的值，最后使用 lock.unlock() 释放锁。</p>
+<p>getCount() 方法直接返回计数器的值，无需获取锁。<br>这种方式比使用 synchronized 关键字更灵活，因为它可以细粒度地控制需要同步的代码块，而不是整个方法。</p>
+<p>★ 后续的章节会详细的介绍 synchronized关键字和ReentrantLock特性，敬请期待</p>
+<h2 id="4-2-非阻塞同步"><a href="#4-2-非阻塞同步" class="headerlink" title="4.2 非阻塞同步"></a>4.2 非阻塞同步</h2><p>在JAVA中，互斥同步最主要的问题就是线程阻塞和唤醒所带来的开销导致的性能问题，这种同步也称为阻塞同步，是一种悲观的并发策略，无论共享数据是否真的会出现竞争，它都要进行加锁，这样 用户态核心态转换、维护锁计数器和阻塞检查、线程唤醒等操作都会产生大量的开销。</p>
+<p>非阻塞同步是指在多线程环境下，不需要使用阻塞等待的方式来实现同步控制，线程可以一直进行计算操作，而不会被阻塞。下面介绍几种手段实现非阻塞同步。</p>
+<ol>
+<li><p>CAS</p>
+<p>​        随着硬件指令集水平的发展，我们经常使用基于冲突检测的乐观并发策略: 先执行操作，如果没有其它线程争用共享数据，那操作就成功了，否则采取补偿措施(始终重试，直至成功)。这种乐观的并发策略的许多实现都不需要将线程阻塞，因此这种同步操作称为非阻塞同步。</p>
+<p>​        乐观锁需要操作和冲突检测这两个步骤具备原子性，这里就不能再使用互斥同步来保证了，只能靠硬件来完成。硬件支持的原子性操作最典型的是: 比较并交换(Compare-and-Swap，CAS)。</p>
+<p>​        CAS操作包含三个操作数 —— 内存位置（V）、预期原值（A）和新值（B）。如果内存位置V的值与预期原值A相匹配，则将内存位置的值更新为B，否则不进行任何操作。在并发环境中，CAS操作可以保证数据的一致性和线程安全性。、</p>
+</li>
+<li><p>AtomicInteger</p>
+<p>​        AtomicInteger是Java中的一个原子整数类，它提供了原子操作的更新方法，可以在多线程环境下安全地更新共享的整数变量。</p>
+<p>​        AtomicInteger的更新方法包括incrementAndGet()、getAndIncrement()、decrementAndGet()、getAndDecrement()、compareAndSet()等，它们使用了 Unsafe 类的 CAS 操作，保证对共享变量的操作是原子性的。</p>
+</li>
+</ol>
+<p>以下代码使用了 AtomicInteger 执行了计数操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.concurrent.atomic.AtomicInteger;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AtomicIntegerExample</span> &#123;  </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">AtomicInteger</span> <span class="variable">counter</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AtomicInteger</span>(<span class="number">0</span>);  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;  </span><br><span class="line">        <span class="comment">// 启动10个线程，每个线程将计数器加10  </span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;  </span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;  </span><br><span class="line">                <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> <span class="number">0</span>; j &lt; <span class="number">10</span>; j++) &#123;  </span><br><span class="line">                    counter.incrementAndGet();  </span><br><span class="line">                &#125;  </span><br><span class="line">            &#125;).start();  </span><br><span class="line">        &#125;  </span><br><span class="line">  </span><br><span class="line">        <span class="comment">// 等待所有线程执行完毕  </span></span><br><span class="line">        <span class="keyword">try</span> &#123;  </span><br><span class="line">            Thread.sleep(<span class="number">1000</span>);  </span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;  </span><br><span class="line">            e.printStackTrace();  </span><br><span class="line">        &#125;  </span><br><span class="line">  </span><br><span class="line">        <span class="comment">// 输出计数器的值  </span></span><br><span class="line">        System.out.println(<span class="string">&quot;Counter: &quot;</span> + counter);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这个示例中，我们使用AtomicInteger来维护一个计数器的值，并启动了10个线程，每个线程将计数器加10次。由于AtomicInteger提供了原子操作的更新方法，因此即使多个线程同时更新计数器的值，也不会出现线程安全问题。最后，我们输出计数器的值，可以看到它应该是100（10个线程每个线程执行10次计数器加1操作）。</p>
+<p>3.ABA</p>
+<p>如果某个线程将变量A更改为B后再更改为A，那么另一个等待CAS操作的线程会认为该变量没有发生过改变，仍然是A，然后执行CAS操作。这样就可能导致数据的不一致。</p>
+<p>J.U.C 包提供了一个带有标记的原子引用类 AtomicStampedReference 来解决这个问题，它可以通过控制变量值的版本来保证 CAS 的正确性。大部分情况下 ABA 问题不会影响程序并发的正确性，如果需要解决 ABA 问题，改用传统的互斥同步可能会比原子类更高效。</p>
+<p>另外，Java 8引入了一种新的原子类：LongAdder和LongAccumulator，它们内部采用了分段化的思想来解决高并发下的ABA问题。它们将内部变量分为一个数组，每个线程更新自己的分段，最后再合并结果。这种方式既解决了ABA问题，又提高了并发性能。</p>
+<h2 id="4-3-无同步方案"><a href="#4-3-无同步方案" class="headerlink" title="4.3 无同步方案"></a>4.3 无同步方案</h2><p>换一个思路，如果没有方法的计算不涉及共享数据，不需要进行同步，是不是就不需要任何同步措施去保证正确性，也就没有线程安全的问题。</p>
+<ul>
+<li>栈封闭：多个线程访问同一个方法的局部变量时，不会出现线程安全问题，因为局部变量存储在虚拟机栈中，属于线程私有的。</li>
+<li>线程本地存储(Thread Local Storage)：如果一段代码中所需要的数据必须与其他代码共享，那就看看这些共享数据的代码是否能保证在同一个线程中执行。如果能保证，我们就可以把共享数据的可见范围限制在同一个线程之内，这样，无须同步也能保证线程之间不出现数据争用的问题。</li>
+<li>可重入代码(Reentrant Code)：可以在代码执行的任何时刻中断它，转而去执行另外一段代码(包括递归调用它本身)，而在控制权返回后，原来的程序不会出现任何错误。</li>
+</ul>
+<p>这块简单介绍，后续会有专门的章节进行学习</p>
+<h1 id="5-总结"><a href="#5-总结" class="headerlink" title="5 总结"></a>5 总结</h1><ul>
+<li>了解了多线程产生的原因，以及线程不安全的原因</li>
+<li>从 可见性，原子性和有序性 来阐述并发状态下线程不安全的原因</li>
+<li>分析了Java是怎么解决并发问题的</li>
+</ul>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMCZ7HaLpZxDj_zG1XxJmHwfbAThfQAAqTEMRuvMJFV9E-PLlimPicBAAMCAAN4AAM2BA.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMCZ7HaLpZxDj_zG1XxJmHwfbAThfQAAqTEMRuvMJFV9E-PLlimPicBAAMCAAN4AAM2BA.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">dachang</div><div class="post-copyright__author_desc">感谢你选择与我一起虚度时光。</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="https://yeoh.de5.net/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%868-Java%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('https://yeoh.de5.net/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%868-Java%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/')">Java核心系列8：Java如何保证线程安全性</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg" target="_blank"><img class="post-qr-code-img" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg" target="_blank"><img class="post-qr-code-img" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="https://yeoh.de5.net/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%868-Java%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=Java核心系列8：Java如何保证线程安全性&amp;url=https://yeoh.de5.net/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%868-Java%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/&amp;pic=https://imags-563.pages.dev/file/AgACAgUAAxkDAAPHaUeniRmu8VmXdRdOwZJvuRr3qAQAAt4LaxunpzhWwB3-eqHKUV0BAAMCAAN4AAM2BA.png" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://yeoh.de5.net" target="_blank">数根朽木，</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__category-list"><a class="post-meta__box__categoryes" href="/categories/Java%E6%A0%B8%E5%BF%83%E7%B3%BB%E5%88%97/"><span class="categoryes-punctuation"> <i class="anzhiyufont anzhiyu-icon-inbox"></i></span>Java核心系列<span class="categoryesPageCount">15</span></a></div><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/Java%E6%A0%B8%E5%BF%83/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>Java核心<span class="tagsPageCount">14</span></a><a class="post-meta__box__tags" href="/tags/Java%E5%9F%BA%E7%A1%80/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>Java基础<span class="tagsPageCount">11</span></a><a class="post-meta__box__tags" href="/tags/JavaSE/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>JavaSE<span class="tagsPageCount">11</span></a></div></div><div class="post_share"><div class="social-share" data-image="https://imags-563.pages.dev/file/AgACAgUAAxkDAAP9aUfYMWMpVNZK-Oa9yBLA3qKllZ0AAgsLaxunp0BW2F3X0MGT15YBAAMCAAN5AAM2BA.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%869-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%A4%9A%E7%BA%BF%E7%A8%8B/"><img class="prev-cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPNaUerPVar-Daieeucr_Jz7o8OSBIAAuYLaxunpzhW_tn_AqDcKe4BAAMCAAN4AAM2BA.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Java核心系列9：并发与多线程-线程基础</div></div></a></div><div class="next-post pull-right"><a href="/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%867-%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7%E8%AE%A8%E8%AE%BA/"><img class="next-cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPGaUelcLCws8zRT7ERXBCf6R3tCr8AAtMLaxunpzhWk41It71juDIBAAMCAAN4AAM2BA.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Java核心系列7：线程安全性讨论</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%8610-%E7%BA%BF%E7%A8%8B%E7%AE%A1%E7%90%86/" title="Java核心系列10：线程管理"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPQaUetiv4xao864OZFnrxs3CgvkQIAAvMLaxunpzhWq55FdPk-m8gBAAMCAAN4AAM2BA.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-04-02</div><div class="title">Java核心系列10：线程管理</div></div></a></div><div><a href="/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%864-AOP%E5%8E%9F%E7%90%86%E5%92%8C%E5%88%87%E9%9D%A2%E5%BA%94%E7%94%A8/" title="Java核心系列4：AOP原理和切面应用"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAO7aUeZINnJFq-LgiD0zKhbT4tJcLIAArALaxunpzhWCEFByZsi2asBAAMCAAN4AAM2BA.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-04-02</div><div class="title">Java核心系列4：AOP原理和切面应用</div></div></a></div><div><a href="/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%865-%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/" title="Java核心系列5：反射机制详解"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAO9aUefsXcKjYIgHwirSq7t_-reVNYAArgLaxunpzhW8BZ7pDXPUAwBAAMCAAN5AAM2BA.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-04-02</div><div class="title">Java核心系列5：反射机制详解</div></div></a></div><div><a href="/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%866-%E9%9B%86%E5%90%88%E6%A1%86%E6%9E%B6/" title="Java核心系列6：集合框架详解"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPBaUejFFd0HhphPeeOE9ETsurNGHAAAr8LaxunpzhWrj0lkLLs9ekBAAMCAAN3AAM2BA.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-04-02</div><div class="title">Java核心系列6：集合框架详解</div></div></a></div><div><a href="/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%867-%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7%E8%AE%A8%E8%AE%BA/" title="Java核心系列7：线程安全性讨论"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPGaUelcLCws8zRT7ERXBCf6R3tCr8AAtMLaxunpzhWk41It71juDIBAAMCAAN4AAM2BA.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-04-02</div><div class="title">Java核心系列7：线程安全性讨论</div></div></a></div><div><a href="/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%869-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%A4%9A%E7%BA%BF%E7%A8%8B/" title="Java核心系列9：并发与多线程-线程基础"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPNaUerPVar-Daieeucr_Jz7o8OSBIAAuYLaxunpzhW_tn_AqDcKe4BAAMCAAN4AAM2BA.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-04-02</div><div class="title">Java核心系列9：并发与多线程-线程基础</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div><div class="comment-tips" id="comment-tips"><span>✅ 你无需删除空行，直接评论以获取最佳展示效果</span></div></div><div class="comment-wrap"><div><div id="twikoo-wrap"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%EF%BC%88JMM%EF%BC%89-%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%B9%B6%E5%8F%91%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">1 Java内存模型（JMM） 如何解决并发问题</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E5%85%B3%E9%94%AE%E5%AD%97-volatile%E3%80%81synchronized-%E5%92%8C-final"><span class="toc-number">1.1.</span> <span class="toc-text">2.1 关键字: volatile、synchronized 和 final</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-1-volatile"><span class="toc-number">1.1.1.</span> <span class="toc-text">2.1.1 volatile</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-2-synchronized"><span class="toc-number">1.1.2.</span> <span class="toc-text">2.1.2 synchronized</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-3-final"><span class="toc-number">1.1.3.</span> <span class="toc-text">2.1.3 final</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-Happens-Before-%E8%A7%84%E5%88%99"><span class="toc-number">1.2.</span> <span class="toc-text">2.2 Happens-Before 规则</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-1-%E7%A8%8B%E5%BA%8F%E9%A1%BA%E5%BA%8F%E8%A7%84%E5%88%99%EF%BC%88Program-Order-Rule%EF%BC%89"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.2.1 程序顺序规则（Program Order Rule）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-2-%E7%AE%A1%E7%A8%8B%E9%94%81%E5%AE%9A%E8%A7%84%E5%88%99%EF%BC%88Monitor-Lock-Rule%EF%BC%89"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2.2 管程锁定规则（Monitor Lock Rule）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-3-volatile%E5%8F%98%E9%87%8F%E8%A7%84%E5%88%99%EF%BC%88Volatile-Variable-Rule%EF%BC%89"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.2.3 volatile变量规则（Volatile Variable Rule）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-4-%E7%BA%BF%E7%A8%8B%E5%90%AF%E5%8A%A8%E8%A7%84%E5%88%99%EF%BC%88Thread-Start-Rule%EF%BC%89"><span class="toc-number">1.2.4.</span> <span class="toc-text">2.2.4 线程启动规则（Thread Start Rule）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-5-%E7%BA%BF%E7%A8%8B%E5%8A%A0%E5%85%A5%E8%A7%84%E5%88%99-%EF%BC%88Thread-Join-Rule%EF%BC%89"><span class="toc-number">1.2.5.</span> <span class="toc-text">2.2.5 线程加入规则(（Thread Join Rule）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-6-%E7%BA%BF%E7%A8%8B%E7%BB%88%E6%AD%A2%E8%A7%84%E5%88%99%EF%BC%88Thread-Termination-Rule%EF%BC%89"><span class="toc-number">1.2.6.</span> <span class="toc-text">2.2.6 线程终止规则（Thread Termination Rule）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-7-%E7%BA%BF%E7%A8%8B%E4%B8%AD%E6%96%AD%E8%A7%84%E5%88%99%EF%BC%88-Thread-Interruption-Rule%EF%BC%89"><span class="toc-number">1.2.7.</span> <span class="toc-text">2.2.7 线程中断规则（ Thread Interruption Rule）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-8-%E5%AF%B9%E8%B1%A1%E7%BB%88%E7%BB%93%E8%A7%84%E5%88%99%EF%BC%88Finalizer-Rule%EF%BC%89"><span class="toc-number">1.2.8.</span> <span class="toc-text">2.2.8 对象终结规则（Finalizer Rule）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-9-%E4%BC%A0%E9%80%92%E6%80%A7%EF%BC%88Transitivity%EF%BC%89"><span class="toc-number">1.2.9.</span> <span class="toc-text">2.2.9 传递性（Transitivity）</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7%E8%83%BD%E8%AE%A8%E8%AE%BA"><span class="toc-number">2.</span> <span class="toc-text">3 线程安全性能讨论</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E4%B8%8D%E5%8F%AF%E5%8F%98%EF%BC%88Immutable%EF%BC%89"><span class="toc-number">2.1.</span> <span class="toc-text">3.1 不可变（Immutable）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E7%BB%9D%E5%AF%B9%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%EF%BC%88Absolute-Thread-Safety%EF%BC%89"><span class="toc-number">2.2.</span> <span class="toc-text">3.2 绝对线程安全（Absolute Thread Safety）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-%E7%9B%B8%E5%AF%B9%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%EF%BC%88Relative-Thread-Safety%EF%BC%89"><span class="toc-number">2.3.</span> <span class="toc-text">3.3 相对线程安全（Relative Thread Safety）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-4-%E7%BA%BF%E7%A8%8B%E5%85%BC%E5%AE%B9%EF%BC%88Thread-Compatibility%EF%BC%89"><span class="toc-number">2.4.</span> <span class="toc-text">3.4 线程兼容（Thread Compatibility）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-5-%E7%BA%BF%E7%A8%8B%E5%AF%B9%E7%AB%8B%EF%BC%88Thread-Hostility%EF%BC%89"><span class="toc-number">2.5.</span> <span class="toc-text">3.5 线程对立（Thread Hostility）</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8"><span class="toc-number">3.</span> <span class="toc-text">4 如何实现线程安全</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-synchronized%E5%85%B3%E9%94%AE%E5%AD%97-ReentrantLock%E7%89%B9%E6%80%A7"><span class="toc-number">3.1.</span> <span class="toc-text">4.1 synchronized关键字&#x2F;ReentrantLock特性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E9%9D%9E%E9%98%BB%E5%A1%9E%E5%90%8C%E6%AD%A5"><span class="toc-number">3.2.</span> <span class="toc-text">4.2 非阻塞同步</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-3-%E6%97%A0%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88"><span class="toc-number">3.3.</span> <span class="toc-text">4.3 无同步方案</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">5 总结</span></a></li></ol></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div id="footer_deal"><a class="deal_link" href="mailto:youngyang0220@gmail.com" title="email"><i class="anzhiyufont anzhiyu-icon-envelope"></i></a><img class="footer_mini_logo" title="返回顶部" alt="返回顶部" onclick="anzhiyu.scrollToDest(0, 500)" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMCZ7HaLpZxDj_zG1XxJmHwfbAThfQAAqTEMRuvMJFV9E-PLlimPicBAAMCAAN4AAM2BA.jpg" size="50px"/><a class="deal_link" target="_blank" rel="noopener" href="https://github.com/dachang007" title="Github"><i class="anzhiyufont anzhiyu-icon-github"></i></a></div><div id="anzhiyu-footer"><div class="footer-group"><div class="footer-title">服务</div><div class="footer-links"><a class="footer-item" title="51la统计" target="_blank" rel="noopener" href="https://v6.51.la/">51la统计</a><a class="footer-item" title="十年之约" target="_blank" rel="noopener" href="https://www.foreverblog.cn/">十年之约</a><a class="footer-item" title="开往" target="_blank" rel="noopener" href="https://github.com/travellings-link/travellings">开往</a></div></div><div class="footer-group"><div class="footer-title">主题</div><div class="footer-links"><a class="footer-item" title="文档" target="_blank" rel="noopener" href="https://docs.anheyu.com/">文档</a><a class="footer-item" title="源码" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu">源码</a><a class="footer-item" title="更新日志" href="/update/">更新日志</a></div></div><div class="footer-group"><div class="footer-title">导航</div><div class="footer-links"><a class="footer-item" title="图床工具" target="_blank" rel="noopener" href="https://imags-563.pages.dev">图床工具</a><a class="footer-item" title="在线烟花模拟器" target="_blank" rel="noopener" href="http://greatree.hidns.co">在线烟花模拟器</a><a class="footer-item" title="订阅转换" target="_blank" rel="noopener" href="https://suburl.v1.mk">订阅转换</a><a class="footer-item" title="在线简历生成" target="_blank" rel="noopener" href="https://imags-563.pages.dev">在线简历生成</a></div></div><div class="footer-group"><div class="footer-title-group"><div class="footer-title">友链</div><a class="random-friends-btn" id="footer-random-friends-btn" href="javascript:addFriendLinksInFooter();" title="换一批友情链接"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right"></i></a></div><div class="footer-links" id="friend-links-in-footer"></div></div></div><p id="ghbdages"><a class="github-badge" target="_blank" href="https://hexo.io/" style="margin-inline:5px" data-title="博客框架为Hexo_v5.4.0" title="博客框架为Hexo_v5.4.0"><img src="https://npm.elemecdn.com/anzhiyu-blog@2.1.5/img/badge/Frame-Hexo.svg" alt="博客框架为Hexo_v5.4.0"/></a><a class="github-badge" target="_blank" href="https://blog.anheyu.com/" style="margin-inline:5px" data-title="本站使用AnZhiYu主题" title="本站使用AnZhiYu主题"><img src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.9/img/Theme-AnZhiYu-2E67D3.svg" alt="本站使用AnZhiYu主题"/></a><a class="github-badge" target="_blank" href="https://www.Cloudflare.com/" style="margin-inline:5px" data-title="本站使用CloudFlare为静态资源提供CDN加速" title="本站使用CloudFlare为静态资源提供CDN加速"><img src="https://img.shields.io/badge/%E2%98%81CDN-CloudFlare-yellow" alt="本站使用CloudFlare为静态资源提供CDN加速"/></a><a class="github-badge" target="_blank" href="https://github.com/" style="margin-inline:5px" data-title="本站项目由Github托管" title="本站项目由Github托管"><img src="https://npm.elemecdn.com/anzhiyu-blog@2.1.5/img/badge/Source-Github.svg" alt="本站项目由Github托管"/></a><a class="github-badge" target="_blank" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" style="margin-inline:5px" data-title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可" title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"><img src="https://npm.elemecdn.com/anzhiyu-blog@2.2.0/img/badge/Copyright-BY-NC-SA.svg" alt="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"/></a></p></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2022 - 2025 By <a class="footer-bar-link" href="/" title="dachang" target="_blank">dachang</a></div></div><div id="footer-type-tips"></div><div class="js-pjax"><script>function subtitleType () {
+  fetch('https://v1.hitokoto.cn')
+    .then(response => response.json())
+    .then(data => {
+      if (false) {
+        const from = '出自 ' + data.from
+        const sub = []
+        sub.unshift(data.hitokoto, from)
+        window.typed = new Typed('#footer-type-tips', {
+          strings: sub,
+          startDelay: 300,
+          typeSpeed: 150,
+          loop: false,
+          backSpeed: 50,
+        })
+      } else {
+        document.getElementById('footer-type-tips').innerHTML = data.hitokoto
+      }
+    })
+}
+
+if (false) {
+  if (typeof Typed === 'function') {
+    subtitleType()
+  } else {
+    getScript('https://cdn.cbd.int/typed.js@2.1.0/dist/typed.umd.js').then(subtitleType)
+  }
+} else {
+  subtitleType()
+}
+</script></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">38</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">33</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">8</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网站项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="个人博客"><img class="back-menu-item-icon" src="/favicon.ico" alt="个人博客"/><span class="back-menu-item-text">个人博客</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线简历"><img class="back-menu-item-icon" src="/favicon.ico" alt="在线简历"/><span class="back-menu-item-text">在线简历</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">建设工具</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线图床"><img class="back-menu-item-icon" src="/img/image.ico" alt="在线图床"/><span class="back-menu-item-text">在线图床</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="在线烟花模拟器"><img class="back-menu-item-icon" src="/img/Clash.Mini.png" alt="在线烟花模拟器"/><span class="back-menu-item-text">在线烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="烟花模拟器"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMMZ7Qfv1Xv2qvgqSVN7kNhRO_uzfgAAlvAMRtiZKBVrGT1Z6RPiX4BAAMCAANtAAM2BA.png" alt="烟花模拟器"/><span class="back-menu-item-text">烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://pay.totalh.net/" title="三合一收款码"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAM8Z7WNYNdWdrYsas5PPFT8Di3493sAAgLKMRsEtalVDcfaakgTXPkBAAMCAAN4AAM2BA.png" alt="三合一收款码"/><span class="back-menu-item-text">三合一收款码</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 博客文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 全部文章</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 文章分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 所有标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 网站工具</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 图床工具</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="http://greatree.hidns.co"><i class="anzhiyufont anzhiyu-icon-artstation faa-tada" style="font-size: 0.9em;"></i><span> 烟花模拟器</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://suburl.v1.mk"><i class="anzhiyufont anzhiyu-icon-envelope faa-tada" style="font-size: 0.9em;"></i><span> 订阅转换</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><span> 在线简历生成</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于我</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 在线简历</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><i class="anzhiyufont anzhiyu-icon-shoe-prints1 faa-tada" style="font-size: 0.9em;"></i><span> 随便逛逛</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Boolean-filter/" style="font-size: 0.88rem;">Boolean filter<sup>2</sup></a><a href="/tags/DNS%E6%B3%84%E9%9C%B2/" style="font-size: 0.88rem;">DNS泄露<sup>1</sup></a><a href="/tags/Fake-IP/" style="font-size: 0.88rem;">Fake IP<sup>1</sup></a><a href="/tags/JVM%E8%99%9A%E6%8B%9F%E6%9C%BA/" style="font-size: 0.88rem;">JVM虚拟机<sup>1</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>1</sup></a><a href="/tags/JavaSE/" style="font-size: 0.88rem;">JavaSE<sup>11</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 0.88rem;">Java基础<sup>11</sup></a><a href="/tags/Java%E6%A0%B8%E5%BF%83/" style="font-size: 0.88rem;">Java核心<sup>14</sup></a><a href="/tags/Java%E7%89%88%E6%9C%AC%E6%96%B0%E7%89%B9%E6%80%A7/" style="font-size: 0.88rem;">Java版本新特性<sup>2</sup></a><a href="/tags/MQ/" style="font-size: 0.88rem;">MQ<sup>2</sup></a><a href="/tags/MySQL/" style="font-size: 0.88rem;">MySQL<sup>10</sup></a><a href="/tags/OOM/" style="font-size: 0.88rem;">OOM<sup>1</sup></a><a href="/tags/RabbitMQ/" style="font-size: 0.88rem;">RabbitMQ<sup>2</sup></a><a href="/tags/Redis/" style="font-size: 0.88rem;">Redis<sup>5</sup></a><a href="/tags/Redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/" style="font-size: 0.88rem;">Redis内存淘汰策略<sup>1</sup></a><a href="/tags/Redis%E5%8E%9F%E7%90%86/" style="font-size: 0.88rem;">Redis原理<sup>1</sup></a><a href="/tags/Redis%E7%BC%93%E5%AD%98/" style="font-size: 0.88rem;">Redis缓存<sup>1</sup></a><a href="/tags/RocketMQ/" style="font-size: 0.88rem;">RocketMQ<sup>2</sup></a><a href="/tags/SSM/" style="font-size: 0.88rem;">SSM<sup>1</sup></a><a href="/tags/Spring/" style="font-size: 0.88rem;">Spring<sup>1</sup></a><a href="/tags/SpringBoot/" style="font-size: 0.88rem;">SpringBoot<sup>1</sup></a><a href="/tags/kafka/" style="font-size: 0.88rem;">kafka<sup>2</sup></a><a href="/tags/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" style="font-size: 0.88rem;">单例模式<sup>1</sup></a><a href="/tags/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/" style="font-size: 0.88rem;">布隆过滤器<sup>2</sup></a><a href="/tags/%E6%8E%A5%E5%8F%A3%E8%B6%85%E6%97%B6/" style="font-size: 0.88rem;">接口超时<sup>1</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/" style="font-size: 0.88rem;">消息中间件<sup>2</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" style="font-size: 0.88rem;">消息队列<sup>1</sup></a><a href="/tags/%E7%BA%BF%E4%B8%8A%E4%BA%8B%E6%95%85/" style="font-size: 0.88rem;">线上事故<sup>1</sup></a><a href="/tags/%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/" style="font-size: 0.88rem;">缓存雪崩<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96/" style="font-size: 0.88rem;">网络优化<sup>1</sup></a><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 0.88rem;">设计模式<sup>1</sup></a><a href="/tags/%E8%BF%90%E7%BB%B4%E8%B0%83%E4%BC%98/" style="font-size: 0.88rem;">运维调优<sup>3</sup></a><a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" style="font-size: 0.88rem;">高并发<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const init = () => {
+    twikoo.init(Object.assign({
+      el: '#twikoo-wrap',
+      envId: 'https://twikoo-kohl-zeta.vercel.app',
+      region: '',
+      onCommentLoaded: () => {
+        anzhiyu.loadLightbox(document.querySelectorAll('#twikoo .tk-content img:not(.tk-owo-emotion)'))
+      }
+    }, null))
+  }
+
+  const loadTwikoo = () => {
+    if (typeof twikoo === 'object') setTimeout(runFn,0)
+    else getScript('https://unpkg.com/twikoo@1.6.44/dist/twikoo.all.min.js').then(runFn)
+  }
+
+  const getCount = () => {
+    const countELement = document.getElementById('twikoo-count')
+    if(!countELement) return
+    twikoo.getCommentsCount({
+      envId: 'https://twikoo-kohl-zeta.vercel.app',
+      region: '',
+      urls: [window.location.pathname],
+      includeReply: false
+    }).then(res => {
+      countELement.textContent = res[0].count
+    }).catch(err => {
+      console.error(err)
+    })
+  }
+
+  const runFn = () => {
+    init();
+    
+  }
+
+  if ('Twikoo' === 'Twikoo' || !true) {
+    if (true) anzhiyu.loadComment(document.getElementById('twikoo-wrap'), loadTwikoo)
+    else {
+      loadTwikoo()
+    }
+  } else {
+    window.loadOtherComment = loadTwikoo
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getComment = () => {
+    const runTwikoo = () => {
+      twikoo.getRecentComments({
+        envId: 'https://twikoo-kohl-zeta.vercel.app',
+        region: '',
+        pageSize: 6,
+        includeReply: true
+      }).then(function (res) {
+        const twikooArray = res.map(e => {
+          return {
+            'content': changeContent(e.comment),
+            'avatar': e.avatar,
+            'nick': e.nick,
+            'url': e.url + '#' + e.id,
+            'date': new Date(e.created).toISOString()
+          }
+        })
+
+        saveToLocal.set('twikoo-newest-comments', JSON.stringify(twikooArray), 10/(60*24))
+        generateHtml(twikooArray)
+      }).catch(function (err) {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      })
+    }
+
+    if (typeof twikoo === 'object') {
+      runTwikoo()
+    } else {
+      getScript('https://unpkg.com/twikoo@1.6.44/dist/twikoo.all.min.js').then(runTwikoo)
+    }
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'><div class='name'><span>${array[i].nick} </span></div></a>`
+        }
+        
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('twikoo-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","meta[property=\"og:type\"]","meta[property=\"og:site_name\"]","meta[property=\"og:description\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404')
+  }
+})</script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>

@@ -1,0 +1,521 @@
+<!DOCTYPE html><html lang="zh-cn" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>线上事故记录OOM-转载 | 数根朽木，</title><meta name="keywords" content="线上事故,运维调优,OOM"><meta name="author" content="dachang"><meta name="copyright" content="dachang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#F9F9F9"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="线上事故记录OOM-转载"><meta name="application-name" content="线上事故记录OOM-转载"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#F9F9F9"><meta property="og:type" content="article"><meta property="og:title" content="线上事故记录OOM-转载"><meta property="og:url" content="https://yeoh.de5.net/2025/03/11/%E6%8E%92%E5%BF%A7%E8%A7%A3%E9%9A%BE/%E7%94%9F%E4%BA%A7%E4%BA%8B%E6%95%85%E8%AE%B0%E5%BD%95OOM/index.html"><meta property="og:site_name" content="数根朽木，"><meta property="og:description" content="0x01 案例一事故时间：2018年6月13日 故障类型：java.lang.OutOfMemoryError: Java heap space 事故经过：某考务管理系统，前期收集考生报名信息时允许上传ZIP附件提交相关材料，后台服务会解析压缩包并从中获取相关文件。 系统运行后不久，考务群就陆续有人"><meta property="og:locale" content="zh-cn"><meta property="og:image" content="https://imags-563.pages.dev/file/AgACAgUAAxkDAAOYaUNwDmRjUI7AX0G_E9ZI8ybVCXgAAosLaxvvjBhWXBf2s0w9R_wBAAMCAAN3AAM2BA.jpg"><meta property="article:author" content="dachang"><meta property="article:tag" content="blog, coding, technology, personal"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://imags-563.pages.dev/file/AgACAgUAAxkDAAOYaUNwDmRjUI7AX0G_E9ZI8ybVCXgAAosLaxvvjBhWXBf2s0w9R_wBAAMCAAN3AAM2BA.jpg"><meta name="description" content="0x01 案例一事故时间：2018年6月13日 故障类型：java.lang.OutOfMemoryError: Java heap space 事故经过：某考务管理系统，前期收集考生报名信息时允许上传ZIP附件提交相关材料，后台服务会解析压缩包并从中获取相关文件。 系统运行后不久，考务群就陆续有人"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="https://yeoh.de5.net/2025/03/11/%E6%8E%92%E5%BF%A7%E8%A7%A3%E9%9A%BE/%E7%94%9F%E4%BA%A7%E4%BA%8B%E6%95%85%E8%AE%B0%E5%BD%95OOM/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: undefined,
+  diytitle: undefined,
+  LA51: {"enable":true,"ck":null,"LingQueMonitorID":null},
+  greetingBox: undefined,
+  twikooEnvId: 'https://twikoo-kohl-zeta.vercel.app',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: undefined,
+  friends_vue_info: undefined,
+  navMusic: false,
+  mainTone: undefined,
+  authorStatus: undefined,
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"该文章距离上次更新已经过去","messageNext":"天了，文章内容可能已经过时，注意甄别。"},
+  highlight: {"plugin":"highlight.js","highlightCopy":false,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: dachang","link":"链接: ","source":"来源: 数根朽木，","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'mediumZoom',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: true,
+  islazyload: false,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '数根朽木，',
+  title: '线上事故记录OOM-转载',
+  postAI: '',
+  pageFillDescription: '0x01 案例一, 0x02 案例二, 0x03 案例三, 0x04 案例四, 0x05 案例五, 0x06 案例六, 0x07 案例七, 0x08 案例八案例一事故时间年月日故障类型事故经过某考务管理系统前期收集考生报名信息时允许上传附件提交相关材料后台服务会解析压缩包并从中获取相关文件系统运行后不久考务群就陆续有人反馈报名网站打不开无法访问等等让运维重启系统后又恢复正常跑了一段时间以后又有人说无法访问仔细检查故障时的日志发现故障时间点都是发生在有人上传文件的时候从服务器上提取了一部分样本发现压缩文件里面包含若干个文件文件中是重复的字符类似该文件原始数据巨大且单调重复导致压缩后的却非常小真是个天才直觉告诉我们这是被恶意攻击了遂暂时关闭了文件上传接口改为通过表单录入信息报名事后复盘当时的代码发现处理文件时没有释放到磁盘临时文件都是在内存中直接解压并读取解压后的文本数据这就给了攻击者可乘之机但是后来专门去研究了下这方面的安全漏洞发现这是一种炸弹即使是释放到磁盘也有可能造成磁盘资源耗尽除了构造简单重复内容还能通过递归嵌套目录穿越等构造恶意的并释放巨量数据有兴趣的朋友可以去自行查阅解决方案禁止上传嵌套压缩包只允许上传单级压缩文件检查文件大小检查文件路径案例二事故时间年月日故障类型事故经过某报文处理服务需要同时处理多种渠道的报文使用了和进行报文编解组和格式检查随着业务越来越繁重某次上线后生产服务频繁出现内存异常最后经查是因为应用启动时一次性加载了全量的和对象大量的加载类填满了应用参数均设置为当时的加载代码如下一次性初始化了所有的源老规矩先救命再治病临时解决方案评估最大并扩容最终解决方案服务拆分分块加载案例三事故时间年月日故障类型事故经过某营销管理系统对接第三方接口上送的数据并进行解析处理触发对应的业务流程其中一个业务处理是给编号为的直连机构推送通知按照接口约定其中由第三方接口指定且最大值不会超过管理后台采用了类似这样的代码进行处理发送通知给企业当前编号发送通知给企业失败当前编号上线之后系统一直运行良好直到有一天第三方接口上送数据时传了个嚯系统直接崩了打电话过去对方说是配置有误导致参数填写错误这边喜提其实测试之初应该可以避免的但是负责该业务的开发过于信任第三方上送的数据没有考虑到意外的参数范围狠狠的交了一笔学费解决方案增加严格的参数校验同时修改尾递归写法为循环发送案例四事故时间年月日故障类型事故经过某接口服务配置了无界线程池作为业务线程池该接口业务非常简单收集各个上游服务的度量指标简单记录日志并写入数据库轻量高频无长时间阻塞一切都那么完美然而某天突然运维报告服务不可用查询日志发现服务已经凉了有段时间死因是还好留下了堆栈一通分析发现是有段时间应用日志所在磁盘空间写满导致线程得不到释放高频调用之下最终无法创建新线程导致服务被压垮那么为什么写日志会阻塞线程呢当时应用使用的是日志实现查看其配置使用的是异步记录器不丢失日志这里的配置正是压死骆驼的最后一根稻草日志首先被写入内存队列再由工作线程异步写入磁盘如果磁盘写满导致下游无法正常工作而的队列又被填满就会导致对的调用发生阻塞官方文档里对于是这样描述的设置为虽然可以防丢但也让没有退路可言解决方案为接口配置有界线程池并调整为合理数值案例五事故时间年月日故障类型事故经过某后台管理系统由于存在敏感数据需要在本地安装安全控件来辅助访问该系统在首页上提供了多个版本的控件安装包下载上线之初系统运行都挺正常但是某天突然有用户反馈系统无法访问浏览器提示网关错误查阅发现服务已挂应用日志提示使用工具分析文件发现存在大量的内存占用结合应用日志发现服务异常之时正在调用某个文件下载方法该方法使用读取文件到内存中并使用数组存储文件内容将该数组写入到的输出流完成下载关键代码如下短短几行代码却让人虎躯一震没有判断文件的大小就直接完整读取危险而且没有使用缓冲流的方式进行读写事实证明问题恰恰就是出在这里某个版本的控件由于打包时体积偏大约多导致多个用户同时下载时堆区内存一下子就被控件文件数据填满进而发生异常解决方案将控件安装包文件挂载到上并提供外链不经过应用服务器下载案例六事故时间年月日故障类型事故经过公司开发人员在开发某开放接口时需要调用公司的一个基础数据接口服务然而从时许开始公司的接口调用就开始出现异常返回错误码错误信息为公司开发人员向公司开发人员反映某开放接口从时许开始无法访问和使用该系统为某基础数据接口服务基于协议进行通信按照惯例首先排查网络是否异常经运维人员检查证明网络连通性没有问题公司开发组于时分通知运维人员重启应用服务期间短暂恢复正常但是很快十分钟后电话再次响起告知服务又出现异常无法访问在日志中搜索找到了若干处内存溢出错误但是令人费解的是每次出现错误的位置居然都不一样最后发现是应用启动脚本中参数设置成与参数一样的大小导致堆区大小失衡进而引发内存异常该问题的排查过程在生产事故记一次特殊的排查一文中有详细的分析过程这里就不再赘述了案例七事故时间年月日故障类型事故经过某报表分析系统其业务大体上为导入各种文件进行解析校验并计算各项统计数据对于异常的数据可以在首页上监控告警并提示有天运营的妹子突然找过来说她登录不了系统了刚开始听到的我认为只是简单的浏览器问题可以秀一波操作了结果到了工位上一看发现登录页面验证码出不来了做过前后端分离项目的朋友都知道这种情况下后端服务非死即伤强装镇定安抚一下妹子说我得去查查日志看看咋回事远程到服务器发现后端应用确实已经灰飞烟灭查看日志发现有若干错误找到那段时间的应用日志最终问题定位到了某个语句上该是个单表查询语句但是返回的记录行数竟然有追查源头发现就是首页上的监控告警前端定时器每隔秒调用一次后端服务扫描该表的记录筛选出状态异常的数据并返回但是没有做分页限制导致某个业务人员上传了一个超大的表但是有个关键数据项填写错误该批数据行记录全部被系统标记为异常当有多个运营人员登录系统并进入首页后就会反复触发该查询语句进而导致内存溢出解决方案限制首页监控查询行数同时优化监控逻辑建立查询缓存防止短时间内重复扫描业务表案例八事故时间年月日故障类型事故经过某查询接口服务上线后基本稳定运行三个月后有用户反映查询缓慢遂查之发现日志中频繁出现报告第一时间做了堆栈快照发现内存中有大量的容器未释放分析指向了基本可以定位到是中的数据没有及时清理无法被回收导致的内存泄露最终频繁也无法回收足够空间解决方案严格遵循使用后释放的原则及时移除中的数据引用',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-12-20 12:46:42',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#1F1F1F')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#F9F9F9')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><div class="back-home-button"><i class="anzhiyufont anzhiyu-icon-grip-vertical"></i><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网站项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="个人博客"><img class="back-menu-item-icon" src="/favicon.ico" alt="个人博客"/><span class="back-menu-item-text">个人博客</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线简历"><img class="back-menu-item-icon" src="/favicon.ico" alt="在线简历"/><span class="back-menu-item-text">在线简历</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">建设工具</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线图床"><img class="back-menu-item-icon" src="/img/image.ico" alt="在线图床"/><span class="back-menu-item-text">在线图床</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="在线烟花模拟器"><img class="back-menu-item-icon" src="/img/Clash.Mini.png" alt="在线烟花模拟器"/><span class="back-menu-item-text">在线烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="烟花模拟器"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMMZ7Qfv1Xv2qvgqSVN7kNhRO_uzfgAAlvAMRtiZKBVrGT1Z6RPiX4BAAMCAANtAAM2BA.png" alt="烟花模拟器"/><span class="back-menu-item-text">烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://pay.totalh.net/" title="三合一收款码"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAM8Z7WNYNdWdrYsas5PPFT8Di3493sAAgLKMRsEtalVDcfaakgTXPkBAAMCAAN4AAM2BA.png" alt="三合一收款码"/><span class="back-menu-item-text">三合一收款码</span></a></div></div></div></div><a id="site-name" href="/" accesskey="h"><div class="title">数根朽木，</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a><div id="he-plugin-simple"></div><script>var WIDGET = {
+  "CONFIG": {
+    "modules": "0124",
+    "background": "2",
+    "tmpColor": "FFFFFF",
+    "tmpSize": "16",
+    "cityColor": "FFFFFF",
+    "citySize": "16",
+    "aqiColor": "E8D87B",
+    "aqiSize": "16",
+    "weatherIconSize": "24",
+    "alertIconSize": "18",
+    "padding": "10px 10px 10px 10px",
+    "shadow": "0",
+    "language": "auto",
+    "borderRadius": "20",
+    "fixed": "true",
+    "vertical": "top",
+    "horizontal": "left",
+    "left": "20",
+    "top": "7.1",
+    "key": "df245676fb434a0691ead1c63341cd94"
+  }
+}
+</script><link rel="stylesheet" href="https://widget.qweather.net/simple/static/css/he-simple.css?v=1.4.0"/><script src="https://widget.qweather.net/simple/static/js/he-simple.js?v=1.4.0"></script></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 博客文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 全部文章</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 文章分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 所有标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 网站工具</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 图床工具</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="http://greatree.hidns.co"><i class="anzhiyufont anzhiyu-icon-artstation faa-tada" style="font-size: 0.9em;"></i><span> 烟花模拟器</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://suburl.v1.mk"><i class="anzhiyufont anzhiyu-icon-envelope faa-tada" style="font-size: 0.9em;"></i><span> 订阅转换</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><span> 在线简历生成</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于我</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 在线简历</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><i class="anzhiyufont anzhiyu-icon-shoe-prints1 faa-tada" style="font-size: 0.9em;"></i><span> 随便逛逛</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button only-home" id="travellings_button" title="随机前往一个开往项目网站"><a class="site-page" onclick="anzhiyu.totraveling()" title="随机前往一个开往项目网站" href="javascript:void(0);" rel="external nofollow" data-pjax-state="external"><i class="anzhiyufont anzhiyu-icon-train"></i></a></div><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Boolean-filter/" style="font-size: 1.05rem;">Boolean filter<sup>2</sup></a><a href="/tags/DNS%E6%B3%84%E9%9C%B2/" style="font-size: 1.05rem;">DNS泄露<sup>1</sup></a><a href="/tags/Fake-IP/" style="font-size: 1.05rem;">Fake IP<sup>1</sup></a><a href="/tags/JVM%E8%99%9A%E6%8B%9F%E6%9C%BA/" style="font-size: 1.05rem;">JVM虚拟机<sup>1</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>1</sup></a><a href="/tags/JavaSE/" style="font-size: 1.05rem;">JavaSE<sup>11</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 1.05rem;">Java基础<sup>11</sup></a><a href="/tags/Java%E6%A0%B8%E5%BF%83/" style="font-size: 1.05rem;">Java核心<sup>14</sup></a><a href="/tags/Java%E7%89%88%E6%9C%AC%E6%96%B0%E7%89%B9%E6%80%A7/" style="font-size: 1.05rem;">Java版本新特性<sup>2</sup></a><a href="/tags/MQ/" style="font-size: 1.05rem;">MQ<sup>2</sup></a><a href="/tags/MySQL/" style="font-size: 1.05rem;">MySQL<sup>10</sup></a><a href="/tags/OOM/" style="font-size: 1.05rem;">OOM<sup>1</sup></a><a href="/tags/RabbitMQ/" style="font-size: 1.05rem;">RabbitMQ<sup>2</sup></a><a href="/tags/Redis/" style="font-size: 1.05rem;">Redis<sup>5</sup></a><a href="/tags/Redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/" style="font-size: 1.05rem;">Redis内存淘汰策略<sup>1</sup></a><a href="/tags/Redis%E5%8E%9F%E7%90%86/" style="font-size: 1.05rem;">Redis原理<sup>1</sup></a><a href="/tags/Redis%E7%BC%93%E5%AD%98/" style="font-size: 1.05rem;">Redis缓存<sup>1</sup></a><a href="/tags/RocketMQ/" style="font-size: 1.05rem;">RocketMQ<sup>2</sup></a><a href="/tags/SSM/" style="font-size: 1.05rem;">SSM<sup>1</sup></a><a href="/tags/Spring/" style="font-size: 1.05rem;">Spring<sup>1</sup></a><a href="/tags/SpringBoot/" style="font-size: 1.05rem;">SpringBoot<sup>1</sup></a><a href="/tags/kafka/" style="font-size: 1.05rem;">kafka<sup>2</sup></a><a href="/tags/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" style="font-size: 1.05rem;">单例模式<sup>1</sup></a><a href="/tags/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/" style="font-size: 1.05rem;">布隆过滤器<sup>2</sup></a><a href="/tags/%E6%8E%A5%E5%8F%A3%E8%B6%85%E6%97%B6/" style="font-size: 1.05rem;">接口超时<sup>1</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/" style="font-size: 1.05rem;">消息中间件<sup>2</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" style="font-size: 1.05rem;">消息队列<sup>1</sup></a><a href="/tags/%E7%BA%BF%E4%B8%8A%E4%BA%8B%E6%95%85/" style="font-size: 1.05rem;">线上事故<sup>1</sup></a><a href="/tags/%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/" style="font-size: 1.05rem;">缓存雪崩<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96/" style="font-size: 1.05rem;">网络优化<sup>1</sup></a><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 1.05rem;">设计模式<sup>1</sup></a><a href="/tags/%E8%BF%90%E7%BB%B4%E8%B0%83%E4%BC%98/" style="font-size: 1.05rem;">运维调优<sup>3</sup></a><a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" style="font-size: 1.05rem;">高并发<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/05/"><span class="card-archive-list-date">五月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/04/"><span class="card-archive-list-date">四月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">15</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/03/"><span class="card-archive-list-date">三月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">12</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/02/"><span class="card-archive-list-date">二月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">10</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8E%92%E5%BF%A7%E8%A7%A3%E9%9A%BE/" itemprop="url">排忧解难</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/OOM/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>OOM</span></a><a class="article-meta__tags" href="/tags/%E7%BA%BF%E4%B8%8A%E4%BA%8B%E6%95%85/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>线上事故</span></a><a class="article-meta__tags" href="/tags/%E8%BF%90%E7%BB%B4%E8%B0%83%E4%BC%98/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>运维调优</span></a></span></div></div><h1 class="post-title" itemprop="name headline">线上事故记录OOM-转载</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-03-11T13:18:24.000Z" title="发表于 2025-03-11 21:18:24">2025-03-11</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-12-20T04:46:42.277Z" title="更新于 2025-12-20 12:46:42">2025-12-20</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-wordcount"><i class="anzhiyufont anzhiyu-icon-file-word post-meta-icon" title="文章字数"></i><span class="post-meta-label" title="文章字数">字数总计:</span><span class="word-count" title="文章字数">3k</span><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-clock post-meta-icon" title="阅读时长"></i><span class="post-meta-label" title="阅读时长">阅读时长:</span><span>10分钟</span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为深圳"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>深圳</span></div></div></div><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAOYaUNwDmRjUI7AX0G_E9ZI8ybVCXgAAosLaxvvjBhWXBf2s0w9R_wBAAMCAAN3AAM2BA.jpg"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="https://yeoh.de5.net/2025/03/11/%E6%8E%92%E5%BF%A7%E8%A7%A3%E9%9A%BE/%E7%94%9F%E4%BA%A7%E4%BA%8B%E6%95%85%E8%AE%B0%E5%BD%95OOM/"><header><a class="post-meta-categories" href="/categories/%E6%8E%92%E5%BF%A7%E8%A7%A3%E9%9A%BE/" itemprop="url">排忧解难</a><a href="/tags/OOM/" tabindex="-1" itemprop="url">OOM</a><a href="/tags/%E7%BA%BF%E4%B8%8A%E4%BA%8B%E6%95%85/" tabindex="-1" itemprop="url">线上事故</a><a href="/tags/%E8%BF%90%E7%BB%B4%E8%B0%83%E4%BC%98/" tabindex="-1" itemprop="url">运维调优</a><h1 id="CrawlerTitle" itemprop="name headline">线上事故记录OOM-转载</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">dachang</span><time itemprop="dateCreated datePublished" datetime="2025-03-11T13:18:24.000Z" title="发表于 2025-03-11 21:18:24">2025-03-11</time><time itemprop="dateCreated datePublished" datetime="2025-12-20T04:46:42.277Z" title="更新于 2025-12-20 12:46:42">2025-12-20</time></header><h2 id="0x01-案例一"><a href="#0x01-案例一" class="headerlink" title="0x01 案例一"></a>0x01 案例一</h2><p><strong>事故时间</strong>：2018年6月13日</p>
+<p><strong>故障类型</strong>：<code>java.lang.OutOfMemoryError: Java heap space</code></p>
+<p><strong>事故经过</strong>：某考务管理系统，前期收集考生报名信息时允许上传ZIP附件提交相关材料，后台服务会解析压缩包并从中获取相关文件。</p>
+<p>系统运行后不久，考务群就陆续有人反馈报名网站打不开，无法访问等等。让运维重启系统后，又恢复正常，跑了一段时间以后，又有人说无法访问。仔细检查故障时的日志，发现故障时间点都是发生在有人上传ZIP文件的时候。</p>
+<p>从服务器上提取了一部分样本，发现压缩文件里面包含若干个TXT文件，TXT文件中是重复的字符，类似AAA…该TXT文件原始数据巨大且单调重复，导致压缩后的ZIP却非常小，真是个天才！直觉告诉我们这是被恶意攻击了，遂暂时关闭了文件上传接口，改为通过表单录入信息报名。</p>
+<p>事后复盘当时的代码，发现处理ZIP文件时没有释放到磁盘临时文件，都是在内存中直接解压并读取解压后的文本数据，这就给了攻击者可乘之机。但是后来专门去研究了下这方面的安全漏洞，发现这是一种ZIP炸弹（ZIP of Death or ZIP Bomb），即使是释放到磁盘，也有可能造成磁盘资源耗尽。除了构造简单重复内容，还能通过递归嵌套，目录穿越等构造恶意的ZIP并释放巨量数据，有兴趣的朋友可以去自行查阅。</p>
+<p><strong>解决方案</strong>：禁止上传嵌套压缩包，只允许上传单级压缩文件；检查文件大小；检查文件路径。</p>
+<h2 id="0x02-案例二"><a href="#0x02-案例二" class="headerlink" title="0x02 案例二"></a>0x02 案例二</h2><p><strong>事故时间</strong>：2021年6月30日</p>
+<p><strong>故障类型</strong>：<code>java.lang.OutOfMemoryError: Metaspace</code></p>
+<p><strong>事故经过</strong>：某报文处理服务，需要同时处理多种渠道的<code>XML</code>报文，使用了 JAXB (Java Architecture for XML Binding) 和 XSD (XML Schema Definition) 进行报文编&#x2F;解组和格式检查。</p>
+<p>随着业务越来越繁重，某次上线后，生产服务频繁出现<code>java.lang.OutOfMemoryError: Metaspace</code>内存异常。最后经查是因为应用启动时，一次性加载了全量的XSD和<code>Document</code>对象，大量的加载类填满了Metaspace。</p>
+<p>应用JVM参数<code>-XX:MaxMetaspaceSize</code>、<code>-XX:MetaspaceSize</code>均设置为256MB，当时的加载代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">SchemaFactory</span> <span class="variable">schemaFactory</span></span><br><span class="line">        <span class="operator">=</span> SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);</span><br><span class="line"><span class="keyword">return</span> schemaFactory.newSchema(schemaSources);</span><br></pre></td></tr></table></figure>
+
+<p>一次性初始化了所有的XSD源。老规矩，先救命再治病：</p>
+<ul>
+<li><strong>临时解决方案</strong>：评估最大Metaspace并扩容</li>
+<li><strong>最终解决方案</strong>：服务拆分，分块加载</li>
+</ul>
+<h2 id="0x03-案例三"><a href="#0x03-案例三" class="headerlink" title="0x03 案例三"></a>0x03 案例三</h2><p><strong>事故时间</strong>：2022年3月17日</p>
+<p><strong>故障类型</strong>：<code>java.lang.StackOverflowError</code></p>
+<p><strong>事故经过</strong>：某营销管理系统对接第三方接口上送的数据，并进行解析处理，触发对应的业务流程。其中一个业务处理是给编号为0-N的直连机构推送通知，按照接口约定，其中N由第三方接口指定，且最大值不会超过255。</p>
+<p>管理后台采用了类似这样的代码进行处理：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">process</span><span class="params">(<span class="type">int</span> corpNum)</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;发送通知给企业，当前编号: &quot;</span> + corpNum);</span><br><span class="line">        sendSms(corpNum);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line">        System.err.println(<span class="string">&quot;发送通知给企业失败，当前编号: &quot;</span> + corpNum);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (corpNum != <span class="number">0</span>) &#123;</span><br><span class="line">        process(corpNum - <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上线之后系统一直运行良好，直到有一天，第三方接口上送数据时传了个-1，嚯！系统直接崩了，打电话过去对方说是配置有误，导致参数填写错误。这边喜提<code>java.lang.StackOverflowError</code>。</p>
+<p>其实测试之初应该可以避免的，但是负责该业务的开发过于信任第三方上送的数据，没有考虑到意外的参数范围，狠狠的交了一笔学费。</p>
+<p><strong>解决方案</strong>：增加严格的参数校验，同时修改尾递归写法为循环发送。</p>
+<h2 id="0x04-案例四"><a href="#0x04-案例四" class="headerlink" title="0x04 案例四"></a>0x04 案例四</h2><p><strong>事故时间</strong>：2022年4月15日</p>
+<p><strong>故障类型</strong>：<code>java.lang.OutOfMemoryError: unable to create new native thread</code></p>
+<p><strong>事故经过</strong>：某接口服务配置了无界线程池作为业务线程池。该接口业务非常简单，收集各个上游服务的度量指标 (Metrics) ，简单记录日志并写入数据库，轻量、高频、无长时间阻塞，一切都那么完美。</p>
+<p>然而，某天突然运维报告服务不可用，查询日志发现服务已经凉了有段时间，死因是<code>java.lang.OutOfMemoryError: unable to create new native thread</code>。还好留下了堆栈，一通分析，发现是有段时间应用日志所在磁盘空间写满，导致线程得不到释放，高频调用之下，最终无法创建新线程，导致服务被压垮。</p>
+<p>那么为什么写日志会阻塞线程呢？当时应用使用的是logback日志实现，查看其配置，使用的是<code>AsyncAppender</code>异步记录器：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">appender</span> <span class="attr">name</span>=<span class="string">&quot;file.async&quot;</span> <span class="attr">class</span>=<span class="string">&quot;ch.qos.logback.classic.AsyncAppender&quot;</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 不丢失日志 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">discardingThreshold</span>&gt;</span>0<span class="tag">&lt;/<span class="name">discardingThreshold</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">appender-ref</span> <span class="attr">ref</span>=<span class="string">&quot;file.log&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">appender</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里的配置正是压死骆驼的最后一根稻草。日志首先被写入<code>BlockingQueue</code>内存队列，再由工作线程异步写入磁盘。如果磁盘写满导致下游<code>FileAppender</code>无法正常工作，而<code>AsyncAppender</code>的队列又被填满，就会导致对<code>Logger</code>的调用发生阻塞。</p>
+<p>官方文档里对于<code>discardingThreshold</code>是这样描述的：</p>
+<blockquote>
+<p>In light of the discussion above and in order to reduce blocking, by default, when less than 20% of the queue capacity remains, AsyncAppender will drop events of level TRACE, DEBUG and INFO keeping only events of level WARN and ERROR. This strategy ensures non-blocking handling of logging events (hence excellent performance) at the cost loosing events of level TRACE, DEBUG and INFO when the queue has less than 20% capacity. Event loss can be prevented by setting the discardingThreshold property to 0 (zero).</p>
+</blockquote>
+<p>设置为0，虽然可以防丢，但也让logback没有退路可言。</p>
+<p><strong>解决方案</strong>：为接口配置有界线程池，并调整<code>discardingThreshold</code>为合理数值。</p>
+<h2 id="0x05-案例五"><a href="#0x05-案例五" class="headerlink" title="0x05 案例五"></a>0x05 案例五</h2><p><strong>事故时间</strong>：2022年5月25日</p>
+<p><strong>故障类型</strong>：<code>java.lang.OutOfMemoryError: Java heap space</code></p>
+<p><strong>事故经过</strong>：某后台管理系统，由于存在敏感数据，需要在本地安装安全控件来辅助访问，该系统在首页上提供了多个版本的控件安装包下载。</p>
+<p>上线之初系统运行都挺正常，但是某天突然有用户反馈系统无法访问，浏览器提示502网关错误。查阅发现服务已挂，应用日志提示<code>java.lang.OutOfMemoryError: Java heap space</code>，使用MAT(Memory Analyzer Tool)工具分析dump文件，发现存在大量的<code>byte[]</code>内存占用。</p>
+<p>结合应用日志，发现服务异常之时正在调用某个文件下载方法，该方法使用<code>FileInputStream</code>读取文件到内存中，并使用<code>byte[]</code>数组存储文件内容， subsequent to将该<code>byte[]</code>数组写入到<code>Response</code>的输出流完成下载，关键代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] readFileContent(File file) &#123;</span><br><span class="line">    <span class="type">long</span> <span class="variable">fileLength</span> <span class="operator">=</span> file.length();</span><br><span class="line">    <span class="type">byte</span>[] fileContent = <span class="keyword">new</span> <span class="title class_">byte</span>[(<span class="type">int</span>) fileLength];</span><br><span class="line">    <span class="keyword">try</span> (<span class="type">FileInputStream</span> <span class="variable">in</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(file)) &#123;</span><br><span class="line">        in.read(fileContent);</span><br><span class="line">        <span class="keyword">return</span> fileContent;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        logger.error(e.getMessage(), e);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>短短几行代码却让人虎躯一震，没有判断文件的大小就直接完整读取，危险！而且没有使用缓冲流的方式进行读写。事实证明问题恰恰就是出在这里，某个版本的控件由于打包时体积偏大（约200多MB），导致多个用户同时下载时，堆区内存一下子就被控件文件数据填满，进而发生OOM异常。</p>
+<p><strong>解决方案</strong>：将控件安装包文件挂载到FTP上并提供外链，不经过应用服务器下载。</p>
+<h2 id="0x06-案例六"><a href="#0x06-案例六" class="headerlink" title="0x06 案例六"></a>0x06 案例六</h2><p><strong>事故时间</strong>：2023年3月10日</p>
+<p><strong>故障类型</strong>：<code>java.lang.OutOfMemoryError: Java heap space</code></p>
+<p><strong>事故经过</strong>：A公司开发人员在开发某开放接口时，需要调用C公司的一个基础数据接口服务。然而，从14时许开始，A公司的接口调用就开始出现异常，返回错误码<code>500</code>，错误信息为<code>java.lang.OutOfMemoryError: Java heap space</code>。</p>
+<p>C公司开发人员向A公司开发人员反映某开放接口从14时许开始无法访问和使用。该系统为某基础数据接口服务，基于HTTP协议进行通信。</p>
+<p>按照惯例，首先排查网络是否异常，经运维人员检查，证明网络连通性没有问题。A公司开发组于14时30分通知运维人员重启应用服务，期间短暂恢复正常。但是，很快，十分钟后，电话再次响起，告知服务又出现异常，无法访问。</p>
+<p>在日志中搜索，找到了若干处内存溢出错误<code>java.lang.OutOfMemoryError: Java heap space</code>，但是令人费解的是每次出现OOM错误的位置居然都不一样。最后发现是应用启动脚本中，<code>-Xmn</code>参数设置成与<code>-Xmx</code>参数一样的大小，导致堆区大小失衡，进而引发内存异常。</p>
+<p>该问题的排查过程在<a target="_blank" rel="noopener" href="https://www.cnblogs.com/mylibs/p/production-accident-0002.html">生产事故-记一次特殊的OOM排查</a>一文中有详细的分析过程，这里就不再赘述了。</p>
+<h2 id="0x07-案例七"><a href="#0x07-案例七" class="headerlink" title="0x07 案例七"></a>0x07 案例七</h2><p><strong>事故时间</strong>：2024年4月28日</p>
+<p><strong>故障类型</strong>：<code>java.lang.OutOfMemoryError: Java heap space</code></p>
+<p><strong>事故经过</strong>：某报表分析系统，其业务大体上为导入各种CSV&#x2F;XLS&#x2F;XLSX文件进行解析，校验并计算各项统计数据，对于异常的数据可以在首页上监控告警并提示。</p>
+<p>有天运营的妹子突然找过来说她登录不了系统了，刚开始听到的我认为只是简单的浏览器问题，可以秀一波操作了，结果到了工位上一看，发现登录页面验证码出不来了。做过前后端分离项目的朋友都知道，这种情况下，后端服务非死即伤。强装镇定，安抚一下妹子，说我得去查查日志看看咋回事。</p>
+<p>远程到服务器，发现后端应用确实已经灰飞烟灭，查看GC日志，发现有若干<code>java.lang.OutOfMemoryError: Java heap space</code>错误。找到那段时间的应用日志，最终问题定位到了某个<code>SQL</code>语句上，该<code>SQL</code>是个单表查询语句，但是返回的记录行数竟然有10w+。</p>
+<p>追查源头，发现就是首页上的监控告警。前端定时器每隔20秒调用一次后端服务扫描该表的记录，筛选出状态异常的数据并返回，但是没有做分页限制，导致某个业务人员上传了一个超大的Excel表，但是有个关键数据项填写错误，该批数据10w+行记录全部被系统标记为异常，当有多个运营人员登录系统并进入首页后，就会反复触发该查询语句，进而导致内存溢出。</p>
+<p><strong>解决方案</strong>：限制首页监控查询行数，同时优化监控逻辑，建立查询缓存，防止短时间内重复扫描业务表。</p>
+<h2 id="0x08-案例八"><a href="#0x08-案例八" class="headerlink" title="0x08 案例八"></a>0x08 案例八</h2><p><strong>事故时间</strong>：2024年12月5日</p>
+<p><strong>故障类型</strong>：<code>java.lang.OutOfMemoryError: GC Overhead limit exceeded</code></p>
+<p><strong>事故经过</strong>：某查询接口服务，上线后基本稳定运行，三个月后有用户反映查询缓慢。</p>
+<p>遂查之，发现GC日志中频繁出现<code>java.lang.OutOfMemoryError: GC Overhead limit exceeded</code>报告。第一时间做了堆栈快照，发现内存中有大量的<code>List</code>容器未释放，MAT分析Incoming references指向了<code>ThreadLocalMap</code>，基本可以定位到是<code>ThreadLocal</code>中的数据没有及时清理，无法被GC回收，导致的内存泄露，最终频繁Full GC也无法回收足够空间。</p>
+<p><strong>解决方案</strong>：严格遵循使用后释放的原则，及时移除<code>ThreadLocal</code>中的数据引用。</p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMCZ7HaLpZxDj_zG1XxJmHwfbAThfQAAqTEMRuvMJFV9E-PLlimPicBAAMCAAN4AAM2BA.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMCZ7HaLpZxDj_zG1XxJmHwfbAThfQAAqTEMRuvMJFV9E-PLlimPicBAAMCAAN4AAM2BA.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">dachang</div><div class="post-copyright__author_desc">感谢你选择与我一起虚度时光。</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="https://yeoh.de5.net/2025/03/11/%E6%8E%92%E5%BF%A7%E8%A7%A3%E9%9A%BE/%E7%94%9F%E4%BA%A7%E4%BA%8B%E6%95%85%E8%AE%B0%E5%BD%95OOM/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('https://yeoh.de5.net/2025/03/11/%E6%8E%92%E5%BF%A7%E8%A7%A3%E9%9A%BE/%E7%94%9F%E4%BA%A7%E4%BA%8B%E6%95%85%E8%AE%B0%E5%BD%95OOM/')">线上事故记录OOM-转载</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg" target="_blank"><img class="post-qr-code-img" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg" target="_blank"><img class="post-qr-code-img" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="https://yeoh.de5.net/2025/03/11/%E6%8E%92%E5%BF%A7%E8%A7%A3%E9%9A%BE/%E7%94%9F%E4%BA%A7%E4%BA%8B%E6%95%85%E8%AE%B0%E5%BD%95OOM/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=线上事故记录OOM-转载&amp;url=https://yeoh.de5.net/2025/03/11/%E6%8E%92%E5%BF%A7%E8%A7%A3%E9%9A%BE/%E7%94%9F%E4%BA%A7%E4%BA%8B%E6%95%85%E8%AE%B0%E5%BD%95OOM/&amp;pic=https://imags-563.pages.dev/file/AgACAgUAAxkDAAOYaUNwDmRjUI7AX0G_E9ZI8ybVCXgAAosLaxvvjBhWXBf2s0w9R_wBAAMCAAN3AAM2BA.jpg" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://yeoh.de5.net" target="_blank">数根朽木，</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__category-list"><a class="post-meta__box__categoryes" href="/categories/%E6%8E%92%E5%BF%A7%E8%A7%A3%E9%9A%BE/"><span class="categoryes-punctuation"> <i class="anzhiyufont anzhiyu-icon-inbox"></i></span>排忧解难<span class="categoryesPageCount">3</span></a></div><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/OOM/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>OOM<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/%E7%BA%BF%E4%B8%8A%E4%BA%8B%E6%95%85/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>线上事故<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/%E8%BF%90%E7%BB%B4%E8%B0%83%E4%BC%98/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>运维调优<span class="tagsPageCount">3</span></a></div></div><div class="post_share"><div class="social-share" data-image="https://imags-563.pages.dev/file/AgACAgUAAxkDAAP9aUfYMWMpVNZK-Oa9yBLA3qKllZ0AAgsLaxunp0BW2F3X0MGT15YBAAMCAAN5AAM2BA.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/03/11/%E6%8E%92%E5%BF%A7%E8%A7%A3%E9%9A%BE/%E7%94%9F%E4%BA%A7%E4%BA%8B%E6%95%85%E8%AE%B0%E5%BD%95%E5%8C%BB%E7%96%97%E9%A1%B9%E7%9B%AE/"><img class="prev-cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAOXaUNv4MuwOGedDGtvtfzYit5RpUsAAooLaxvvjBhWt7jSsbJwPbgBAAMCAAN5AAM2BA.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">线上事故记录-接口超时&amp;锁表--转载</div></div></a></div><div class="next-post pull-right"><a href="/2025/03/11/Redis%E7%B3%BB%E5%88%97/Redis%E7%B3%BB%E5%88%9714-%E4%BD%BF%E7%94%A8List%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/"><img class="next-cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAANlaUIziU-Bsh9lbn9JNmBQLD0O0WkAAmkLaxvvjBBW98Yxo9My5IUBAAMCAAN4AAM2BA.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Redis系列14：使用List实现消息队列</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/03/20/%E6%8E%92%E5%BF%A7%E8%A7%A3%E9%9A%BE/%E7%94%9F%E4%BA%A7%E4%BA%8B%E6%95%85%E8%AE%B0%E5%BD%95%E4%B8%80%E6%AC%A1%E9%9B%AA%E5%B4%A9%E7%9A%84%E7%81%BE%E9%9A%BE%E5%A4%8D%E7%9B%98/" title="生产事故记录-一次雪崩的灾难复盘-转载"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAOLaUNlvyfBsyfO0tXybyInf7wcJFIAAnkLaxvvjBhWXix4WSxiEQkBAAMCAAN5AAM2BA.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-03-20</div><div class="title">生产事故记录-一次雪崩的灾难复盘-转载</div></div></a></div><div><a href="/2025/03/11/%E6%8E%92%E5%BF%A7%E8%A7%A3%E9%9A%BE/%E7%94%9F%E4%BA%A7%E4%BA%8B%E6%95%85%E8%AE%B0%E5%BD%95%E5%8C%BB%E7%96%97%E9%A1%B9%E7%9B%AE/" title="线上事故记录-接口超时&amp;锁表--转载"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAOXaUNv4MuwOGedDGtvtfzYit5RpUsAAooLaxvvjBhWt7jSsbJwPbgBAAMCAAN5AAM2BA.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-03-11</div><div class="title">线上事故记录-接口超时&amp;锁表--转载</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div><div class="comment-tips" id="comment-tips"><span>✅ 你无需删除空行，直接评论以获取最佳展示效果</span></div></div><div class="comment-wrap"><div><div id="twikoo-wrap"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-%E6%A1%88%E4%BE%8B%E4%B8%80"><span class="toc-number">1.</span> <span class="toc-text">0x01 案例一</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-%E6%A1%88%E4%BE%8B%E4%BA%8C"><span class="toc-number">2.</span> <span class="toc-text">0x02 案例二</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-%E6%A1%88%E4%BE%8B%E4%B8%89"><span class="toc-number">3.</span> <span class="toc-text">0x03 案例三</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-%E6%A1%88%E4%BE%8B%E5%9B%9B"><span class="toc-number">4.</span> <span class="toc-text">0x04 案例四</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x05-%E6%A1%88%E4%BE%8B%E4%BA%94"><span class="toc-number">5.</span> <span class="toc-text">0x05 案例五</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x06-%E6%A1%88%E4%BE%8B%E5%85%AD"><span class="toc-number">6.</span> <span class="toc-text">0x06 案例六</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x07-%E6%A1%88%E4%BE%8B%E4%B8%83"><span class="toc-number">7.</span> <span class="toc-text">0x07 案例七</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x08-%E6%A1%88%E4%BE%8B%E5%85%AB"><span class="toc-number">8.</span> <span class="toc-text">0x08 案例八</span></a></li></ol></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div id="footer_deal"><a class="deal_link" href="mailto:youngyang0220@gmail.com" title="email"><i class="anzhiyufont anzhiyu-icon-envelope"></i></a><img class="footer_mini_logo" title="返回顶部" alt="返回顶部" onclick="anzhiyu.scrollToDest(0, 500)" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMCZ7HaLpZxDj_zG1XxJmHwfbAThfQAAqTEMRuvMJFV9E-PLlimPicBAAMCAAN4AAM2BA.jpg" size="50px"/><a class="deal_link" target="_blank" rel="noopener" href="https://github.com/dachang007" title="Github"><i class="anzhiyufont anzhiyu-icon-github"></i></a></div><div id="anzhiyu-footer"><div class="footer-group"><div class="footer-title">服务</div><div class="footer-links"><a class="footer-item" title="51la统计" target="_blank" rel="noopener" href="https://v6.51.la/">51la统计</a><a class="footer-item" title="十年之约" target="_blank" rel="noopener" href="https://www.foreverblog.cn/">十年之约</a><a class="footer-item" title="开往" target="_blank" rel="noopener" href="https://github.com/travellings-link/travellings">开往</a></div></div><div class="footer-group"><div class="footer-title">主题</div><div class="footer-links"><a class="footer-item" title="文档" target="_blank" rel="noopener" href="https://docs.anheyu.com/">文档</a><a class="footer-item" title="源码" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu">源码</a><a class="footer-item" title="更新日志" href="/update/">更新日志</a></div></div><div class="footer-group"><div class="footer-title">导航</div><div class="footer-links"><a class="footer-item" title="图床工具" target="_blank" rel="noopener" href="https://imags-563.pages.dev">图床工具</a><a class="footer-item" title="在线烟花模拟器" target="_blank" rel="noopener" href="http://greatree.hidns.co">在线烟花模拟器</a><a class="footer-item" title="订阅转换" target="_blank" rel="noopener" href="https://suburl.v1.mk">订阅转换</a><a class="footer-item" title="在线简历生成" target="_blank" rel="noopener" href="https://imags-563.pages.dev">在线简历生成</a></div></div><div class="footer-group"><div class="footer-title-group"><div class="footer-title">友链</div><a class="random-friends-btn" id="footer-random-friends-btn" href="javascript:addFriendLinksInFooter();" title="换一批友情链接"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right"></i></a></div><div class="footer-links" id="friend-links-in-footer"></div></div></div><p id="ghbdages"><a class="github-badge" target="_blank" href="https://hexo.io/" style="margin-inline:5px" data-title="博客框架为Hexo_v5.4.0" title="博客框架为Hexo_v5.4.0"><img src="https://npm.elemecdn.com/anzhiyu-blog@2.1.5/img/badge/Frame-Hexo.svg" alt="博客框架为Hexo_v5.4.0"/></a><a class="github-badge" target="_blank" href="https://blog.anheyu.com/" style="margin-inline:5px" data-title="本站使用AnZhiYu主题" title="本站使用AnZhiYu主题"><img src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.9/img/Theme-AnZhiYu-2E67D3.svg" alt="本站使用AnZhiYu主题"/></a><a class="github-badge" target="_blank" href="https://www.Cloudflare.com/" style="margin-inline:5px" data-title="本站使用CloudFlare为静态资源提供CDN加速" title="本站使用CloudFlare为静态资源提供CDN加速"><img src="https://img.shields.io/badge/%E2%98%81CDN-CloudFlare-yellow" alt="本站使用CloudFlare为静态资源提供CDN加速"/></a><a class="github-badge" target="_blank" href="https://github.com/" style="margin-inline:5px" data-title="本站项目由Github托管" title="本站项目由Github托管"><img src="https://npm.elemecdn.com/anzhiyu-blog@2.1.5/img/badge/Source-Github.svg" alt="本站项目由Github托管"/></a><a class="github-badge" target="_blank" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" style="margin-inline:5px" data-title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可" title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"><img src="https://npm.elemecdn.com/anzhiyu-blog@2.2.0/img/badge/Copyright-BY-NC-SA.svg" alt="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"/></a></p></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2022 - 2025 By <a class="footer-bar-link" href="/" title="dachang" target="_blank">dachang</a></div></div><div id="footer-type-tips"></div><div class="js-pjax"><script>function subtitleType () {
+  fetch('https://v1.hitokoto.cn')
+    .then(response => response.json())
+    .then(data => {
+      if (false) {
+        const from = '出自 ' + data.from
+        const sub = []
+        sub.unshift(data.hitokoto, from)
+        window.typed = new Typed('#footer-type-tips', {
+          strings: sub,
+          startDelay: 300,
+          typeSpeed: 150,
+          loop: false,
+          backSpeed: 50,
+        })
+      } else {
+        document.getElementById('footer-type-tips').innerHTML = data.hitokoto
+      }
+    })
+}
+
+if (false) {
+  if (typeof Typed === 'function') {
+    subtitleType()
+  } else {
+    getScript('https://cdn.cbd.int/typed.js@2.1.0/dist/typed.umd.js').then(subtitleType)
+  }
+} else {
+  subtitleType()
+}
+</script></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">38</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">33</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">8</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网站项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="个人博客"><img class="back-menu-item-icon" src="/favicon.ico" alt="个人博客"/><span class="back-menu-item-text">个人博客</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线简历"><img class="back-menu-item-icon" src="/favicon.ico" alt="在线简历"/><span class="back-menu-item-text">在线简历</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">建设工具</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线图床"><img class="back-menu-item-icon" src="/img/image.ico" alt="在线图床"/><span class="back-menu-item-text">在线图床</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="在线烟花模拟器"><img class="back-menu-item-icon" src="/img/Clash.Mini.png" alt="在线烟花模拟器"/><span class="back-menu-item-text">在线烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="烟花模拟器"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMMZ7Qfv1Xv2qvgqSVN7kNhRO_uzfgAAlvAMRtiZKBVrGT1Z6RPiX4BAAMCAANtAAM2BA.png" alt="烟花模拟器"/><span class="back-menu-item-text">烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://pay.totalh.net/" title="三合一收款码"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAM8Z7WNYNdWdrYsas5PPFT8Di3493sAAgLKMRsEtalVDcfaakgTXPkBAAMCAAN4AAM2BA.png" alt="三合一收款码"/><span class="back-menu-item-text">三合一收款码</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 博客文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 全部文章</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 文章分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 所有标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 网站工具</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 图床工具</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="http://greatree.hidns.co"><i class="anzhiyufont anzhiyu-icon-artstation faa-tada" style="font-size: 0.9em;"></i><span> 烟花模拟器</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://suburl.v1.mk"><i class="anzhiyufont anzhiyu-icon-envelope faa-tada" style="font-size: 0.9em;"></i><span> 订阅转换</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><span> 在线简历生成</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于我</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 在线简历</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><i class="anzhiyufont anzhiyu-icon-shoe-prints1 faa-tada" style="font-size: 0.9em;"></i><span> 随便逛逛</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Boolean-filter/" style="font-size: 0.88rem;">Boolean filter<sup>2</sup></a><a href="/tags/DNS%E6%B3%84%E9%9C%B2/" style="font-size: 0.88rem;">DNS泄露<sup>1</sup></a><a href="/tags/Fake-IP/" style="font-size: 0.88rem;">Fake IP<sup>1</sup></a><a href="/tags/JVM%E8%99%9A%E6%8B%9F%E6%9C%BA/" style="font-size: 0.88rem;">JVM虚拟机<sup>1</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>1</sup></a><a href="/tags/JavaSE/" style="font-size: 0.88rem;">JavaSE<sup>11</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 0.88rem;">Java基础<sup>11</sup></a><a href="/tags/Java%E6%A0%B8%E5%BF%83/" style="font-size: 0.88rem;">Java核心<sup>14</sup></a><a href="/tags/Java%E7%89%88%E6%9C%AC%E6%96%B0%E7%89%B9%E6%80%A7/" style="font-size: 0.88rem;">Java版本新特性<sup>2</sup></a><a href="/tags/MQ/" style="font-size: 0.88rem;">MQ<sup>2</sup></a><a href="/tags/MySQL/" style="font-size: 0.88rem;">MySQL<sup>10</sup></a><a href="/tags/OOM/" style="font-size: 0.88rem;">OOM<sup>1</sup></a><a href="/tags/RabbitMQ/" style="font-size: 0.88rem;">RabbitMQ<sup>2</sup></a><a href="/tags/Redis/" style="font-size: 0.88rem;">Redis<sup>5</sup></a><a href="/tags/Redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/" style="font-size: 0.88rem;">Redis内存淘汰策略<sup>1</sup></a><a href="/tags/Redis%E5%8E%9F%E7%90%86/" style="font-size: 0.88rem;">Redis原理<sup>1</sup></a><a href="/tags/Redis%E7%BC%93%E5%AD%98/" style="font-size: 0.88rem;">Redis缓存<sup>1</sup></a><a href="/tags/RocketMQ/" style="font-size: 0.88rem;">RocketMQ<sup>2</sup></a><a href="/tags/SSM/" style="font-size: 0.88rem;">SSM<sup>1</sup></a><a href="/tags/Spring/" style="font-size: 0.88rem;">Spring<sup>1</sup></a><a href="/tags/SpringBoot/" style="font-size: 0.88rem;">SpringBoot<sup>1</sup></a><a href="/tags/kafka/" style="font-size: 0.88rem;">kafka<sup>2</sup></a><a href="/tags/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" style="font-size: 0.88rem;">单例模式<sup>1</sup></a><a href="/tags/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/" style="font-size: 0.88rem;">布隆过滤器<sup>2</sup></a><a href="/tags/%E6%8E%A5%E5%8F%A3%E8%B6%85%E6%97%B6/" style="font-size: 0.88rem;">接口超时<sup>1</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/" style="font-size: 0.88rem;">消息中间件<sup>2</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" style="font-size: 0.88rem;">消息队列<sup>1</sup></a><a href="/tags/%E7%BA%BF%E4%B8%8A%E4%BA%8B%E6%95%85/" style="font-size: 0.88rem;">线上事故<sup>1</sup></a><a href="/tags/%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/" style="font-size: 0.88rem;">缓存雪崩<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96/" style="font-size: 0.88rem;">网络优化<sup>1</sup></a><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 0.88rem;">设计模式<sup>1</sup></a><a href="/tags/%E8%BF%90%E7%BB%B4%E8%B0%83%E4%BC%98/" style="font-size: 0.88rem;">运维调优<sup>3</sup></a><a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" style="font-size: 0.88rem;">高并发<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const init = () => {
+    twikoo.init(Object.assign({
+      el: '#twikoo-wrap',
+      envId: 'https://twikoo-kohl-zeta.vercel.app',
+      region: '',
+      onCommentLoaded: () => {
+        anzhiyu.loadLightbox(document.querySelectorAll('#twikoo .tk-content img:not(.tk-owo-emotion)'))
+      }
+    }, null))
+  }
+
+  const loadTwikoo = () => {
+    if (typeof twikoo === 'object') setTimeout(runFn,0)
+    else getScript('https://unpkg.com/twikoo@1.6.44/dist/twikoo.all.min.js').then(runFn)
+  }
+
+  const getCount = () => {
+    const countELement = document.getElementById('twikoo-count')
+    if(!countELement) return
+    twikoo.getCommentsCount({
+      envId: 'https://twikoo-kohl-zeta.vercel.app',
+      region: '',
+      urls: [window.location.pathname],
+      includeReply: false
+    }).then(res => {
+      countELement.textContent = res[0].count
+    }).catch(err => {
+      console.error(err)
+    })
+  }
+
+  const runFn = () => {
+    init();
+    
+  }
+
+  if ('Twikoo' === 'Twikoo' || !true) {
+    if (true) anzhiyu.loadComment(document.getElementById('twikoo-wrap'), loadTwikoo)
+    else {
+      loadTwikoo()
+    }
+  } else {
+    window.loadOtherComment = loadTwikoo
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getComment = () => {
+    const runTwikoo = () => {
+      twikoo.getRecentComments({
+        envId: 'https://twikoo-kohl-zeta.vercel.app',
+        region: '',
+        pageSize: 6,
+        includeReply: true
+      }).then(function (res) {
+        const twikooArray = res.map(e => {
+          return {
+            'content': changeContent(e.comment),
+            'avatar': e.avatar,
+            'nick': e.nick,
+            'url': e.url + '#' + e.id,
+            'date': new Date(e.created).toISOString()
+          }
+        })
+
+        saveToLocal.set('twikoo-newest-comments', JSON.stringify(twikooArray), 10/(60*24))
+        generateHtml(twikooArray)
+      }).catch(function (err) {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      })
+    }
+
+    if (typeof twikoo === 'object') {
+      runTwikoo()
+    } else {
+      getScript('https://unpkg.com/twikoo@1.6.44/dist/twikoo.all.min.js').then(runTwikoo)
+    }
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'><div class='name'><span>${array[i].nick} </span></div></a>`
+        }
+        
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('twikoo-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","meta[property=\"og:type\"]","meta[property=\"og:site_name\"]","meta[property=\"og:description\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404')
+  }
+})</script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>

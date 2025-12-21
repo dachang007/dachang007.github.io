@@ -1,0 +1,510 @@
+<!DOCTYPE html><html lang="zh-cn" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>MySQL系列：分库分表 | 数根朽木，</title><meta name="keywords" content="分库分表,MySQL"><meta name="author" content="dachang"><meta name="copyright" content="dachang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#F9F9F9"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="MySQL系列：分库分表"><meta name="application-name" content="MySQL系列：分库分表"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#F9F9F9"><meta property="og:type" content="article"><meta property="og:title" content="MySQL系列：分库分表"><meta property="og:url" content="https://yeoh.de5.net/2025/04/29/MySQL%E7%B3%BB%E5%88%97/MySQL%E7%B3%BB%E5%88%97-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/index.html"><meta property="og:site_name" content="数根朽木，"><meta property="og:description" content="1 为什么要分库分表物理服务机的CPU、内存、存储设备、连接数等资源有限，某个时段大量连接同时执行操作，会导致数据库在处理上遇到性能瓶颈。为了解决这个问题，行业先驱门充分发扬了分而治之的思想，对大库表进行分割， 然后实施更好的控制和管理，同时使用多台机器的CPU、内存、存储，提供更好的性能。而分治有"><meta property="og:locale" content="zh-cn"><meta property="og:image" content="https://imags-563.pages.dev/file/AgACAgUAAxkDAAP9aUfYMWMpVNZK-Oa9yBLA3qKllZ0AAgsLaxunp0BW2F3X0MGT15YBAAMCAAN5AAM2BA.png"><meta property="article:author" content="dachang"><meta property="article:tag" content="blog, coding, technology, personal"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://imags-563.pages.dev/file/AgACAgUAAxkDAAP9aUfYMWMpVNZK-Oa9yBLA3qKllZ0AAgsLaxunp0BW2F3X0MGT15YBAAMCAAN5AAM2BA.png"><meta name="description" content="1 为什么要分库分表物理服务机的CPU、内存、存储设备、连接数等资源有限，某个时段大量连接同时执行操作，会导致数据库在处理上遇到性能瓶颈。为了解决这个问题，行业先驱门充分发扬了分而治之的思想，对大库表进行分割， 然后实施更好的控制和管理，同时使用多台机器的CPU、内存、存储，提供更好的性能。而分治有"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="https://yeoh.de5.net/2025/04/29/MySQL%E7%B3%BB%E5%88%97/MySQL%E7%B3%BB%E5%88%97-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: undefined,
+  diytitle: undefined,
+  LA51: {"enable":true,"ck":null,"LingQueMonitorID":null},
+  greetingBox: undefined,
+  twikooEnvId: 'https://twikoo-kohl-zeta.vercel.app',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: undefined,
+  friends_vue_info: undefined,
+  navMusic: false,
+  mainTone: undefined,
+  authorStatus: undefined,
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"该文章距离上次更新已经过去","messageNext":"天了，文章内容可能已经过时，注意甄别。"},
+  highlight: {"plugin":"highlight.js","highlightCopy":false,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: dachang","link":"链接: ","source":"来源: 数根朽木，","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'mediumZoom',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: true,
+  islazyload: false,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '数根朽木，',
+  title: 'MySQL系列：分库分表',
+  postAI: '',
+  pageFillDescription: '1 为什么要分库分表, 2 垂直拆分（Scale Up 纵向扩展）, 2.1 垂直分库, 2.2 垂直分表, 3 水平拆分（Scale Out 横向扩展）, 3.1 库内分表, 3.2 库内分表的实现策略, 3.2.1 HASH（哈希）, 3.2.2 RANGE（范围）, 3.2.3 LIST（预定义列表）, 3.2.4 KEY（键值）, 3.2.5 Composite（复合模式）, 3.3 分库分表, 4 分库分表存在的问题, 4.1 事务问题, 4.2 跨库跨表的join问题, 4.3 额外的数据管理负担和数据运算压力为什么要分库分表物理服务机的内存存储设备连接数等资源有限某个时段大量连接同时执行操作会导致数据库在处理上遇到性能瓶颈为了解决这个问题行业先驱门充分发扬了分而治之的思想对大库表进行分割然后实施更好的控制和管理同时使用多台机器的内存存储提供更好的性能而分治有两种实现方式垂直拆分和水平拆分垂直拆分纵向扩展垂直拆分分为垂直分库和垂直分表主要按功能模块拆分以解决各个库或者各个表之间的资源竞争比如分为订单库商品库用户库这种方式多个数据库之间的表结构是不同的垂直分库先说说垂直分库垂直分库其实是一种简单逻辑分割比如我们的数据库中有商品表还有对订单表还有积分表接下来我们就可以创建三个数据库一个数据库存放商品一个数据库存放订单一个数据库存放积分垂直分库有一个优点他能够根据业务场景进行孵化比如某一单一场景只用到某张表基本上应用和数据库可以拆分出来做成相应的服务拆分方式如下图所示垂直分表再来说说垂直分表比较适用于那种字段比较多的表假设我们一张表有个字段我们分析了一下当前业务执行的语句有个字段是经常使用的而另外个字段使用比较少这样我们就可以把个字段放在主表里面我们再创建一个辅助表存放另外个字段当然主表和辅助表都是有主键的他们通过主键进行关联合并就可以组合成个字段的表拆分方式如下图所示除了这种访问频率的冷热拆分之外还可以按照字段类型结构来拆分比如大文本字段单独放在一个表中与基础字段隔离提高基础字段的访问效率也可以将字段按照功能用途来拆分比如采购的物料表可以按照基本属性销售属性采购属性生产制造属性财务会计属性等用途垂直拆分总体来说垂直拆分有以下优点跟随业务进行分割类似微服务的分治理念方便解耦之后的管理及扩展高并发的场景下垂直拆分使用多台服务器的内存能提升性能同时对单机数据库连接数一些资源限制也得到了提升能实现冷热数据的分离垂直拆分的缺点部分业务表无法应用层需要很大的改造只能通过聚合的方式来实现增加了开发的难度单表数据量膨胀的问题依然没有得到有效的解决分布式事务也是一个难题水平拆分横向扩展水平拆分又分为库内分表和分库分表来解决单表中数据量增长出现的压力这些数据库中的表结构完全相同库内分表先说说库内分表假设当我们的表达到了万行记录的时候非常影响数据库的读写效率怎么办呢我们可以考虑按照订单编号的进行分区就是把订单编号在万的放在表中将编号在万万的放在中以此类推每个表中存放万数据关于水平分表的时机业内的标准不是很统一阿里的开发手册的标准是当单表行数超过万行或者单表容量超过时才推荐进行分库分表百度的则是行的进行分表这个是百度的经过测试推算出的结果但是这边忽略了单表的字段数和字段类型如果字段数很多超过列对性能影响也是不小的我们曾经有个业务表字段是随着业务的增长而自动扩增的到了后期字段越来越多查询性能也越来越慢所以个人觉得不必拘泥于还是开发人员在使用过程中如果压测发现因为数据基数变大而导致执行效率慢下来就可以开始考虑分表了库内分表的实现策略目前在中支持四种表分区的方式分别为及当然在其它的类型数据库中分区的实现方式略有不同但是分区的思想原理是相同具体如下哈希分区主要用来确保数据在预先确定数目的分区中平均分布而在和分区中必须明确指定一个给定的列值或列值集合应该保存在哪个分区中而在分区中自动完成这些工作你所要做的只是基于将要被哈希的列值指定一个列值或表达式以及指定被分区的表将要被分割成的分区数量示例如下上面的例子使用函数对日期进行运算并根据这个日期来分区数据这里共分为个分区建表语句上添加一个子句其中是一个返回整数的表达式它可以是字段类型为整型的一列的名字也可以是返回非负数的表达式另外可能需要在后面再添加一个子句其中是一个非负的整数它表示表将要被分割成分区的数量范围基于属于一个给定连续区间的列值把多行分配给同一个分区这些区间要连续且不能相互重叠使用操作符来进行定义示例如下上面的示例使用了范围函数对岗位编号进行分区共分为个分区岗位编号为的对应在分区中的编号在分区中依次类推即可那么类别编号大于可以使用来将大于的数据统一存放在分区中即可预定义列表类似于按分区区别在于分区是基于列值匹配一个离散值集合中的某个值来进行选择分区的分区通过使用来实现其中是某列值或一个基于某个列值并返回一个整数值的表达式然后通过的方式来定义每个分区其中是一个通过逗号分隔的整数列表示例如下上面的例子使用了列表匹配函数对员工岗位编号进行分区共分为个分区编号为的对应在分区中类别在分区中依次类推即可不同于的是分区的数据必须匹配列表中的岗位编号才能进行分区所以这种方式只是适合比较区间值确定并少量的情况键值类似于按分区区别在于分区只支持计算一列或多列且服务器提供其自身的哈希函数必须有一列或多列包含整数值示例如下注意此种分区算法目前使用的比较少使用服务器提供的哈希函数有不确定性对于后期数据统计整理存在会更复杂所以我们更倾向于使用由我们定义表达式的大家知道其存在和怎么使用即可复合模式是上面几种模式的组合使用比如你在的基础上再进行哈希分区分库分表库内分表解决了单表数据量过大的瓶颈问题但使用还是同一主机的内存另外单库的连接数也有限制并不能完全的降低系统的压力此时我们就要考虑另外一种技术叫分库分表分库分表在库内分表的基础上将分的表挪动到不同的主机和数据库上可以充分的使用其他主机的内存和资源拆分方式进一步演进到下面分库分表存在的问题事务问题在执行分库分表之后由于数据存储到了不同的库上数据库事务管理出现了困难如果依赖数据库本身的分布式事务管理功能去执行事务将付出高昂的性能代价如果由应用程序去协助控制形成程序逻辑上的事务又会造成编程方面的负担跨库跨表的问题在执行了分库分表之后难以避免会将原本逻辑关联性很强的数据划分到不同的表不同的库上这时表的关联操作将受到限制我们无法位于不同分库的表也无法分表粒度不同的表结果原本一次查询能够完成的业务可能需要多次查询才能完成额外的数据管理负担和数据运算压力额外的数据管理负担最显而易见的就是数据的定位问题和数据的增删改查的重复执行问题这些都可以通过应用程序解决但必然引起额外的逻辑运算例如对于一个记录用户成绩的用户数据表业务要求查出成绩最好的位在进行分表之前只需一个语句就可以搞定但是在进行分表之后将需要个语句分别查出每一个分表的前名用户数据然后再对这些数据进行合并计算才能得出结果',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-04-25 18:22:30',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#1F1F1F')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#F9F9F9')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><div class="back-home-button"><i class="anzhiyufont anzhiyu-icon-grip-vertical"></i><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网站项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="个人博客"><img class="back-menu-item-icon" src="/favicon.ico" alt="个人博客"/><span class="back-menu-item-text">个人博客</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线简历"><img class="back-menu-item-icon" src="/favicon.ico" alt="在线简历"/><span class="back-menu-item-text">在线简历</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">建设工具</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线图床"><img class="back-menu-item-icon" src="/img/image.ico" alt="在线图床"/><span class="back-menu-item-text">在线图床</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="在线烟花模拟器"><img class="back-menu-item-icon" src="/img/Clash.Mini.png" alt="在线烟花模拟器"/><span class="back-menu-item-text">在线烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="烟花模拟器"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMMZ7Qfv1Xv2qvgqSVN7kNhRO_uzfgAAlvAMRtiZKBVrGT1Z6RPiX4BAAMCAANtAAM2BA.png" alt="烟花模拟器"/><span class="back-menu-item-text">烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://pay.totalh.net/" title="三合一收款码"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAM8Z7WNYNdWdrYsas5PPFT8Di3493sAAgLKMRsEtalVDcfaakgTXPkBAAMCAAN4AAM2BA.png" alt="三合一收款码"/><span class="back-menu-item-text">三合一收款码</span></a></div></div></div></div><a id="site-name" href="/" accesskey="h"><div class="title">数根朽木，</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a><div id="he-plugin-simple"></div><script>var WIDGET = {
+  "CONFIG": {
+    "modules": "0124",
+    "background": "2",
+    "tmpColor": "FFFFFF",
+    "tmpSize": "16",
+    "cityColor": "FFFFFF",
+    "citySize": "16",
+    "aqiColor": "E8D87B",
+    "aqiSize": "16",
+    "weatherIconSize": "24",
+    "alertIconSize": "18",
+    "padding": "10px 10px 10px 10px",
+    "shadow": "0",
+    "language": "auto",
+    "borderRadius": "20",
+    "fixed": "true",
+    "vertical": "top",
+    "horizontal": "left",
+    "left": "20",
+    "top": "7.1",
+    "key": "df245676fb434a0691ead1c63341cd94"
+  }
+}
+</script><link rel="stylesheet" href="https://widget.qweather.net/simple/static/css/he-simple.css?v=1.4.0"/><script src="https://widget.qweather.net/simple/static/js/he-simple.js?v=1.4.0"></script></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 博客文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 全部文章</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 文章分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 所有标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 网站工具</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 图床工具</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="http://greatree.hidns.co"><i class="anzhiyufont anzhiyu-icon-artstation faa-tada" style="font-size: 0.9em;"></i><span> 烟花模拟器</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://suburl.v1.mk"><i class="anzhiyufont anzhiyu-icon-envelope faa-tada" style="font-size: 0.9em;"></i><span> 订阅转换</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><span> 在线简历生成</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于我</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 在线简历</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><i class="anzhiyufont anzhiyu-icon-shoe-prints1 faa-tada" style="font-size: 0.9em;"></i><span> 随便逛逛</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button only-home" id="travellings_button" title="随机前往一个开往项目网站"><a class="site-page" onclick="anzhiyu.totraveling()" title="随机前往一个开往项目网站" href="javascript:void(0);" rel="external nofollow" data-pjax-state="external"><i class="anzhiyufont anzhiyu-icon-train"></i></a></div><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Boolean-filter/" style="font-size: 1.05rem;">Boolean filter<sup>2</sup></a><a href="/tags/DNS%E6%B3%84%E9%9C%B2/" style="font-size: 1.05rem;">DNS泄露<sup>1</sup></a><a href="/tags/Fake-IP/" style="font-size: 1.05rem;">Fake IP<sup>1</sup></a><a href="/tags/JVM%E8%99%9A%E6%8B%9F%E6%9C%BA/" style="font-size: 1.05rem;">JVM虚拟机<sup>1</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>1</sup></a><a href="/tags/JavaSE/" style="font-size: 1.05rem;">JavaSE<sup>11</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 1.05rem;">Java基础<sup>11</sup></a><a href="/tags/Java%E6%A0%B8%E5%BF%83/" style="font-size: 1.05rem;">Java核心<sup>14</sup></a><a href="/tags/Java%E7%89%88%E6%9C%AC%E6%96%B0%E7%89%B9%E6%80%A7/" style="font-size: 1.05rem;">Java版本新特性<sup>2</sup></a><a href="/tags/MQ/" style="font-size: 1.05rem;">MQ<sup>2</sup></a><a href="/tags/MySQL/" style="font-size: 1.05rem;">MySQL<sup>10</sup></a><a href="/tags/OOM/" style="font-size: 1.05rem;">OOM<sup>1</sup></a><a href="/tags/RabbitMQ/" style="font-size: 1.05rem;">RabbitMQ<sup>2</sup></a><a href="/tags/Redis/" style="font-size: 1.05rem;">Redis<sup>5</sup></a><a href="/tags/Redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/" style="font-size: 1.05rem;">Redis内存淘汰策略<sup>1</sup></a><a href="/tags/Redis%E5%8E%9F%E7%90%86/" style="font-size: 1.05rem;">Redis原理<sup>1</sup></a><a href="/tags/Redis%E7%BC%93%E5%AD%98/" style="font-size: 1.05rem;">Redis缓存<sup>1</sup></a><a href="/tags/RocketMQ/" style="font-size: 1.05rem;">RocketMQ<sup>2</sup></a><a href="/tags/SSM/" style="font-size: 1.05rem;">SSM<sup>1</sup></a><a href="/tags/Spring/" style="font-size: 1.05rem;">Spring<sup>1</sup></a><a href="/tags/SpringBoot/" style="font-size: 1.05rem;">SpringBoot<sup>1</sup></a><a href="/tags/kafka/" style="font-size: 1.05rem;">kafka<sup>2</sup></a><a href="/tags/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" style="font-size: 1.05rem;">单例模式<sup>1</sup></a><a href="/tags/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/" style="font-size: 1.05rem;">布隆过滤器<sup>2</sup></a><a href="/tags/%E6%8E%A5%E5%8F%A3%E8%B6%85%E6%97%B6/" style="font-size: 1.05rem;">接口超时<sup>1</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/" style="font-size: 1.05rem;">消息中间件<sup>2</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" style="font-size: 1.05rem;">消息队列<sup>1</sup></a><a href="/tags/%E7%BA%BF%E4%B8%8A%E4%BA%8B%E6%95%85/" style="font-size: 1.05rem;">线上事故<sup>1</sup></a><a href="/tags/%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/" style="font-size: 1.05rem;">缓存雪崩<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96/" style="font-size: 1.05rem;">网络优化<sup>1</sup></a><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 1.05rem;">设计模式<sup>1</sup></a><a href="/tags/%E8%BF%90%E7%BB%B4%E8%B0%83%E4%BC%98/" style="font-size: 1.05rem;">运维调优<sup>3</sup></a><a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" style="font-size: 1.05rem;">高并发<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/05/"><span class="card-archive-list-date">五月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/04/"><span class="card-archive-list-date">四月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">15</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/03/"><span class="card-archive-list-date">三月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">12</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/02/"><span class="card-archive-list-date">二月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">10</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/MySQL/" itemprop="url">MySQL</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/MySQL/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>MySQL</span></a></span></div></div><h1 class="post-title" itemprop="name headline">MySQL系列：分库分表</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-04-29T10:22:30.000Z" title="发表于 2025-04-29 18:22:30">2025-04-29</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-04-25T10:22:30.000Z" title="更新于 2025-04-25 18:22:30">2025-04-25</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-wordcount"><i class="anzhiyufont anzhiyu-icon-file-word post-meta-icon" title="文章字数"></i><span class="post-meta-label" title="文章字数">字数总计:</span><span class="word-count" title="文章字数">3.1k</span><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-clock post-meta-icon" title="阅读时长"></i><span class="post-meta-label" title="阅读时长">阅读时长:</span><span>10分钟</span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为深圳"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>深圳</span></div></div></div><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAP9aUfYMWMpVNZK-Oa9yBLA3qKllZ0AAgsLaxunp0BW2F3X0MGT15YBAAMCAAN5AAM2BA.png"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="https://yeoh.de5.net/2025/04/29/MySQL%E7%B3%BB%E5%88%97/MySQL%E7%B3%BB%E5%88%97-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/"><header><a class="post-meta-categories" href="/categories/MySQL/" itemprop="url">MySQL</a><a href="/tags/MySQL/" tabindex="-1" itemprop="url">MySQL</a><h1 id="CrawlerTitle" itemprop="name headline">MySQL系列：分库分表</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">dachang</span><time itemprop="dateCreated datePublished" datetime="2025-04-29T10:22:30.000Z" title="发表于 2025-04-29 18:22:30">2025-04-29</time><time itemprop="dateCreated datePublished" datetime="2025-04-25T10:22:30.000Z" title="更新于 2025-04-25 18:22:30">2025-04-25</time></header><h3 id="1-为什么要分库分表"><a href="#1-为什么要分库分表" class="headerlink" title="1 为什么要分库分表"></a>1 为什么要分库分表</h3><p>物理服务机的CPU、内存、存储设备、连接数等资源有限，某个时段大量连接同时执行操作，会导致数据库在处理上遇到性能瓶颈。为了解决这个问题，行业先驱门充分发扬了分而治之的思想，对大库表进行分割，</p>
+<p>然后实施更好的控制和管理，同时使用多台机器的CPU、内存、存储，提供更好的性能。而分治有两种实现方式：垂直拆分和水平拆分。</p>
+<h3 id="2-垂直拆分（Scale-Up-纵向扩展）"><a href="#2-垂直拆分（Scale-Up-纵向扩展）" class="headerlink" title="2 垂直拆分（Scale Up 纵向扩展）"></a>2 垂直拆分（Scale Up 纵向扩展）</h3><p>垂直拆分分为垂直分库和垂直分表，主要按功能模块拆分，以解决各个库或者各个表之间的资源竞争。比如分为订单库、商品库、用户库…这种方式，多个数据库之间的表结构是不同的。</p>
+<h4 id="2-1-垂直分库"><a href="#2-1-垂直分库" class="headerlink" title="2.1 垂直分库"></a>2.1 垂直分库</h4><p>先说说垂直分库。垂直分库其实是一种简单逻辑分割。比如我们的数据库中有商品表Products、还有对订单表Orders，还有积分表Scores。接下来我们就可以创建三个数据库，一个数据库存放商品，一个数据库存放订单，一个数据库存放积分。</p>
+<p>垂直分库有一个优点，他能够根据业务场景进行孵化，比如某一单一场景只用到某2-3张表，基本上应用和数据库可以拆分出来做成相应的服务。拆分方式如下图所示：</p>
+<p><img src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAIBAWlH2X-7Bsw0BEnjc4F2WApJiSl0AAITC2sbp6dAVqJstfr6j5H9AQADAgADeAADNgQ.png"></p>
+<h4 id="2-2-垂直分表"><a href="#2-2-垂直分表" class="headerlink" title="2.2 垂直分表"></a>2.2 垂直分表</h4><p>再来说说垂直分表，比较适用于那种字段比较多的表，假设我们一张表有100个字段，我们分析了一下当前业务执行的SQL语句，有20个字段是经常使用的，而另外80个字段使用比较少。</p>
+<p>这样我们就可以把20个字段放在主表里面，我们再创建一个辅助表，存放另外80个字段。当然主表和辅助表都是有主键的，他们通过主键进行关联合并，就可以组合成100个字段的表。拆分方式如下图所示。</p>
+<p><img src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAIBAAFpR9lU482OY05NIKZfsSKhQmX0_wACEgtrG6enQFZiVZbfhcZc0gEAAwIAA3cAAzYE.png"></p>
+<p> 除了这种访问频率的冷热拆分之外，还可以按照字段类型结构来拆分，比如大文本字段单独放在一个表中，与基础字段隔离，提高基础字段的访问效率。</p>
+<p>也可以将字段按照功能用途来拆分，比如采购的物料表可以按照基本属性、销售属性、采购属性、生产制造属性、财务会计属性等用途垂直拆分。</p>
+<p> 总体来说：垂直拆分有以下优点：</p>
+<ul>
+<li>跟随业务进行分割，类似微服务的分治理念，方便解耦之后的管理及扩展。</li>
+<li>高并发的场景下，垂直拆分使用多台服务器的CPU、I&#x2F;O、内存能提升性能，同时对单机数据库连接数、一些资源限制也得到了提升，能实现冷热数据的分离。</li>
+</ul>
+<p>垂直拆分的缺点：</p>
+<ul>
+<li>部分业务表无法join，应用层需要很大的改造，只能通过聚合的方式来实现。增加了开发的难度。</li>
+<li>单表数据量膨胀的问题依然没有得到有效的解决。分布式事务也是一个难题。</li>
+</ul>
+<h3 id="3-水平拆分（Scale-Out-横向扩展）"><a href="#3-水平拆分（Scale-Out-横向扩展）" class="headerlink" title="3 水平拆分（Scale Out 横向扩展）"></a>3 水平拆分（Scale Out 横向扩展）</h3><p>水平拆分又分为库内分表和分库分表，来解决单表中数据量增长出现的压力，这些数据库中的表结构完全相同。</p>
+<h4 id="3-1-库内分表"><a href="#3-1-库内分表" class="headerlink" title="3.1 库内分表"></a>3.1 库内分表</h4><p>先说说库内分表。假设当我们的Orders表达到了5000万行记录的时候，非常影响数据库的读写效率，怎么办呢？</p>
+<p>我们可以考虑按照订单编号的order_id进行rang分区,就是把订单编号在1-1000万的放在order1表中，将编号在1000万-2000万的放在order2中，以此类推，每个表中存放1000万数据。</p>
+<p><img src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAP_aUfZIJ7JRizIBcNKUAECTCZNN20AAhELaxunp0BW0d1dkRiry2oBAAMCAAN5AAM2BA.png"></p>
+<p> 关于水平分表的时机，业内的标准不是很统一，阿里的Java 开发手册的标准是当单表行数超过 500万行或者单表容量超过 2 GB时，才推荐进行分库分表。百度的则是1000 W行的进行分表，这个是百度的DBA经过测试推算出的结果。</p>
+<p>但是这边忽略了单表的字段数和字段类型，如果字段数很多，超过50列，对性能影响也是不小的，我们曾经有个业务，表字段是随着业务的增长而自动扩增的，到了后期，字段越来越多，查询性能也越来越慢。</p>
+<p>所以个人觉得不必拘泥于500W 还是1000W，开发人员在使用过程中，如果压测发现因为数据基数变大而导致执行效率慢下来，就可以开始考虑分表了。</p>
+<h4 id="3-2-库内分表的实现策略"><a href="#3-2-库内分表的实现策略" class="headerlink" title="3.2 库内分表的实现策略"></a>3.2 库内分表的实现策略</h4><p>目前在MySql中支持四种表分区的方式，分别为HASH、RANGE、LIST及KEY，当然在其它的类型数据库中，分区的实现方式略有不同，但是分区的思想原理是相同，具体如下：</p>
+<h5 id="3-2-1-HASH（哈希）"><a href="#3-2-1-HASH（哈希）" class="headerlink" title="3.2.1 HASH（哈希）"></a>3.2.1 HASH（哈希）</h5><p>HASH分区主要用来确保数据在预先确定数目的分区中平均分布，而在RANGE和LIST分区中，必须明确指定一个给定的列值或列值集合应该保存在哪个分区中，而在HASH分区中，MySQL自动完成这些工作，</p>
+<p>你所要做的只是基于将要被哈希的列值指定一个列值或表达式，以及指定被分区的表将要被分割成的分区数量。 示例如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">drop table if EXISTS  `t_userinfo`;</span><br><span class="line">CREATE TABLE `t_userinfo` (</span><br><span class="line">`id` int(10) unsigned NOT NULL,</span><br><span class="line">`personcode` varchar(20) DEFAULT NULL,</span><br><span class="line">`personname` varchar(100) DEFAULT NULL,</span><br><span class="line">`depcode` varchar(100) DEFAULT NULL,</span><br><span class="line">`depname` varchar(500) DEFAULT NULL,</span><br><span class="line">`gwcode` int(11) DEFAULT NULL,</span><br><span class="line">`gwname` varchar(200) DEFAULT NULL,</span><br><span class="line">`gravalue` varchar(20) DEFAULT NULL,</span><br><span class="line">`createtime` DateTime NOT NULL</span><br><span class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8</span><br><span class="line">PARTITION BY HASH(YEAR(createtime))</span><br><span class="line">PARTITIONS 10;</span><br></pre></td></tr></table></figure>
+
+<p>上面的例子，使用HASH函数对createtime日期进行HASH运算，并根据这个日期来分区数据，这里共分为10个分区。 </p>
+<p>建表语句上添加一个“PARTITION BY HASH (expr)”子句，其中“expr”是一个返回整数的表达式，它可以是字段类型为MySQL 整型的一列的名字，也可以是返回非负数的表达式。</p>
+<p>另外，可能需要在后面再添加一个“PARTITIONS num”子句，其中num 是一个非负的整数，它表示表将要被分割成分区的数量。 </p>
+<h5 id="3-2-2-RANGE（范围）"><a href="#3-2-2-RANGE（范围）" class="headerlink" title="3.2.2 RANGE（范围）"></a>3.2.2 RANGE（范围）</h5><p>基于属于一个给定连续区间的列值，把多行分配给同一个分区，这些区间要连续且不能相互重叠，使用VALUES LESS THAN操作符来进行定义。示例如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">drop table if EXISTS  `t_userinfo`;</span><br><span class="line">CREATE TABLE `t_userinfo` (</span><br><span class="line">`id` int(10) unsigned NOT NULL,</span><br><span class="line">`personcode` varchar(20) DEFAULT NULL,</span><br><span class="line">`personname` varchar(100) DEFAULT NULL,</span><br><span class="line">`depcode` varchar(100) DEFAULT NULL,</span><br><span class="line">`depname` varchar(500) DEFAULT NULL,</span><br><span class="line">`gwcode` int(11) DEFAULT NULL,</span><br><span class="line">`gwname` varchar(200) DEFAULT NULL,</span><br><span class="line">`gravalue` varchar(20) DEFAULT NULL,</span><br><span class="line">`createtime` DateTime NOT NULL</span><br><span class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8</span><br><span class="line">PARTITION BY RANGE(gwcode) (</span><br><span class="line">PARTITION P0 VALUES LESS THAN(101) ,</span><br><span class="line">PARTITION P1 VALUES LESS THAN(201) ,</span><br><span class="line">PARTITION P2 VALUES LESS THAN(301) ,</span><br><span class="line">PARTITION P3 VALUES LESS THAN MAXVALUE</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>上面的示例，使用了范围RANGE函数对岗位编号进行分区，共分为4个分区，</p>
+<p>岗位编号为1<del>100 的对应在分区P0中，101</del>200的编号在分区P1中，依次类推即可。那么类别编号大于300，可以使用MAXVALUE来将大于300的数据统一存放在分区P3中即可。 </p>
+<h5 id="3-2-3-LIST（预定义列表）"><a href="#3-2-3-LIST（预定义列表）" class="headerlink" title="3.2.3 LIST（预定义列表）"></a>3.2.3 LIST（预定义列表）</h5><p>类似于按RANGE分区，区别在于LIST分区是基于列值匹配一个离散值集合中的某个值来进行选择分区的。LIST分区通过使用“PARTITION BY LIST(expr)”来实现，其中“expr” 是某列值或一个基于某个列值、并返回一个整数值的表达式，</p>
+<p>然后通过“VALUES IN (value_list)”的方式来定义每个分区，其中“value_list”是一个通过逗号分隔的整数列表。 示例如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">drop table if EXISTS  `t_userinfo`;</span><br><span class="line">CREATE TABLE `t_userinfo` (</span><br><span class="line">`id` int(10) unsigned NOT NULL,</span><br><span class="line">`personcode` varchar(20) DEFAULT NULL,</span><br><span class="line">`personname` varchar(100) DEFAULT NULL,</span><br><span class="line">`depcode` varchar(100) DEFAULT NULL,</span><br><span class="line">`depname` varchar(500) DEFAULT NULL,</span><br><span class="line">`gwcode` int(11) DEFAULT NULL,</span><br><span class="line">`gwname` varchar(200) DEFAULT NULL,</span><br><span class="line">`gravalue` varchar(20) DEFAULT NULL,</span><br><span class="line">`createtime` DateTime NOT NULL</span><br><span class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8</span><br><span class="line">PARTITION BY LIST(`gwcode`) (</span><br><span class="line">PARTITION P0 VALUES IN (46,77,89) ,</span><br><span class="line">PARTITION P1 VALUES IN (106,125,177) ,</span><br><span class="line">PARTITION P2 VALUES IN (205,219,289) ,</span><br><span class="line">PARTITION P3 VALUES IN (302,317,458,509,610)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>上面的例子，使用了列表匹配LIST函数对员工岗位编号进行分区，共分为4个分区，编号为46,77,89的对应在分区P0中，106,125,177类别在分区P1中，依次类推即可。</p>
+<p>不同于RANGE的是，LIST分区的数据必须匹配列表中的岗位编号才能进行分区，所以这种方式只是适合比较区间值确定并少量的情况。 </p>
+<h5 id="3-2-4-KEY（键值）"><a href="#3-2-4-KEY（键值）" class="headerlink" title="3.2.4 KEY（键值）"></a>3.2.4 KEY（键值）</h5><p>类似于按HASH分区，区别在于KEY分区只支持计算一列或多列，且MySQL 服务器提供其自身的哈希函数。必须有一列或多列包含整数值。 示例如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">drop table if EXISTS  `t_userinfo`;</span><br><span class="line">CREATE TABLE `t_userinfo` (</span><br><span class="line">`id` int(10) unsigned NOT NULL,</span><br><span class="line">`personcode` varchar(20) DEFAULT NULL,</span><br><span class="line">`personname` varchar(100) DEFAULT NULL,</span><br><span class="line">`depcode` varchar(100) DEFAULT NULL,</span><br><span class="line">`depname` varchar(500) DEFAULT NULL,</span><br><span class="line">`gwcode` int(11) DEFAULT NULL,</span><br><span class="line">`gwname` varchar(200) DEFAULT NULL,</span><br><span class="line">`gravalue` varchar(20) DEFAULT NULL,</span><br><span class="line">`createtime` DateTime NOT NULL</span><br><span class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8</span><br><span class="line">PARTITION BY KEY(gwcode)</span><br><span class="line">PARTITIONS 10;</span><br></pre></td></tr></table></figure>
+
+<p>注意：此种分区算法目前使用的比较少，使用服务器提供的哈希函数有不确定性，对于后期数据统计、整理存在会更复杂，所以我们更倾向于使用由我们定义表达式的Hash，大家知道其存在和怎么使用即可。 </p>
+<h5 id="3-2-5-Composite（复合模式）"><a href="#3-2-5-Composite（复合模式）" class="headerlink" title="3.2.5 Composite（复合模式）"></a>3.2.5 Composite（复合模式）</h5><p>Composite是上面几种模式的组合使用，比如你在Range的基础上，再进行Hash 哈希分区。</p>
+<h4 id="3-3-分库分表"><a href="#3-3-分库分表" class="headerlink" title="3.3 分库分表"></a>3.3 分库分表</h4><p>库内分表解决了单表数据量过大的瓶颈问题，但使用还是同一主机的CPU、IO、内存，另外单库的连接数也有限制，并不能完全的降低系统的压力。</p>
+<p>此时，我们就要考虑另外一种技术叫分库分表。分库分表在库内分表的基础上，将分的表挪动到不同的主机和数据库上。可以充分的使用其他主机的CPU、内存和IO资源。 拆分方式进一步演进到下面：</p>
+<p><img src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAP-aUfYniL_hXAAATDwddP1eyhNmcXmAAINC2sbp6dAVjYIcBEtqSufAQADAgADeQADNgQ.png"> </p>
+<h3 id="4-分库分表存在的问题"><a href="#4-分库分表存在的问题" class="headerlink" title="4 分库分表存在的问题"></a>4 分库分表存在的问题</h3><h4 id="4-1-事务问题"><a href="#4-1-事务问题" class="headerlink" title="4.1 事务问题"></a>4.1 事务问题</h4><p>在执行分库分表之后，由于数据存储到了不同的库上，数据库事务管理出现了困难。如果依赖数据库本身的分布式事务管理功能去执行事务，将付出高昂的性能代价；如果由应用程序去协助控制，形成程序逻辑上的事务，又会造成编程方面的负担。</p>
+<h4 id="4-2-跨库跨表的join问题"><a href="#4-2-跨库跨表的join问题" class="headerlink" title="4.2 跨库跨表的join问题"></a>4.2 跨库跨表的join问题</h4><p>在执行了分库分表之后，难以避免会将原本逻辑关联性很强的数据划分到不同的表、不同的库上，这时，表的关联操作将受到限制，我们无法join位于不同分库的表，也无法join分表粒度不同的表，结果原本一次查询能够完成的业务，可能需要多次查询才能完成。 </p>
+<h4 id="4-3-额外的数据管理负担和数据运算压力"><a href="#4-3-额外的数据管理负担和数据运算压力" class="headerlink" title="4.3 额外的数据管理负担和数据运算压力"></a>4.3 额外的数据管理负担和数据运算压力</h4><p>额外的数据管理负担，最显而易见的就是数据的定位问题和数据的增删改查的重复执行问题，这些都可以通过应用程序解决，但必然引起额外的逻辑运算，例如，对于一个记录用户成绩的用户数据表userTable，业务要求查出成绩最好的100位，在进行分表之前，</p>
+<p>只需一个order by语句就可以搞定，但是在进行分表之后，将需要n个order by语句，分别查出每一个分表的前100名用户数据，然后再对这些数据进行合并计算，才能得出结果。</p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMCZ7HaLpZxDj_zG1XxJmHwfbAThfQAAqTEMRuvMJFV9E-PLlimPicBAAMCAAN4AAM2BA.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMCZ7HaLpZxDj_zG1XxJmHwfbAThfQAAqTEMRuvMJFV9E-PLlimPicBAAMCAAN4AAM2BA.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">dachang</div><div class="post-copyright__author_desc">感谢你选择与我一起虚度时光。</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="https://yeoh.de5.net/2025/04/29/MySQL%E7%B3%BB%E5%88%97/MySQL%E7%B3%BB%E5%88%97-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('https://yeoh.de5.net/2025/04/29/MySQL%E7%B3%BB%E5%88%97/MySQL%E7%B3%BB%E5%88%97-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/')">MySQL系列：分库分表</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg" target="_blank"><img class="post-qr-code-img" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg" target="_blank"><img class="post-qr-code-img" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="https://yeoh.de5.net/2025/04/29/MySQL%E7%B3%BB%E5%88%97/MySQL%E7%B3%BB%E5%88%97-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=MySQL系列：分库分表&amp;url=https://yeoh.de5.net/2025/04/29/MySQL%E7%B3%BB%E5%88%97/MySQL%E7%B3%BB%E5%88%97-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/&amp;pic=https://imags-563.pages.dev/file/AgACAgUAAxkDAAP9aUfYMWMpVNZK-Oa9yBLA3qKllZ0AAgsLaxunp0BW2F3X0MGT15YBAAMCAAN5AAM2BA.png" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://yeoh.de5.net" target="_blank">数根朽木，</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__category-list"><a class="post-meta__box__categoryes" href="/categories/MySQL/"><span class="categoryes-punctuation"> <i class="anzhiyufont anzhiyu-icon-inbox"></i></span>MySQL<span class="categoryesPageCount">10</span></a></div><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/MySQL/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>MySQL<span class="tagsPageCount">10</span></a></div></div><div class="post_share"><div class="social-share" data-image="https://imags-563.pages.dev/file/AgACAgUAAxkDAAP9aUfYMWMpVNZK-Oa9yBLA3qKllZ0AAgsLaxunp0BW2F3X0MGT15YBAAMCAAN5AAM2BA.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/04/25/MySQL%E7%B3%BB%E5%88%97/MySQL%E7%B3%BB%E5%88%97-%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E7%9A%84%E5%8E%9F%E7%90%86%E5%92%8C%E5%AE%9E%E8%B7%B5/"><img class="prev-cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPyaUfS6PLDQNcyqAx0TCEm0a7w8EEAAoUMaxunpzhWRPy5eaxKXq4BAAMCAAN5AAM2BA.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">MySQL系列：代码评审中的MySQL（团队规范）</div></div></a></div><div class="next-post pull-right"><a href="/2025/05/02/MySQL%E7%B3%BB%E5%88%97/MySQL%E7%B3%BB%E5%88%97-%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D/"><img class="next-cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAIBAmlH3SZw4NLnVFKHYP2CLXavRmtwAAIZC2sbp6dAVo74ckeE45n5AQADAgADeAADNgQ.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">MySQL系列：备份与恢复</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/05/02/MySQL%E7%B3%BB%E5%88%97/MySQL%E7%B3%BB%E5%88%97-%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D/" title="MySQL系列：备份与恢复"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAIBAmlH3SZw4NLnVFKHYP2CLXavRmtwAAIZC2sbp6dAVo74ckeE45n5AQADAgADeAADNgQ.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-05-02</div><div class="title">MySQL系列：备份与恢复</div></div></a></div><div><a href="/2025/04/25/MySQL%E7%B3%BB%E5%88%97/MySQL%E7%B3%BB%E5%88%97-%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E7%9A%84%E5%8E%9F%E7%90%86%E5%92%8C%E5%AE%9E%E8%B7%B5/" title="MySQL系列：代码评审中的MySQL（团队规范）"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPyaUfS6PLDQNcyqAx0TCEm0a7w8EEAAoUMaxunpzhWRPy5eaxKXq4BAAMCAAN5AAM2BA.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-04-25</div><div class="title">MySQL系列：代码评审中的MySQL（团队规范）</div></div></a></div><div><a href="/2025/04/25/MySQL%E7%B3%BB%E5%88%97/MySQL%E7%B3%BB%E5%88%97-%E4%BB%A3%E7%A0%81%E8%AF%84%E5%AE%A1%E4%B8%AD%E7%9A%84MySQL%EF%BC%88%E5%9B%A2%E9%98%9F%E8%A7%84%E8%8C%83%EF%BC%89/" title="MySQL系列：代码评审中的MySQL（团队规范）"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPyaUfS6PLDQNcyqAx0TCEm0a7w8EEAAoUMaxunpzhWRPy5eaxKXq4BAAMCAAN5AAM2BA.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-04-25</div><div class="title">MySQL系列：代码评审中的MySQL（团队规范）</div></div></a></div><div><a href="/2025/04/20/MySQL%E7%B3%BB%E5%88%97/MySQL%E7%B3%BB%E5%88%97-%E6%9E%84%E5%BB%BA%E9%AB%98%E6%80%A7%E8%83%BD%E7%B4%A2%E5%BC%95%EF%BC%88%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90%E7%AF%87%EF%BC%89/" title="MySQL系列：构建高性能索引（策略篇）"><img class="cover" src="https://imags-563.pages.dev/file/BQACAgUAAxkDAAPxaUfQyXftWvebBGdp5kS_D9ADkSUAAikfAAKnpzhWukFlk9Yp1qk2BA.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-04-20</div><div class="title">MySQL系列：构建高性能索引（策略篇）</div></div></a></div><div><a href="/2025/04/15/MySQL%E7%B3%BB%E5%88%97/MySQL%E7%B3%BB%E5%88%97-%E4%B8%80%E6%AC%A1%E6%B7%B1%E5%A4%9C%E4%BC%98%E5%8C%96%E4%BA%BF%E7%BA%A7%E6%95%B0%E6%8D%AE%E5%88%86%E9%A1%B5%E7%9A%84%E5%A5%87%E5%A6%99%E7%BB%8F%E5%8E%86%EF%BC%88%E8%BD%AC%E8%BD%BD%EF%BC%89/" title="MySQL系列：一次深夜优化亿级数据分页的奇妙经历(转载)"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPYaUe4NadOqX-6URQliZqbjPJAwbsAAhkMaxunpzhWuvfiroJgL84BAAMCAAN4AAM2BA.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-04-15</div><div class="title">MySQL系列：一次深夜优化亿级数据分页的奇妙经历(转载)</div></div></a></div><div><a href="/2025/04/15/MySQL%E7%B3%BB%E5%88%97/MySQL%E7%B3%BB%E5%88%97-%E6%9E%84%E5%BB%BA%E9%AB%98%E6%80%A7%E8%83%BD%E7%B4%A2%E5%BC%95%EF%BC%88%E7%AD%96%E7%95%A5%E7%AF%87%EF%BC%89/" title="MySQL系列：构建高性能索引（策略篇）"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPoaUfHtrXTEwNovIjA5oNlwJqix08AAkgMaxunpzhW4CSPh9dlOhsBAAMCAAN3AAM2BA.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-04-15</div><div class="title">MySQL系列：构建高性能索引（策略篇）</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div><div class="comment-tips" id="comment-tips"><span>✅ 你无需删除空行，直接评论以获取最佳展示效果</span></div></div><div class="comment-wrap"><div><div id="twikoo-wrap"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8"><span class="toc-number">1.</span> <span class="toc-text">1 为什么要分库分表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%9E%82%E7%9B%B4%E6%8B%86%E5%88%86%EF%BC%88Scale-Up-%E7%BA%B5%E5%90%91%E6%89%A9%E5%B1%95%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">2 垂直拆分（Scale Up 纵向扩展）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-%E5%9E%82%E7%9B%B4%E5%88%86%E5%BA%93"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 垂直分库</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-%E5%9E%82%E7%9B%B4%E5%88%86%E8%A1%A8"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 垂直分表</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%B0%B4%E5%B9%B3%E6%8B%86%E5%88%86%EF%BC%88Scale-Out-%E6%A8%AA%E5%90%91%E6%89%A9%E5%B1%95%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">3 水平拆分（Scale Out 横向扩展）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-%E5%BA%93%E5%86%85%E5%88%86%E8%A1%A8"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 库内分表</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-%E5%BA%93%E5%86%85%E5%88%86%E8%A1%A8%E7%9A%84%E5%AE%9E%E7%8E%B0%E7%AD%96%E7%95%A5"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 库内分表的实现策略</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#3-2-1-HASH%EF%BC%88%E5%93%88%E5%B8%8C%EF%BC%89"><span class="toc-number">3.2.1.</span> <span class="toc-text">3.2.1 HASH（哈希）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-2-2-RANGE%EF%BC%88%E8%8C%83%E5%9B%B4%EF%BC%89"><span class="toc-number">3.2.2.</span> <span class="toc-text">3.2.2 RANGE（范围）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-2-3-LIST%EF%BC%88%E9%A2%84%E5%AE%9A%E4%B9%89%E5%88%97%E8%A1%A8%EF%BC%89"><span class="toc-number">3.2.3.</span> <span class="toc-text">3.2.3 LIST（预定义列表）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-2-4-KEY%EF%BC%88%E9%94%AE%E5%80%BC%EF%BC%89"><span class="toc-number">3.2.4.</span> <span class="toc-text">3.2.4 KEY（键值）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-2-5-Composite%EF%BC%88%E5%A4%8D%E5%90%88%E6%A8%A1%E5%BC%8F%EF%BC%89"><span class="toc-number">3.2.5.</span> <span class="toc-text">3.2.5 Composite（复合模式）</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 分库分表</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E5%AD%98%E5%9C%A8%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">4.</span> <span class="toc-text">4 分库分表存在的问题</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-%E4%BA%8B%E5%8A%A1%E9%97%AE%E9%A2%98"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 事务问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-%E8%B7%A8%E5%BA%93%E8%B7%A8%E8%A1%A8%E7%9A%84join%E9%97%AE%E9%A2%98"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 跨库跨表的join问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-%E9%A2%9D%E5%A4%96%E7%9A%84%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E8%B4%9F%E6%8B%85%E5%92%8C%E6%95%B0%E6%8D%AE%E8%BF%90%E7%AE%97%E5%8E%8B%E5%8A%9B"><span class="toc-number">4.3.</span> <span class="toc-text">4.3 额外的数据管理负担和数据运算压力</span></a></li></ol></li></ol></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div id="footer_deal"><a class="deal_link" href="mailto:youngyang0220@gmail.com" title="email"><i class="anzhiyufont anzhiyu-icon-envelope"></i></a><img class="footer_mini_logo" title="返回顶部" alt="返回顶部" onclick="anzhiyu.scrollToDest(0, 500)" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMCZ7HaLpZxDj_zG1XxJmHwfbAThfQAAqTEMRuvMJFV9E-PLlimPicBAAMCAAN4AAM2BA.jpg" size="50px"/><a class="deal_link" target="_blank" rel="noopener" href="https://github.com/dachang007" title="Github"><i class="anzhiyufont anzhiyu-icon-github"></i></a></div><div id="anzhiyu-footer"><div class="footer-group"><div class="footer-title">服务</div><div class="footer-links"><a class="footer-item" title="51la统计" target="_blank" rel="noopener" href="https://v6.51.la/">51la统计</a><a class="footer-item" title="十年之约" target="_blank" rel="noopener" href="https://www.foreverblog.cn/">十年之约</a><a class="footer-item" title="开往" target="_blank" rel="noopener" href="https://github.com/travellings-link/travellings">开往</a></div></div><div class="footer-group"><div class="footer-title">主题</div><div class="footer-links"><a class="footer-item" title="文档" target="_blank" rel="noopener" href="https://docs.anheyu.com/">文档</a><a class="footer-item" title="源码" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu">源码</a><a class="footer-item" title="更新日志" href="/update/">更新日志</a></div></div><div class="footer-group"><div class="footer-title">导航</div><div class="footer-links"><a class="footer-item" title="图床工具" target="_blank" rel="noopener" href="https://imags-563.pages.dev">图床工具</a><a class="footer-item" title="在线烟花模拟器" target="_blank" rel="noopener" href="http://greatree.hidns.co">在线烟花模拟器</a><a class="footer-item" title="订阅转换" target="_blank" rel="noopener" href="https://suburl.v1.mk">订阅转换</a><a class="footer-item" title="在线简历生成" target="_blank" rel="noopener" href="https://imags-563.pages.dev">在线简历生成</a></div></div><div class="footer-group"><div class="footer-title-group"><div class="footer-title">友链</div><a class="random-friends-btn" id="footer-random-friends-btn" href="javascript:addFriendLinksInFooter();" title="换一批友情链接"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right"></i></a></div><div class="footer-links" id="friend-links-in-footer"></div></div></div><p id="ghbdages"><a class="github-badge" target="_blank" href="https://hexo.io/" style="margin-inline:5px" data-title="博客框架为Hexo_v5.4.0" title="博客框架为Hexo_v5.4.0"><img src="https://npm.elemecdn.com/anzhiyu-blog@2.1.5/img/badge/Frame-Hexo.svg" alt="博客框架为Hexo_v5.4.0"/></a><a class="github-badge" target="_blank" href="https://blog.anheyu.com/" style="margin-inline:5px" data-title="本站使用AnZhiYu主题" title="本站使用AnZhiYu主题"><img src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.9/img/Theme-AnZhiYu-2E67D3.svg" alt="本站使用AnZhiYu主题"/></a><a class="github-badge" target="_blank" href="https://www.Cloudflare.com/" style="margin-inline:5px" data-title="本站使用CloudFlare为静态资源提供CDN加速" title="本站使用CloudFlare为静态资源提供CDN加速"><img src="https://img.shields.io/badge/%E2%98%81CDN-CloudFlare-yellow" alt="本站使用CloudFlare为静态资源提供CDN加速"/></a><a class="github-badge" target="_blank" href="https://github.com/" style="margin-inline:5px" data-title="本站项目由Github托管" title="本站项目由Github托管"><img src="https://npm.elemecdn.com/anzhiyu-blog@2.1.5/img/badge/Source-Github.svg" alt="本站项目由Github托管"/></a><a class="github-badge" target="_blank" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" style="margin-inline:5px" data-title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可" title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"><img src="https://npm.elemecdn.com/anzhiyu-blog@2.2.0/img/badge/Copyright-BY-NC-SA.svg" alt="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"/></a></p></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2022 - 2025 By <a class="footer-bar-link" href="/" title="dachang" target="_blank">dachang</a></div></div><div id="footer-type-tips"></div><div class="js-pjax"><script>function subtitleType () {
+  fetch('https://v1.hitokoto.cn')
+    .then(response => response.json())
+    .then(data => {
+      if (false) {
+        const from = '出自 ' + data.from
+        const sub = []
+        sub.unshift(data.hitokoto, from)
+        window.typed = new Typed('#footer-type-tips', {
+          strings: sub,
+          startDelay: 300,
+          typeSpeed: 150,
+          loop: false,
+          backSpeed: 50,
+        })
+      } else {
+        document.getElementById('footer-type-tips').innerHTML = data.hitokoto
+      }
+    })
+}
+
+if (false) {
+  if (typeof Typed === 'function') {
+    subtitleType()
+  } else {
+    getScript('https://cdn.cbd.int/typed.js@2.1.0/dist/typed.umd.js').then(subtitleType)
+  }
+} else {
+  subtitleType()
+}
+</script></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">38</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">33</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">8</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网站项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="个人博客"><img class="back-menu-item-icon" src="/favicon.ico" alt="个人博客"/><span class="back-menu-item-text">个人博客</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线简历"><img class="back-menu-item-icon" src="/favicon.ico" alt="在线简历"/><span class="back-menu-item-text">在线简历</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">建设工具</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线图床"><img class="back-menu-item-icon" src="/img/image.ico" alt="在线图床"/><span class="back-menu-item-text">在线图床</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="在线烟花模拟器"><img class="back-menu-item-icon" src="/img/Clash.Mini.png" alt="在线烟花模拟器"/><span class="back-menu-item-text">在线烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="烟花模拟器"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMMZ7Qfv1Xv2qvgqSVN7kNhRO_uzfgAAlvAMRtiZKBVrGT1Z6RPiX4BAAMCAANtAAM2BA.png" alt="烟花模拟器"/><span class="back-menu-item-text">烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://pay.totalh.net/" title="三合一收款码"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAM8Z7WNYNdWdrYsas5PPFT8Di3493sAAgLKMRsEtalVDcfaakgTXPkBAAMCAAN4AAM2BA.png" alt="三合一收款码"/><span class="back-menu-item-text">三合一收款码</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 博客文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 全部文章</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 文章分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 所有标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 网站工具</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 图床工具</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="http://greatree.hidns.co"><i class="anzhiyufont anzhiyu-icon-artstation faa-tada" style="font-size: 0.9em;"></i><span> 烟花模拟器</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://suburl.v1.mk"><i class="anzhiyufont anzhiyu-icon-envelope faa-tada" style="font-size: 0.9em;"></i><span> 订阅转换</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><span> 在线简历生成</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于我</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 在线简历</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><i class="anzhiyufont anzhiyu-icon-shoe-prints1 faa-tada" style="font-size: 0.9em;"></i><span> 随便逛逛</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Boolean-filter/" style="font-size: 0.88rem;">Boolean filter<sup>2</sup></a><a href="/tags/DNS%E6%B3%84%E9%9C%B2/" style="font-size: 0.88rem;">DNS泄露<sup>1</sup></a><a href="/tags/Fake-IP/" style="font-size: 0.88rem;">Fake IP<sup>1</sup></a><a href="/tags/JVM%E8%99%9A%E6%8B%9F%E6%9C%BA/" style="font-size: 0.88rem;">JVM虚拟机<sup>1</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>1</sup></a><a href="/tags/JavaSE/" style="font-size: 0.88rem;">JavaSE<sup>11</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 0.88rem;">Java基础<sup>11</sup></a><a href="/tags/Java%E6%A0%B8%E5%BF%83/" style="font-size: 0.88rem;">Java核心<sup>14</sup></a><a href="/tags/Java%E7%89%88%E6%9C%AC%E6%96%B0%E7%89%B9%E6%80%A7/" style="font-size: 0.88rem;">Java版本新特性<sup>2</sup></a><a href="/tags/MQ/" style="font-size: 0.88rem;">MQ<sup>2</sup></a><a href="/tags/MySQL/" style="font-size: 0.88rem;">MySQL<sup>10</sup></a><a href="/tags/OOM/" style="font-size: 0.88rem;">OOM<sup>1</sup></a><a href="/tags/RabbitMQ/" style="font-size: 0.88rem;">RabbitMQ<sup>2</sup></a><a href="/tags/Redis/" style="font-size: 0.88rem;">Redis<sup>5</sup></a><a href="/tags/Redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/" style="font-size: 0.88rem;">Redis内存淘汰策略<sup>1</sup></a><a href="/tags/Redis%E5%8E%9F%E7%90%86/" style="font-size: 0.88rem;">Redis原理<sup>1</sup></a><a href="/tags/Redis%E7%BC%93%E5%AD%98/" style="font-size: 0.88rem;">Redis缓存<sup>1</sup></a><a href="/tags/RocketMQ/" style="font-size: 0.88rem;">RocketMQ<sup>2</sup></a><a href="/tags/SSM/" style="font-size: 0.88rem;">SSM<sup>1</sup></a><a href="/tags/Spring/" style="font-size: 0.88rem;">Spring<sup>1</sup></a><a href="/tags/SpringBoot/" style="font-size: 0.88rem;">SpringBoot<sup>1</sup></a><a href="/tags/kafka/" style="font-size: 0.88rem;">kafka<sup>2</sup></a><a href="/tags/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" style="font-size: 0.88rem;">单例模式<sup>1</sup></a><a href="/tags/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/" style="font-size: 0.88rem;">布隆过滤器<sup>2</sup></a><a href="/tags/%E6%8E%A5%E5%8F%A3%E8%B6%85%E6%97%B6/" style="font-size: 0.88rem;">接口超时<sup>1</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/" style="font-size: 0.88rem;">消息中间件<sup>2</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" style="font-size: 0.88rem;">消息队列<sup>1</sup></a><a href="/tags/%E7%BA%BF%E4%B8%8A%E4%BA%8B%E6%95%85/" style="font-size: 0.88rem;">线上事故<sup>1</sup></a><a href="/tags/%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/" style="font-size: 0.88rem;">缓存雪崩<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96/" style="font-size: 0.88rem;">网络优化<sup>1</sup></a><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 0.88rem;">设计模式<sup>1</sup></a><a href="/tags/%E8%BF%90%E7%BB%B4%E8%B0%83%E4%BC%98/" style="font-size: 0.88rem;">运维调优<sup>3</sup></a><a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" style="font-size: 0.88rem;">高并发<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const init = () => {
+    twikoo.init(Object.assign({
+      el: '#twikoo-wrap',
+      envId: 'https://twikoo-kohl-zeta.vercel.app',
+      region: '',
+      onCommentLoaded: () => {
+        anzhiyu.loadLightbox(document.querySelectorAll('#twikoo .tk-content img:not(.tk-owo-emotion)'))
+      }
+    }, null))
+  }
+
+  const loadTwikoo = () => {
+    if (typeof twikoo === 'object') setTimeout(runFn,0)
+    else getScript('https://unpkg.com/twikoo@1.6.44/dist/twikoo.all.min.js').then(runFn)
+  }
+
+  const getCount = () => {
+    const countELement = document.getElementById('twikoo-count')
+    if(!countELement) return
+    twikoo.getCommentsCount({
+      envId: 'https://twikoo-kohl-zeta.vercel.app',
+      region: '',
+      urls: [window.location.pathname],
+      includeReply: false
+    }).then(res => {
+      countELement.textContent = res[0].count
+    }).catch(err => {
+      console.error(err)
+    })
+  }
+
+  const runFn = () => {
+    init();
+    
+  }
+
+  if ('Twikoo' === 'Twikoo' || !true) {
+    if (true) anzhiyu.loadComment(document.getElementById('twikoo-wrap'), loadTwikoo)
+    else {
+      loadTwikoo()
+    }
+  } else {
+    window.loadOtherComment = loadTwikoo
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getComment = () => {
+    const runTwikoo = () => {
+      twikoo.getRecentComments({
+        envId: 'https://twikoo-kohl-zeta.vercel.app',
+        region: '',
+        pageSize: 6,
+        includeReply: true
+      }).then(function (res) {
+        const twikooArray = res.map(e => {
+          return {
+            'content': changeContent(e.comment),
+            'avatar': e.avatar,
+            'nick': e.nick,
+            'url': e.url + '#' + e.id,
+            'date': new Date(e.created).toISOString()
+          }
+        })
+
+        saveToLocal.set('twikoo-newest-comments', JSON.stringify(twikooArray), 10/(60*24))
+        generateHtml(twikooArray)
+      }).catch(function (err) {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      })
+    }
+
+    if (typeof twikoo === 'object') {
+      runTwikoo()
+    } else {
+      getScript('https://unpkg.com/twikoo@1.6.44/dist/twikoo.all.min.js').then(runTwikoo)
+    }
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'><div class='name'><span>${array[i].nick} </span></div></a>`
+        }
+        
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('twikoo-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","meta[property=\"og:type\"]","meta[property=\"og:site_name\"]","meta[property=\"og:description\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404')
+  }
+})</script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>
