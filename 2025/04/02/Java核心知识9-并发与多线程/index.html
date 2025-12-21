@@ -1,0 +1,602 @@
+<!DOCTYPE html><html lang="zh-cn" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>Java核心系列9：并发与多线程-线程基础 | 数根朽木，</title><meta name="keywords" content="Java基础,Java核心,JavaSE,并发多线程"><meta name="author" content="dachang"><meta name="copyright" content="dachang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#F9F9F9"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="Java核心系列9：并发与多线程-线程基础"><meta name="application-name" content="Java核心系列9：并发与多线程-线程基础"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#F9F9F9"><meta property="og:type" content="article"><meta property="og:title" content="Java核心系列9：并发与多线程-线程基础"><meta property="og:url" content="https://yeoh.de5.net/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%869-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%A4%9A%E7%BA%BF%E7%A8%8B/index.html"><meta property="og:site_name" content="数根朽木，"><meta property="og:description" content="1 先导Java线程基础主要包含如下知识点，相信我们再面试的过程中，经常会遇到类似的提问。  线程有哪几种状态? 线程之间如何转变？ 线程有哪几种实现方式? 各优缺点？ 线程的基本操作（线程管理机制）有哪些? 线程如何中断? 线程有几种互斥同步方式? 如何选择? 线程之间的协作方式（通信和协调）?"><meta property="og:locale" content="zh-cn"><meta property="og:image" content="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPNaUerPVar-Daieeucr_Jz7o8OSBIAAuYLaxunpzhW_tn_AqDcKe4BAAMCAAN4AAM2BA.png"><meta property="article:author" content="dachang"><meta property="article:tag" content="blog, coding, technology, personal"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPNaUerPVar-Daieeucr_Jz7o8OSBIAAuYLaxunpzhW_tn_AqDcKe4BAAMCAAN4AAM2BA.png"><meta name="description" content="1 先导Java线程基础主要包含如下知识点，相信我们再面试的过程中，经常会遇到类似的提问。  线程有哪几种状态? 线程之间如何转变？ 线程有哪几种实现方式? 各优缺点？ 线程的基本操作（线程管理机制）有哪些? 线程如何中断? 线程有几种互斥同步方式? 如何选择? 线程之间的协作方式（通信和协调）?"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="https://yeoh.de5.net/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%869-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%A4%9A%E7%BA%BF%E7%A8%8B/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: undefined,
+  diytitle: undefined,
+  LA51: {"enable":true,"ck":null,"LingQueMonitorID":null},
+  greetingBox: undefined,
+  twikooEnvId: 'https://twikoo-kohl-zeta.vercel.app',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: undefined,
+  friends_vue_info: undefined,
+  navMusic: false,
+  mainTone: undefined,
+  authorStatus: undefined,
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"该文章距离上次更新已经过去","messageNext":"天了，文章内容可能已经过时，注意甄别。"},
+  highlight: {"plugin":"highlight.js","highlightCopy":false,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: dachang","link":"链接: ","source":"来源: 数根朽木，","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'mediumZoom',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: true,
+  islazyload: false,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '数根朽木，',
+  title: 'Java核心系列9：并发与多线程-线程基础',
+  postAI: '',
+  pageFillDescription: '1 先导, 2 线程的状态和流转, 2.1 新建(New), 2.2 可运行(Runnable), 2.3 阻塞(Blocking), 2.4 无限期等待(Waiting), 2.5 限期等待(Timed Waiting), 2.6 死亡(Terminated), 3 线程实现方式, 3.1 继承Thread类, 3.2 实现Runnable接口, 3.3 使用Callable和Future, 3.4 优缺点解读, 4 线程管理机制, 4.1 Executor 框架, 4.2 守护线程（Daemon Threads）, 4.3 sleep() 方法, 4.4 yield() 方法, 5 线程中断方式, 5.1 使用interrupt()方法, 5.2 使用Executor的中断操作, 6 线程互斥同步方式, 6.1 synchronized关键字, 6.2 ReentrantLock类, 6.3 对比, 7 线程协作（通信）方案, 7.1 等待x2F通知机制（waitx2Fnotifyx2FnotifyAll）, 7.2 Join 方法, 8 总结先导线程基础主要包含如下知识点相信我们再面试的过程中经常会遇到类似的提问线程有哪几种状态线程之间如何转变线程有哪几种实现方式各优缺点线程的基本操作线程管理机制有哪些线程如何中断线程有几种互斥同步方式如何选择线程之间的协作方式通信和协调下面我们一一解读线程的状态和流转新建如上图创建完线程但尚未启动可运行如上图处于可运行阶段正在运行或者正在等待时间片包含了和两种线程状态阻塞如上图正被住等待获取一个排它锁如果其他的线程释放了锁该状态就会结束无限期等待如上图处在无限期等待阶段等待其它线程显式地唤醒否则不会被分配时间片主要有两种方式进行释放调用方的线程执行完成使用进行显性唤醒限期等待如上图因为有时间控制所以无需等待其它线程显式地唤醒一定时间之后系统会自动唤醒所以他有三种方式进行释放主要有两种方式进行释放调用方的线程执行完成使用进行显性唤醒时间到结束方法带参数方法带参数死亡线程结束任务之后结束产生了异常并结束线程实现方式在中线程的实现方式主要有两种继承类和实现接口此外开始引入了包提供了更多的并发工具如接口与接口它们主要用于任务执行继承类通过继承类来创建线程是最基本的方式你需要创建一个扩展自类的子类并重写其方法然后可以创建该子类的实例来创建新的线程线程运行中调用方法来启动线程实现接口另一种方式是让你的类实现接口并实现方法然后你可以创建类的实例将实现了接口的类的实例作为构造参数传递给它线程运行中调用方法来启动线程使用和虽然和不是直接用于创建线程的但它们提供了一种更灵活的方式来处理线程执行的结果类似于但它可以返回一个结果并且可以抛出异常用于获取执行的结果任务完成阻塞等待获取结果优缺点解读继承类简单直观但不支持多重继承如果类已经继承了其他类则不能再用这种方式另外继承整个类开销过大太重了实现接口更加灵活推荐的方式和提供了更为强大的功能例如返回执行结果和抛出异常但通常用于与等高级并发工具一起使用线程管理机制中的线程管理机制非常强大涵盖了从简单的线程创建到复杂的线程池管理等多个方面框架框架是并发包中的一个关键组件它提供了一种更高级别的抽象来管理线程池通过使用你可以更容易地控制线程的创建执行调度生命周期等它主要有三种类型一个任务创建一个线程所有任务只能使用固定大小的线程单个线程相当于大小为的优点提高程序性能和响应速度通过复用线程来减少线程创建和销毁的开销简化并发编程使用示例守护线程守护线程是一种特殊的线程它主要用于程序中后台任务的支持守护线程与普通线程的区别在于当程序中所有非守护线程结束时会自动退出即使还有守护线程在运行守护线程常用于垃圾回收内部的监控等任务设置守护线程通过调用线程对象的方法在启动线程之前将其设置为守护线程方法方法是类的一个静态方法用于让当前正在执行的线程暂停执行指定的时间毫秒以毫秒为单位在指定的时间过去后线程将回到可运行状态等待的调度用途常用于线程间的简单同步注意方法不会释放锁如果当前线程持有锁的话示例方法方法也是类的一个静态方法它告诉调度器当前线程愿意放弃当前处理器的使用但这并不意味着线程会立即停止执行或进入等待阻塞状态调度器可以忽略这个提示继续让当前线程运行用途提示调度器让出时间但具体是否让出取决于调度器的实现注意方法不会使线程进入阻塞状态也不会释放锁如果持有的话类似仅建议示例线程中断方式在中线程中断是一种重要的线程间通信机制用于通知线程应该停止当前正在执行的任务线程中断的方式主要有以下几种使用方法方法是推荐的线程中断方式它并不会直接停止线程而是设置线程的中断状态为线程需要定期检查这个中断状态通过方法并根据需要自行决定如何响应中断请求比如退出循环释放资源等优点安全灵活符合的并发编程理念示例执行任务线程中断后的清理工作稍后中断线程使用的中断操作调用的方法会等待线程都执行完毕之后再关闭调用的方法则相当于直接调用具体线程的方法线程互斥同步方式中的线程互斥同步是并发编程中的一个重要概念用于保证多个线程在访问共享资源时的互斥性即同一时间只有一个线程能够访问某个资源提供了多种机制来实现线程的互斥同步主要包括以下几种方式关键字基本概念是中最基本的同步机制它可以用来修饰方法或代码块当一个线程访问一个被修饰的方法或代码块时其他试图访问该方法或代码块的线程将被阻塞直到当前线程执行完毕释放锁使用方法修饰方法直接在方法声明上加上关键字例如修饰代码块将需要同步的代码放在对象中这里的对象就是锁对象例如或某个对象特性可见性不仅保证了互斥性还保证了变量的可见性当一个线程释放锁时会将锁变量的值刷新到主存储器中从而使其他线程可以看到最新的变量值可重入性支持可重入性即同一个线程可以多次获取同一个锁而不会导致死锁示例修饰方法类基本概念是包中的一个可重入锁它提供了比更灵活的锁定机制使用方法创建锁对象加锁释放锁通常将释放锁的代码放在块中以确保锁一定会被释放例如特性支持公平锁和非公平锁通过构造器参数可以指定使用哪种锁默认是非公平锁支持尝试获取锁提供了等方法尝试获取锁如果获取不到则不会阻塞线程支持中断锁定的线程与不同的锁可以被中断创建对象加锁释放锁放在块中确保一定会被释放加锁释放锁对比对于大多数简单场景关键字是最直接最简单的选择而对于需要更灵活控制锁的场景则可以考虑使用等高级同步机制线程协作通信方案中线程之间的协作主要可以通过多种机制实现其中等待通知机制和方法是两种常用的方式下面我将分别给出这两种方式的简单代码示例等待通知机制等待通知机制依赖于中的类因为和方法都定义在类中这些方法必须在同步块或同步方法中被调用因为它们是用来控制对某个对象的访问的示例代码当前线程等待保持中断状态当为时继续执行唤醒在此对象监视器上等待的单个线程或者使用唤醒所有等待的线程假设需要一些时间来完成准备工作在这个例子中线程在方法中等待直到线程调用方法并设置为线程模拟了一些准备工作并在之后唤醒方法方法是类的一个方法用于让当前线程等待另一个线程完成其执行示例代码假设执行需要一些时间当前线程线程等待完成在这个例子中线程启动了一个新线程并通过调用等待完成线程在完成后会打印一条消息而线程会在完成后继续执行并打印另一条消息总结总结一下我们讲了让如下内容线程流转状态线程实现方式线程基本操作线程中断方案线程互斥同步方法线程协作通信方案',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-04-02 20:15:09',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#1F1F1F')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#F9F9F9')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><div class="back-home-button"><i class="anzhiyufont anzhiyu-icon-grip-vertical"></i><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网站项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="个人博客"><img class="back-menu-item-icon" src="/favicon.ico" alt="个人博客"/><span class="back-menu-item-text">个人博客</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线简历"><img class="back-menu-item-icon" src="/favicon.ico" alt="在线简历"/><span class="back-menu-item-text">在线简历</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">建设工具</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线图床"><img class="back-menu-item-icon" src="/img/image.ico" alt="在线图床"/><span class="back-menu-item-text">在线图床</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="在线烟花模拟器"><img class="back-menu-item-icon" src="/img/Clash.Mini.png" alt="在线烟花模拟器"/><span class="back-menu-item-text">在线烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="烟花模拟器"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMMZ7Qfv1Xv2qvgqSVN7kNhRO_uzfgAAlvAMRtiZKBVrGT1Z6RPiX4BAAMCAANtAAM2BA.png" alt="烟花模拟器"/><span class="back-menu-item-text">烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://pay.totalh.net/" title="三合一收款码"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAM8Z7WNYNdWdrYsas5PPFT8Di3493sAAgLKMRsEtalVDcfaakgTXPkBAAMCAAN4AAM2BA.png" alt="三合一收款码"/><span class="back-menu-item-text">三合一收款码</span></a></div></div></div></div><a id="site-name" href="/" accesskey="h"><div class="title">数根朽木，</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a><div id="he-plugin-simple"></div><script>var WIDGET = {
+  "CONFIG": {
+    "modules": "0124",
+    "background": "2",
+    "tmpColor": "FFFFFF",
+    "tmpSize": "16",
+    "cityColor": "FFFFFF",
+    "citySize": "16",
+    "aqiColor": "E8D87B",
+    "aqiSize": "16",
+    "weatherIconSize": "24",
+    "alertIconSize": "18",
+    "padding": "10px 10px 10px 10px",
+    "shadow": "0",
+    "language": "auto",
+    "borderRadius": "20",
+    "fixed": "true",
+    "vertical": "top",
+    "horizontal": "left",
+    "left": "20",
+    "top": "7.1",
+    "key": "df245676fb434a0691ead1c63341cd94"
+  }
+}
+</script><link rel="stylesheet" href="https://widget.qweather.net/simple/static/css/he-simple.css?v=1.4.0"/><script src="https://widget.qweather.net/simple/static/js/he-simple.js?v=1.4.0"></script></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 博客文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 全部文章</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 文章分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 所有标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 网站工具</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 图床工具</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="http://greatree.hidns.co"><i class="anzhiyufont anzhiyu-icon-artstation faa-tada" style="font-size: 0.9em;"></i><span> 烟花模拟器</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://suburl.v1.mk"><i class="anzhiyufont anzhiyu-icon-envelope faa-tada" style="font-size: 0.9em;"></i><span> 订阅转换</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><span> 在线简历生成</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于我</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 在线简历</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><i class="anzhiyufont anzhiyu-icon-shoe-prints1 faa-tada" style="font-size: 0.9em;"></i><span> 随便逛逛</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button only-home" id="travellings_button" title="随机前往一个开往项目网站"><a class="site-page" onclick="anzhiyu.totraveling()" title="随机前往一个开往项目网站" href="javascript:void(0);" rel="external nofollow" data-pjax-state="external"><i class="anzhiyufont anzhiyu-icon-train"></i></a></div><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Boolean-filter/" style="font-size: 1.05rem;">Boolean filter<sup>2</sup></a><a href="/tags/DNS%E6%B3%84%E9%9C%B2/" style="font-size: 1.05rem;">DNS泄露<sup>1</sup></a><a href="/tags/Fake-IP/" style="font-size: 1.05rem;">Fake IP<sup>1</sup></a><a href="/tags/JVM%E8%99%9A%E6%8B%9F%E6%9C%BA/" style="font-size: 1.05rem;">JVM虚拟机<sup>1</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>1</sup></a><a href="/tags/JavaSE/" style="font-size: 1.05rem;">JavaSE<sup>11</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 1.05rem;">Java基础<sup>11</sup></a><a href="/tags/Java%E6%A0%B8%E5%BF%83/" style="font-size: 1.05rem;">Java核心<sup>14</sup></a><a href="/tags/Java%E7%89%88%E6%9C%AC%E6%96%B0%E7%89%B9%E6%80%A7/" style="font-size: 1.05rem;">Java版本新特性<sup>2</sup></a><a href="/tags/MQ/" style="font-size: 1.05rem;">MQ<sup>2</sup></a><a href="/tags/OOM/" style="font-size: 1.05rem;">OOM<sup>1</sup></a><a href="/tags/RabbitMQ/" style="font-size: 1.05rem;">RabbitMQ<sup>2</sup></a><a href="/tags/Redis/" style="font-size: 1.05rem;">Redis<sup>5</sup></a><a href="/tags/Redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/" style="font-size: 1.05rem;">Redis内存淘汰策略<sup>1</sup></a><a href="/tags/Redis%E5%8E%9F%E7%90%86/" style="font-size: 1.05rem;">Redis原理<sup>1</sup></a><a href="/tags/Redis%E7%BC%93%E5%AD%98/" style="font-size: 1.05rem;">Redis缓存<sup>1</sup></a><a href="/tags/RocketMQ/" style="font-size: 1.05rem;">RocketMQ<sup>2</sup></a><a href="/tags/SSM/" style="font-size: 1.05rem;">SSM<sup>1</sup></a><a href="/tags/Spring/" style="font-size: 1.05rem;">Spring<sup>1</sup></a><a href="/tags/SpringBoot/" style="font-size: 1.05rem;">SpringBoot<sup>1</sup></a><a href="/tags/kafka/" style="font-size: 1.05rem;">kafka<sup>2</sup></a><a href="/tags/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" style="font-size: 1.05rem;">单例模式<sup>1</sup></a><a href="/tags/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/" style="font-size: 1.05rem;">布隆过滤器<sup>2</sup></a><a href="/tags/%E6%8E%A5%E5%8F%A3%E8%B6%85%E6%97%B6/" style="font-size: 1.05rem;">接口超时<sup>1</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/" style="font-size: 1.05rem;">消息中间件<sup>2</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" style="font-size: 1.05rem;">消息队列<sup>1</sup></a><a href="/tags/%E7%BA%BF%E4%B8%8A%E4%BA%8B%E6%95%85/" style="font-size: 1.05rem;">线上事故<sup>1</sup></a><a href="/tags/%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/" style="font-size: 1.05rem;">缓存雪崩<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96/" style="font-size: 1.05rem;">网络优化<sup>1</sup></a><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 1.05rem;">设计模式<sup>1</sup></a><a href="/tags/%E8%BF%90%E7%BB%B4%E8%B0%83%E4%BC%98/" style="font-size: 1.05rem;">运维调优<sup>3</sup></a><a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" style="font-size: 1.05rem;">高并发<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/04/"><span class="card-archive-list-date">四月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">7</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/03/"><span class="card-archive-list-date">三月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">11</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/02/"><span class="card-archive-list-date">二月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">10</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java%E6%A0%B8%E5%BF%83%E7%B3%BB%E5%88%97/" itemprop="url">Java核心系列</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/Java%E6%A0%B8%E5%BF%83/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>Java核心</span></a><a class="article-meta__tags" href="/tags/Java%E5%9F%BA%E7%A1%80/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>Java基础</span></a><a class="article-meta__tags" href="/tags/JavaSE/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>JavaSE</span></a></span></div></div><h1 class="post-title" itemprop="name headline">Java核心系列9：并发与多线程-线程基础</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-04-02T12:15:09.000Z" title="发表于 2025-04-02 20:15:09">2025-04-02</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-04-02T12:15:09.000Z" title="更新于 2025-04-02 20:15:09">2025-04-02</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-wordcount"><i class="anzhiyufont anzhiyu-icon-file-word post-meta-icon" title="文章字数"></i><span class="post-meta-label" title="文章字数">字数总计:</span><span class="word-count" title="文章字数">3.4k</span><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-clock post-meta-icon" title="阅读时长"></i><span class="post-meta-label" title="阅读时长">阅读时长:</span><span>12分钟</span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为深圳"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>深圳</span></div></div></div><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPNaUerPVar-Daieeucr_Jz7o8OSBIAAuYLaxunpzhW_tn_AqDcKe4BAAMCAAN4AAM2BA.png"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="https://yeoh.de5.net/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%869-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%A4%9A%E7%BA%BF%E7%A8%8B/"><header><a class="post-meta-categories" href="/categories/Java%E6%A0%B8%E5%BF%83%E7%B3%BB%E5%88%97/" itemprop="url">Java核心系列</a><a href="/tags/Java%E6%A0%B8%E5%BF%83/" tabindex="-1" itemprop="url">Java核心</a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" tabindex="-1" itemprop="url">Java基础</a><a href="/tags/JavaSE/" tabindex="-1" itemprop="url">JavaSE</a><h1 id="CrawlerTitle" itemprop="name headline">Java核心系列9：并发与多线程-线程基础</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">dachang</span><time itemprop="dateCreated datePublished" datetime="2025-04-02T12:15:09.000Z" title="发表于 2025-04-02 20:15:09">2025-04-02</time><time itemprop="dateCreated datePublished" datetime="2025-04-02T12:15:09.000Z" title="更新于 2025-04-02 20:15:09">2025-04-02</time></header><h1 id="1-先导"><a href="#1-先导" class="headerlink" title="1 先导"></a>1 先导</h1><p><img src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPPaUesL_F-r5So1LRpVkY_N4GVDFEAAu8LaxunpzhWBkV1X6uJ4hYBAAMCAAN5AAM2BA.png" alt="线程安全基础概览图"><br>Java线程基础主要包含如下知识点，相信我们再面试的过程中，经常会遇到类似的提问。</p>
+<ol>
+<li>线程有哪几种状态? 线程之间如何转变？</li>
+<li>线程有哪几种实现方式? 各优缺点？</li>
+<li>线程的基本操作（线程管理机制）有哪些?</li>
+<li>线程如何中断?</li>
+<li>线程有几种互斥同步方式? 如何选择?</li>
+<li>线程之间的协作方式（通信和协调）?</li>
+</ol>
+<p>下面我们 一 一 解读。</p>
+<h1 id="2-线程的状态和流转"><a href="#2-线程的状态和流转" class="headerlink" title="2 线程的状态和流转"></a>2 线程的状态和流转</h1><p><img src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPOaUer6dvmjBFagfhkaXqEfpl3ui4AAu0LaxunpzhWc0KL_3hfiHIBAAMCAAN5AAM2BA.png" alt="线程的几种状态"></p>
+<h2 id="2-1-新建-New"><a href="#2-1-新建-New" class="headerlink" title="2.1 新建(New)"></a>2.1 新建(New)</h2><p>如上图，创建完线程，但尚未启动。</p>
+<h2 id="2-2-可运行-Runnable"><a href="#2-2-可运行-Runnable" class="headerlink" title="2.2 可运行(Runnable)"></a>2.2 可运行(Runnable)</h2><p>如上图，处于可运行阶段，正在运行，或者正在等待 CPU 时间片。包含了 <code>Running</code> 和 <code>Ready</code> 两种线程状态。</p>
+<h2 id="2-3-阻塞-Blocking"><a href="#2-3-阻塞-Blocking" class="headerlink" title="2.3 阻塞(Blocking)"></a>2.3 阻塞(Blocking)</h2><p>如上图，正被Lock住，等待获取一个排它锁，如果其他的线程释放了锁，该状态就会结束。</p>
+<h2 id="2-4-无限期等待-Waiting"><a href="#2-4-无限期等待-Waiting" class="headerlink" title="2.4 无限期等待(Waiting)"></a>2.4 无限期等待(Waiting)</h2><p>如上图，处在无限期等待阶段，等待其它线程显式地唤醒，否则不会被分配 CPU 时间片。<br>主要有两种方式进行释放：</p>
+<ul>
+<li>调用方的线程执行完成</li>
+<li>使用 Object.notify() &#x2F; Object.notifyAll()进行显性唤醒</li>
+</ul>
+<h2 id="2-5-限期等待-Timed-Waiting"><a href="#2-5-限期等待-Timed-Waiting" class="headerlink" title="2.5 限期等待(Timed Waiting)"></a>2.5 限期等待(Timed Waiting)</h2><p>如上图，因为有时间控制，所以无需等待其它线程显式地唤醒，一定时间之后，系统会自动唤醒。<br>所以他有三种方式进行释放：<br>主要有两种方式进行释放：</p>
+<ul>
+<li>调用方的线程执行完成</li>
+<li>使用 Object.notify() &#x2F; Object.notifyAll()进行显性唤醒</li>
+<li>时间到结束<ul>
+<li>Thread.sleep()</li>
+<li>Object.wait() 方法，带Timeout参数</li>
+<li>Thread.join() 方法，带Timeout参数</li>
+</ul>
+</li>
+</ul>
+<h2 id="2-6-死亡-Terminated"><a href="#2-6-死亡-Terminated" class="headerlink" title="2.6 死亡(Terminated)"></a>2.6 死亡(Terminated)</h2><ul>
+<li>线程结束任务之后结束</li>
+<li>产生了异常并结束</li>
+</ul>
+<h1 id="3-线程实现方式"><a href="#3-线程实现方式" class="headerlink" title="3 线程实现方式"></a>3 线程实现方式</h1><p>在Java中，线程的实现方式主要有两种：继承<code>Thread</code>类和实现<code>Runnable</code>接口。此外，Java 5开始，引入了<code>java.util.concurrent</code>包，提供了更多的并发工具，如<code>Callable</code>接口与<code>Future</code>接口，它们主要用于任务执行。</p>
+<h2 id="3-1-继承Thread类"><a href="#3-1-继承Thread类" class="headerlink" title="3.1 继承Thread类"></a>3.1 继承Thread类</h2><p>通过继承<code>Thread</code>类来创建线程是最基本的方式。你需要创建一个扩展自<code>Thread</code>类的子类，并重写其<code>run()</code>方法。然后，可以创建该子类的实例来创建新的线程。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyThread</span> <span class="keyword">extends</span> <span class="title class_">Thread</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;线程运行中&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ThreadDemo</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">MyThread</span> <span class="variable">t</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyThread</span>();</span><br><span class="line">        t.start(); <span class="comment">// 调用start()方法来启动线程</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-2-实现Runnable接口"><a href="#3-2-实现Runnable接口" class="headerlink" title="3.2 实现Runnable接口"></a>3.2 实现Runnable接口</h2><p>另一种方式是让你的类实现<code>Runnable</code>接口，并实现<code>run()</code>方法。然后，你可以创建<code>Thread</code>类的实例，将实现了<code>Runnable</code>接口的类的实例作为构造参数传递给它。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyRunnable</span> <span class="keyword">implements</span> <span class="title class_">Runnable</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;线程运行中&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RunnableDemo</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Thread</span> <span class="variable">t</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(<span class="keyword">new</span> <span class="title class_">MyRunnable</span>());</span><br><span class="line">        t.start(); <span class="comment">// 调用start()方法来启动线程</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-3-使用Callable和Future"><a href="#3-3-使用Callable和Future" class="headerlink" title="3.3 使用Callable和Future"></a>3.3 使用Callable和Future</h2><p>虽然<code>Callable</code>和<code>Future</code>不是直接用于创建线程的，但它们提供了一种更灵活的方式来处理线程执行的结果。<code>Callable</code>类似于<code>Runnable</code>，但它可以返回一个结果，并且可以抛出异常。<code>Future</code>用于获取<code>Callable</code>执行的结果。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.concurrent.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyCallable</span> <span class="keyword">implements</span> <span class="title class_">Callable</span>&lt;String&gt; &#123;</span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;任务完成&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CallableDemo</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> ExecutionException, InterruptedException &#123;</span><br><span class="line">        <span class="type">ExecutorService</span> <span class="variable">executor</span> <span class="operator">=</span> Executors.newSingleThreadExecutor();</span><br><span class="line">        Future&lt;String&gt; future = executor.submit(<span class="keyword">new</span> <span class="title class_">MyCallable</span>());</span><br><span class="line">        System.out.println(future.get()); <span class="comment">// 阻塞等待获取结果</span></span><br><span class="line">        executor.shutdown();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-4-优缺点解读"><a href="#3-4-优缺点解读" class="headerlink" title="3.4 优缺点解读"></a>3.4 优缺点解读</h2><ul>
+<li><strong>继承Thread类</strong>：简单直观，但Java不支持多重继承，如果类已经继承了其他类，则不能再用这种方式。另外继承整个 Thread 类开销过大，太重了。</li>
+<li><strong>实现Runnable接口</strong>：更加灵活，推荐的方式。</li>
+<li><strong>Callable和Future</strong>：提供了更为强大的功能，例如返回执行结果和抛出异常，但通常用于与<code>ExecutorService</code>等高级并发工具一起使用。</li>
+</ul>
+<h1 id="4-线程管理机制"><a href="#4-线程管理机制" class="headerlink" title="4 线程管理机制"></a>4 线程管理机制</h1><p>Java 中的线程管理机制非常强大，涵盖了从简单的线程创建到复杂的线程池管理等多个方面。</p>
+<h2 id="4-1-Executor-框架"><a href="#4-1-Executor-框架" class="headerlink" title="4.1 Executor 框架"></a>4.1 Executor 框架</h2><p><code>Executor</code> 框架是 Java 并发包（<code>java.util.concurrent</code>）中的一个关键组件，它提供了一种更高级别的抽象来管理线程池。通过使用 <code>Executor</code>，你可以更容易地控制线程的创建、执行、调度、生命周期等。它主要有三种类型：</p>
+<ol>
+<li>CachedThreadPool: 一个任务创建一个线程</li>
+<li>FixedThreadPool: 所有任务只能使用固定大小的线程</li>
+<li>SingleThreadExecutor: 单个线程，相当于大小为 1 的 FixedThreadPool。</li>
+</ol>
+<ul>
+<li><p><strong>优点</strong>：提高程序性能和响应速度，通过复用线程来减少线程创建和销毁的开销，简化并发编程。</p>
+</li>
+<li><p>使用示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ExecutorService</span> <span class="variable">executor</span> <span class="operator">=</span> Executors.newFixedThreadPool(<span class="number">5</span>);</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">    <span class="type">Runnable</span> <span class="variable">worker</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">WorkerThread</span>(<span class="string">&quot;&quot;</span> + i);</span><br><span class="line">    executor.execute(worker);</span><br><span class="line">&#125;</span><br><span class="line">executor.shutdown();</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="4-2-守护线程（Daemon-Threads）"><a href="#4-2-守护线程（Daemon-Threads）" class="headerlink" title="4.2 守护线程（Daemon Threads）"></a>4.2 守护线程（Daemon Threads）</h2><p>守护线程是一种特殊的线程，它主要用于程序中“后台”任务的支持。守护线程与普通线程的区别在于，当程序中所有非守护线程结束时，JVM 会自动退出，即使还有守护线程在运行。守护线程常用于垃圾回收、JVM 内部的监控等任务。<br><strong>设置守护线程</strong>：通过调用线程对象的 <code>setDaemon(true)</code> 方法，在启动线程之前将其设置为守护线程。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Thread</span> <span class="variable">thread</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(<span class="keyword">new</span> <span class="title class_">MyRunnable</span>());</span><br><span class="line">thread.setDaemon(<span class="literal">true</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-3-sleep-方法"><a href="#4-3-sleep-方法" class="headerlink" title="4.3 sleep() 方法"></a>4.3 sleep() 方法</h2><p><code>sleep()</code> 方法是 <code>Thread</code> 类的一个静态方法，用于让当前正在执行的线程暂停执行指定的时间（毫秒），以毫秒为单位。在指定的时间过去后，线程将回到可运行状态，等待CPU的调度。</p>
+<ul>
+<li><strong>用途</strong>：常用于线程间的简单同步。</li>
+<li><strong>注意</strong>：<code>sleep()</code> 方法不会释放锁（如果当前线程持有锁的话）。</li>
+<li><strong>示例</strong>：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">       Thread.sleep(<span class="number">3000</span>);</span><br><span class="line">   &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">       e.printStackTrace();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-4-yield-方法"><a href="#4-4-yield-方法" class="headerlink" title="4.4 yield() 方法"></a>4.4 yield() 方法</h2><p><code>yield()</code> 方法也是 <code>Thread</code> 类的一个静态方法，它告诉调度器当前线程愿意放弃当前处理器的使用，但这并不意味着线程会立即停止执行或进入等待&#x2F;阻塞状态。</p>
+<p>调度器可以忽略这个提示，继续让当前线程运行。</p>
+<ul>
+<li><strong>用途</strong>：提示调度器让出CPU时间，但具体是否让出取决于调度器的实现。</li>
+<li><strong>注意</strong>：<code>yield()</code> 方法不会使线程进入阻塞状态，也不会释放锁（如果持有的话）,类似仅建议。</li>
+<li><strong>示例</strong>：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Thread.<span class="keyword">yield</span>();</span><br></pre></td></tr></table></figure>
+
+<h1 id="5-线程中断方式"><a href="#5-线程中断方式" class="headerlink" title="5 线程中断方式"></a>5 线程中断方式</h1><p>在Java中，线程中断是一种重要的线程间通信机制，用于通知线程应该停止当前正在执行的任务。线程中断的方式主要有以下几种：</p>
+<h2 id="5-1-使用interrupt-方法"><a href="#5-1-使用interrupt-方法" class="headerlink" title="5.1 使用interrupt()方法"></a>5.1 使用<code>interrupt()</code>方法</h2><p><code>interrupt()</code>方法是Java推荐的线程中断方式。它并不会直接停止线程，而是设置线程的中断状态为true。线程需要定期检查这个中断状态（通过<code>isInterrupted()</code>方法），并根据需要自行决定如何响应中断请求，比如退出循环、释放资源等。</p>
+<ul>
+<li><p><strong>优点</strong>：安全、灵活，符合Java的并发编程理念。</p>
+</li>
+<li><p>示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Thread</span> <span class="variable">thread</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;</span><br><span class="line">    <span class="keyword">while</span> (!Thread.currentThread().isInterrupted()) &#123;</span><br><span class="line">        <span class="comment">// 执行任务</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 线程中断后的清理工作</span></span><br><span class="line">&#125;);</span><br><span class="line">thread.start();</span><br><span class="line"><span class="comment">// 稍后中断线程</span></span><br><span class="line">thread.interrupt();</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="5-2-使用Executor的中断操作"><a href="#5-2-使用Executor的中断操作" class="headerlink" title="5.2 使用Executor的中断操作"></a>5.2 使用<code>Executor</code>的中断操作</h2><ol>
+<li>调用 Executor 的 shutdown() 方法，会等待线程都执行完毕之后再关闭</li>
+<li>调用 Executor 的 shutdownNow() 方法，则相当于直接调用具体线程的 interrupt() 方法</li>
+</ol>
+<h1 id="6-线程互斥同步方式"><a href="#6-线程互斥同步方式" class="headerlink" title="6 线程互斥同步方式"></a>6 线程互斥同步方式</h1><p>Java中的线程互斥同步是并发编程中的一个重要概念，用于保证多个线程在访问共享资源时的互斥性，即同一时间只有一个线程能够访问某个资源。Java提供了多种机制来实现线程的互斥同步，主要包括以下几种方式：</p>
+<h2 id="6-1-synchronized关键字"><a href="#6-1-synchronized关键字" class="headerlink" title="6.1 synchronized关键字"></a>6.1 synchronized关键字</h2><p><strong>1. 基本概念</strong>：synchronized是Java中最基本的同步机制，它可以用来修饰方法或代码块。当一个线程访问一个被synchronized修饰的方法或代码块时，其他试图访问该方法或代码块的线程将被阻塞，直到当前线程执行完毕释放锁。<br><strong>2. 使用方法</strong>：</p>
+<ul>
+<li>修饰方法：直接在方法声明上加上synchronized关键字，例如<code>public synchronized void method() &#123;...&#125;</code>。</li>
+<li>修饰代码块：将需要同步的代码放在synchronized(对象) {…}中，这里的对象就是锁对象，例如<code>synchronized(this) &#123;...&#125;</code>或<code>synchronized(某个对象) &#123;...&#125;</code>。</li>
+</ul>
+<p><strong>3. 特性</strong>：</p>
+<ul>
+<li>可见性：synchronized不仅保证了互斥性，还保证了变量的可见性。当一个线程释放锁时，会将锁变量的值刷新到主存储器中，从而使其他线程可以看到最新的变量值。</li>
+<li>可重入性：synchronized支持可重入性，即同一个线程可以多次获取同一个锁，而不会导致死锁。</li>
+</ul>
+<p><strong>4. 示例</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Counter</span> &#123;  </span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> <span class="variable">count</span> <span class="operator">=</span> <span class="number">0</span>;  </span><br><span class="line">  </span><br><span class="line">    <span class="comment">// synchronized修饰方法  </span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">increment</span><span class="params">()</span> &#123;  </span><br><span class="line">        count++;  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="type">int</span> <span class="title function_">getCount</span><span class="params">()</span> &#123;  </span><br><span class="line">        <span class="keyword">return</span> count;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestSynchronized</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;  </span><br><span class="line">        <span class="type">Counter</span> <span class="variable">counter</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Counter</span>();  </span><br><span class="line">  </span><br><span class="line">        <span class="type">Thread</span> <span class="variable">t1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;  </span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;  </span><br><span class="line">                counter.increment();  </span><br><span class="line">            &#125;  </span><br><span class="line">        &#125;);  </span><br><span class="line">  </span><br><span class="line">        <span class="type">Thread</span> <span class="variable">t2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;  </span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;  </span><br><span class="line">                counter.increment();  </span><br><span class="line">            &#125;  </span><br><span class="line">        &#125;);  </span><br><span class="line">  </span><br><span class="line">        t1.start();  </span><br><span class="line">        t2.start();  </span><br><span class="line">  </span><br><span class="line">        t1.join();  </span><br><span class="line">        t2.join();  </span><br><span class="line">  </span><br><span class="line">        System.out.println(<span class="string">&quot;Final count: &quot;</span> + counter.getCount());  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-2-ReentrantLock类"><a href="#6-2-ReentrantLock类" class="headerlink" title="6.2 ReentrantLock类"></a>6.2 ReentrantLock类</h2><ul>
+<li><p><strong>基本概念</strong>：ReentrantLock是java.util.concurrent.locks包中的一个可重入锁，它提供了比synchronized更灵活的锁定机制。</p>
+</li>
+<li><p>使用方法</p>
+<p>：</p>
+<ul>
+<li>创建锁对象：<code>ReentrantLock lock = new ReentrantLock();</code></li>
+<li>加锁：<code>lock.lock();</code></li>
+<li>释放锁：通常将释放锁的代码放在finally块中，以确保锁一定会被释放，例如<code>try &#123;...&#125; finally &#123; lock.unlock(); &#125;</code>。</li>
+</ul>
+</li>
+<li><p>特性</p>
+<p>：</p>
+<ul>
+<li>支持公平锁和非公平锁：通过构造器参数可以指定使用哪种锁，默认是非公平锁。</li>
+<li>支持尝试获取锁：提供了<code>tryLock()</code>等方法，尝试获取锁，如果获取不到则不会阻塞线程。</li>
+<li>支持中断锁定的线程：与synchronized不同，ReentrantLock的锁可以被中断。</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.concurrent.locks.ReentrantLock;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CounterWithLock</span> &#123;  </span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> <span class="variable">count</span> <span class="operator">=</span> <span class="number">0</span>;  </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">ReentrantLock</span> <span class="variable">lock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReentrantLock</span>(); <span class="comment">// 创建ReentrantLock对象  </span></span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">increment</span><span class="params">()</span> &#123;  </span><br><span class="line">        lock.lock(); <span class="comment">// 加锁  </span></span><br><span class="line">        <span class="keyword">try</span> &#123;  </span><br><span class="line">            count++;  </span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;  </span><br><span class="line">            lock.unlock(); <span class="comment">// 释放锁，放在finally块中确保一定会被释放  </span></span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getCount</span><span class="params">()</span> &#123;  </span><br><span class="line">        lock.lock(); <span class="comment">// 加锁  </span></span><br><span class="line">        <span class="keyword">try</span> &#123;  </span><br><span class="line">            <span class="keyword">return</span> count;  </span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;  </span><br><span class="line">            lock.unlock(); <span class="comment">// 释放锁  </span></span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestReentrantLock</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;  </span><br><span class="line">        <span class="type">CounterWithLock</span> <span class="variable">counter</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CounterWithLock</span>();  </span><br><span class="line">  </span><br><span class="line">        <span class="type">Thread</span> <span class="variable">t1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;  </span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++) &#123;  </span><br><span class="line">                counter.increment();  </span><br><span class="line">            &#125;  </span><br><span class="line">        &#125;);  </span><br><span class="line">  </span><br><span class="line">        <span class="type">Thread</span> <span class="variable">t2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;  </span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++) &#123;  </span><br><span class="line">                counter.increment();  </span><br><span class="line">            &#125;  </span><br><span class="line">        &#125;);  </span><br><span class="line">  </span><br><span class="line">        t1.start();  </span><br><span class="line">        t2.start();  </span><br><span class="line">  </span><br><span class="line">        t1.join();  </span><br><span class="line">        t2.join();  </span><br><span class="line">  </span><br><span class="line">        System.out.println(<span class="string">&quot;Final count: &quot;</span> + counter.getCount());  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-3-对比"><a href="#6-3-对比" class="headerlink" title="6.3 对比"></a>6.3 对比</h2><p>对于大多数简单场景，synchronized关键字是最直接、最简单的选择；而对于需要更灵活控制锁的场景，则可以考虑使用ReentrantLock等高级同步机制。</p>
+<h1 id="7-线程协作（通信）方案"><a href="#7-线程协作（通信）方案" class="headerlink" title="7 线程协作（通信）方案"></a>7 线程协作（通信）方案</h1><p>Java中线程之间的协作主要可以通过多种机制实现，其中等待&#x2F;通知机制（<code>wait/notify/notifyAll</code>）和<code>join</code>方法是两种常用的方式。下面我将分别给出这两种方式的简单代码示例。</p>
+<h2 id="7-1-等待-通知机制（wait-notify-notifyAll）"><a href="#7-1-等待-通知机制（wait-notify-notifyAll）" class="headerlink" title="7.1 等待&#x2F;通知机制（wait&#x2F;notify&#x2F;notifyAll）"></a>7.1 等待&#x2F;通知机制（wait&#x2F;notify&#x2F;notifyAll）</h2><p>等待&#x2F;通知机制依赖于Java中的<code>Object</code>类，因为<code>wait()</code>, <code>notify()</code>, 和 <code>notifyAll()</code> 方法都定义在<code>Object</code>类中。这些方法必须在同步块或同步方法中被调用，因为它们是用来控制对某个对象的访问的。</p>
+<p><strong>示例代码</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">WaitNotifyExample</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">Object</span> <span class="variable">lock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Object</span>();</span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="variable">ready</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">doWait</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (lock) &#123;</span><br><span class="line">            <span class="keyword">while</span> (!ready) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    lock.wait(); <span class="comment">// 当前线程等待</span></span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    Thread.currentThread().interrupt(); <span class="comment">// 保持中断状态</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 当ready为true时，继续执行</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">doNotify</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (lock) &#123;</span><br><span class="line">            ready = <span class="literal">true</span>;</span><br><span class="line">            lock.notify(); <span class="comment">// 唤醒在此对象监视器上等待的单个线程</span></span><br><span class="line">            <span class="comment">// 或者使用 lock.notifyAll(); 唤醒所有等待的线程</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">WaitNotifyExample</span> <span class="variable">example</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">WaitNotifyExample</span>();</span><br><span class="line"></span><br><span class="line">        <span class="type">Thread</span> <span class="variable">t1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;Thread 1 is waiting&quot;</span>);</span><br><span class="line">            example.doWait();</span><br><span class="line">            System.out.println(<span class="string">&quot;Thread 1 is proceeding&quot;</span>);</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="type">Thread</span> <span class="variable">t2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>); <span class="comment">// 假设t2需要一些时间来完成准备工作</span></span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                Thread.currentThread().interrupt();</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(<span class="string">&quot;Thread 2 is notifying&quot;</span>);</span><br><span class="line">            example.doNotify();</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，<code>t1</code>线程在<code>doWait()</code>方法中等待，直到<code>t2</code>线程调用<code>doNotify()</code>方法并设置<code>ready</code>为<code>true</code>。<code>t2</code>线程模拟了一些准备工作，并在之后唤醒<code>t1</code>。</p>
+<h2 id="7-2-Join-方法"><a href="#7-2-Join-方法" class="headerlink" title="7.2 Join 方法"></a>7.2 Join 方法</h2><p><code>join</code>方法是<code>Thread</code>类的一个方法，用于让当前线程等待另一个线程完成其执行。</p>
+<p><strong>示例代码</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JoinExample</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Thread</span> <span class="variable">t1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>); <span class="comment">// 假设t1执行需要一些时间</span></span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                Thread.currentThread().interrupt();</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(<span class="string">&quot;Thread 1 completed&quot;</span>);</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        t1.start();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            t1.join(); <span class="comment">// 当前线程（main线程）等待t1完成</span></span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            Thread.currentThread().interrupt();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;Thread 1 has joined, continuing main thread&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，<code>main</code>线程启动了一个新线程<code>t1</code>，并通过调用<code>t1.join()</code>等待<code>t1</code>完成。<code>t1</code>线程在完成后会打印一条消息，而<code>main</code>线程会在<code>t1</code>完成后继续执行并打印另一条消息。</p>
+<h1 id="8-总结"><a href="#8-总结" class="headerlink" title="8 总结"></a>8 总结</h1><p>总结一下，我们讲了让如下内容</p>
+<ol>
+<li>线程流转状态</li>
+<li>线程实现方式</li>
+<li>线程基本操作</li>
+<li>线程中断方案</li>
+<li>线程互斥同步方法</li>
+<li>线程协作（通信）方案</li>
+</ol>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMCZ7HaLpZxDj_zG1XxJmHwfbAThfQAAqTEMRuvMJFV9E-PLlimPicBAAMCAAN4AAM2BA.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMCZ7HaLpZxDj_zG1XxJmHwfbAThfQAAqTEMRuvMJFV9E-PLlimPicBAAMCAAN4AAM2BA.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">dachang</div><div class="post-copyright__author_desc">感谢你选择与我一起虚度时光。</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="https://yeoh.de5.net/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%869-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%A4%9A%E7%BA%BF%E7%A8%8B/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('https://yeoh.de5.net/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%869-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%A4%9A%E7%BA%BF%E7%A8%8B/')">Java核心系列9：并发与多线程-线程基础</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg" target="_blank"><img class="post-qr-code-img" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg" target="_blank"><img class="post-qr-code-img" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="https://yeoh.de5.net/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%869-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%A4%9A%E7%BA%BF%E7%A8%8B/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=Java核心系列9：并发与多线程-线程基础&amp;url=https://yeoh.de5.net/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%869-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%A4%9A%E7%BA%BF%E7%A8%8B/&amp;pic=https://imags-563.pages.dev/file/AgACAgUAAxkDAAPNaUerPVar-Daieeucr_Jz7o8OSBIAAuYLaxunpzhW_tn_AqDcKe4BAAMCAAN4AAM2BA.png" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://yeoh.de5.net" target="_blank">数根朽木，</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__category-list"><a class="post-meta__box__categoryes" href="/categories/Java%E6%A0%B8%E5%BF%83%E7%B3%BB%E5%88%97/"><span class="categoryes-punctuation"> <i class="anzhiyufont anzhiyu-icon-inbox"></i></span>Java核心系列<span class="categoryesPageCount">15</span></a></div><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/Java%E6%A0%B8%E5%BF%83/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>Java核心<span class="tagsPageCount">14</span></a><a class="post-meta__box__tags" href="/tags/Java%E5%9F%BA%E7%A1%80/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>Java基础<span class="tagsPageCount">11</span></a><a class="post-meta__box__tags" href="/tags/JavaSE/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>JavaSE<span class="tagsPageCount">11</span></a></div></div><div class="post_share"><div class="social-share" data-image="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPQaUetiv4xao864OZFnrxs3CgvkQIAAvMLaxunpzhWq55FdPk-m8gBAAMCAAN4AAM2BA.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/03/22/MQ%E7%B3%BB%E5%88%971-%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%89%A7%E8%A1%8C%E5%8E%9F%E7%90%86/"><img class="prev-cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAOaaUYDAXW0BAp2siQqvXyoKYO_KhAAAkMLaxvRfjBWTC0AAWBATgJfAQADAgADeAADNgQ.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">MQ系列1：消息中间件执行原理</div></div></a></div><div class="next-post pull-right"><a href="/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%868-Java%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/"><img class="next-cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPHaUeniRmu8VmXdRdOwZJvuRr3qAQAAt4LaxunpzhWwB3-eqHKUV0BAAMCAAN4AAM2BA.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Java核心系列8：Java如何保证线程安全性</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%8610-%E7%BA%BF%E7%A8%8B%E7%AE%A1%E7%90%86/" title="Java核心系列10：线程管理"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPQaUetiv4xao864OZFnrxs3CgvkQIAAvMLaxunpzhWq55FdPk-m8gBAAMCAAN4AAM2BA.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-04-02</div><div class="title">Java核心系列10：线程管理</div></div></a></div><div><a href="/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%864-AOP%E5%8E%9F%E7%90%86%E5%92%8C%E5%88%87%E9%9D%A2%E5%BA%94%E7%94%A8/" title="Java核心系列4：AOP原理和切面应用"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAO7aUeZINnJFq-LgiD0zKhbT4tJcLIAArALaxunpzhWCEFByZsi2asBAAMCAAN4AAM2BA.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-04-02</div><div class="title">Java核心系列4：AOP原理和切面应用</div></div></a></div><div><a href="/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%865-%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/" title="Java核心系列5：反射机制详解"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAO9aUefsXcKjYIgHwirSq7t_-reVNYAArgLaxunpzhW8BZ7pDXPUAwBAAMCAAN5AAM2BA.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-04-02</div><div class="title">Java核心系列5：反射机制详解</div></div></a></div><div><a href="/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%866-%E9%9B%86%E5%90%88%E6%A1%86%E6%9E%B6/" title="Java核心系列6：集合框架详解"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPBaUejFFd0HhphPeeOE9ETsurNGHAAAr8LaxunpzhWrj0lkLLs9ekBAAMCAAN3AAM2BA.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-04-02</div><div class="title">Java核心系列6：集合框架详解</div></div></a></div><div><a href="/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%867-%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7%E8%AE%A8%E8%AE%BA/" title="Java核心系列7：线程安全性讨论"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPHaUeniRmu8VmXdRdOwZJvuRr3qAQAAt4LaxunpzhWwB3-eqHKUV0BAAMCAAN4AAM2BA.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-04-02</div><div class="title">Java核心系列7：线程安全性讨论</div></div></a></div><div><a href="/2025/04/02/Java%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%868-Java%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/" title="Java核心系列8：Java如何保证线程安全性"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPHaUeniRmu8VmXdRdOwZJvuRr3qAQAAt4LaxunpzhWwB3-eqHKUV0BAAMCAAN4AAM2BA.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-04-02</div><div class="title">Java核心系列8：Java如何保证线程安全性</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div><div class="comment-tips" id="comment-tips"><span>✅ 你无需删除空行，直接评论以获取最佳展示效果</span></div></div><div class="comment-wrap"><div><div id="twikoo-wrap"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%85%88%E5%AF%BC"><span class="toc-number">1.</span> <span class="toc-text">1 先导</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%8A%B6%E6%80%81%E5%92%8C%E6%B5%81%E8%BD%AC"><span class="toc-number">2.</span> <span class="toc-text">2 线程的状态和流转</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E6%96%B0%E5%BB%BA-New"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 新建(New)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E5%8F%AF%E8%BF%90%E8%A1%8C-Runnable"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 可运行(Runnable)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E9%98%BB%E5%A1%9E-Blocking"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 阻塞(Blocking)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-%E6%97%A0%E9%99%90%E6%9C%9F%E7%AD%89%E5%BE%85-Waiting"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 无限期等待(Waiting)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-5-%E9%99%90%E6%9C%9F%E7%AD%89%E5%BE%85-Timed-Waiting"><span class="toc-number">2.5.</span> <span class="toc-text">2.5 限期等待(Timed Waiting)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-6-%E6%AD%BB%E4%BA%A1-Terminated"><span class="toc-number">2.6.</span> <span class="toc-text">2.6 死亡(Terminated)</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">3 线程实现方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E7%BB%A7%E6%89%BFThread%E7%B1%BB"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 继承Thread类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E5%AE%9E%E7%8E%B0Runnable%E6%8E%A5%E5%8F%A3"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 实现Runnable接口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-%E4%BD%BF%E7%94%A8Callable%E5%92%8CFuture"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 使用Callable和Future</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-4-%E4%BC%98%E7%BC%BA%E7%82%B9%E8%A7%A3%E8%AF%BB"><span class="toc-number">3.4.</span> <span class="toc-text">3.4 优缺点解读</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E7%BA%BF%E7%A8%8B%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6"><span class="toc-number">4.</span> <span class="toc-text">4 线程管理机制</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-Executor-%E6%A1%86%E6%9E%B6"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 Executor 框架</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E5%AE%88%E6%8A%A4%E7%BA%BF%E7%A8%8B%EF%BC%88Daemon-Threads%EF%BC%89"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 守护线程（Daemon Threads）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-3-sleep-%E6%96%B9%E6%B3%95"><span class="toc-number">4.3.</span> <span class="toc-text">4.3 sleep() 方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-4-yield-%E6%96%B9%E6%B3%95"><span class="toc-number">4.4.</span> <span class="toc-text">4.4 yield() 方法</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E7%BA%BF%E7%A8%8B%E4%B8%AD%E6%96%AD%E6%96%B9%E5%BC%8F"><span class="toc-number">5.</span> <span class="toc-text">5 线程中断方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-%E4%BD%BF%E7%94%A8interrupt-%E6%96%B9%E6%B3%95"><span class="toc-number">5.1.</span> <span class="toc-text">5.1 使用interrupt()方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-2-%E4%BD%BF%E7%94%A8Executor%E7%9A%84%E4%B8%AD%E6%96%AD%E6%93%8D%E4%BD%9C"><span class="toc-number">5.2.</span> <span class="toc-text">5.2 使用Executor的中断操作</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6-%E7%BA%BF%E7%A8%8B%E4%BA%92%E6%96%A5%E5%90%8C%E6%AD%A5%E6%96%B9%E5%BC%8F"><span class="toc-number">6.</span> <span class="toc-text">6 线程互斥同步方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#6-1-synchronized%E5%85%B3%E9%94%AE%E5%AD%97"><span class="toc-number">6.1.</span> <span class="toc-text">6.1 synchronized关键字</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-2-ReentrantLock%E7%B1%BB"><span class="toc-number">6.2.</span> <span class="toc-text">6.2 ReentrantLock类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-3-%E5%AF%B9%E6%AF%94"><span class="toc-number">6.3.</span> <span class="toc-text">6.3 对比</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#7-%E7%BA%BF%E7%A8%8B%E5%8D%8F%E4%BD%9C%EF%BC%88%E9%80%9A%E4%BF%A1%EF%BC%89%E6%96%B9%E6%A1%88"><span class="toc-number">7.</span> <span class="toc-text">7 线程协作（通信）方案</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#7-1-%E7%AD%89%E5%BE%85-%E9%80%9A%E7%9F%A5%E6%9C%BA%E5%88%B6%EF%BC%88wait-notify-notifyAll%EF%BC%89"><span class="toc-number">7.1.</span> <span class="toc-text">7.1 等待&#x2F;通知机制（wait&#x2F;notify&#x2F;notifyAll）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-2-Join-%E6%96%B9%E6%B3%95"><span class="toc-number">7.2.</span> <span class="toc-text">7.2 Join 方法</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#8-%E6%80%BB%E7%BB%93"><span class="toc-number">8.</span> <span class="toc-text">8 总结</span></a></li></ol></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div id="footer_deal"><a class="deal_link" href="mailto:youngyang0220@gmail.com" title="email"><i class="anzhiyufont anzhiyu-icon-envelope"></i></a><img class="footer_mini_logo" title="返回顶部" alt="返回顶部" onclick="anzhiyu.scrollToDest(0, 500)" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMCZ7HaLpZxDj_zG1XxJmHwfbAThfQAAqTEMRuvMJFV9E-PLlimPicBAAMCAAN4AAM2BA.jpg" size="50px"/><a class="deal_link" target="_blank" rel="noopener" href="https://github.com/dachang007" title="Github"><i class="anzhiyufont anzhiyu-icon-github"></i></a></div><div id="anzhiyu-footer"><div class="footer-group"><div class="footer-title">服务</div><div class="footer-links"><a class="footer-item" title="51la统计" target="_blank" rel="noopener" href="https://v6.51.la/">51la统计</a><a class="footer-item" title="十年之约" target="_blank" rel="noopener" href="https://www.foreverblog.cn/">十年之约</a><a class="footer-item" title="开往" target="_blank" rel="noopener" href="https://github.com/travellings-link/travellings">开往</a></div></div><div class="footer-group"><div class="footer-title">主题</div><div class="footer-links"><a class="footer-item" title="文档" target="_blank" rel="noopener" href="https://docs.anheyu.com/">文档</a><a class="footer-item" title="源码" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu">源码</a><a class="footer-item" title="更新日志" href="/update/">更新日志</a></div></div><div class="footer-group"><div class="footer-title">导航</div><div class="footer-links"><a class="footer-item" title="图床工具" target="_blank" rel="noopener" href="https://imags-563.pages.dev">图床工具</a><a class="footer-item" title="在线烟花模拟器" target="_blank" rel="noopener" href="http://greatree.hidns.co">在线烟花模拟器</a><a class="footer-item" title="订阅转换" target="_blank" rel="noopener" href="https://suburl.v1.mk">订阅转换</a><a class="footer-item" title="在线简历生成" target="_blank" rel="noopener" href="https://imags-563.pages.dev">在线简历生成</a></div></div><div class="footer-group"><div class="footer-title-group"><div class="footer-title">友链</div><a class="random-friends-btn" id="footer-random-friends-btn" href="javascript:addFriendLinksInFooter();" title="换一批友情链接"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right"></i></a></div><div class="footer-links" id="friend-links-in-footer"></div></div></div><p id="ghbdages"><a class="github-badge" target="_blank" href="https://hexo.io/" style="margin-inline:5px" data-title="博客框架为Hexo_v5.4.0" title="博客框架为Hexo_v5.4.0"><img src="https://npm.elemecdn.com/anzhiyu-blog@2.1.5/img/badge/Frame-Hexo.svg" alt="博客框架为Hexo_v5.4.0"/></a><a class="github-badge" target="_blank" href="https://blog.anheyu.com/" style="margin-inline:5px" data-title="本站使用AnZhiYu主题" title="本站使用AnZhiYu主题"><img src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.9/img/Theme-AnZhiYu-2E67D3.svg" alt="本站使用AnZhiYu主题"/></a><a class="github-badge" target="_blank" href="https://www.Cloudflare.com/" style="margin-inline:5px" data-title="本站使用CloudFlare为静态资源提供CDN加速" title="本站使用CloudFlare为静态资源提供CDN加速"><img src="https://img.shields.io/badge/%E2%98%81CDN-CloudFlare-yellow" alt="本站使用CloudFlare为静态资源提供CDN加速"/></a><a class="github-badge" target="_blank" href="https://github.com/" style="margin-inline:5px" data-title="本站项目由Github托管" title="本站项目由Github托管"><img src="https://npm.elemecdn.com/anzhiyu-blog@2.1.5/img/badge/Source-Github.svg" alt="本站项目由Github托管"/></a><a class="github-badge" target="_blank" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" style="margin-inline:5px" data-title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可" title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"><img src="https://npm.elemecdn.com/anzhiyu-blog@2.2.0/img/badge/Copyright-BY-NC-SA.svg" alt="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"/></a></p></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2022 - 2025 By <a class="footer-bar-link" href="/" title="dachang" target="_blank">dachang</a></div></div><div id="footer-type-tips"></div><div class="js-pjax"><script>function subtitleType () {
+  fetch('https://v1.hitokoto.cn')
+    .then(response => response.json())
+    .then(data => {
+      if (false) {
+        const from = '出自 ' + data.from
+        const sub = []
+        sub.unshift(data.hitokoto, from)
+        window.typed = new Typed('#footer-type-tips', {
+          strings: sub,
+          startDelay: 300,
+          typeSpeed: 150,
+          loop: false,
+          backSpeed: 50,
+        })
+      } else {
+        document.getElementById('footer-type-tips').innerHTML = data.hitokoto
+      }
+    })
+}
+
+if (false) {
+  if (typeof Typed === 'function') {
+    subtitleType()
+  } else {
+    getScript('https://cdn.cbd.int/typed.js@2.1.0/dist/typed.umd.js').then(subtitleType)
+  }
+} else {
+  subtitleType()
+}
+</script></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">28</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">32</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">7</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网站项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="个人博客"><img class="back-menu-item-icon" src="/favicon.ico" alt="个人博客"/><span class="back-menu-item-text">个人博客</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线简历"><img class="back-menu-item-icon" src="/favicon.ico" alt="在线简历"/><span class="back-menu-item-text">在线简历</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">建设工具</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线图床"><img class="back-menu-item-icon" src="/img/image.ico" alt="在线图床"/><span class="back-menu-item-text">在线图床</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="在线烟花模拟器"><img class="back-menu-item-icon" src="/img/Clash.Mini.png" alt="在线烟花模拟器"/><span class="back-menu-item-text">在线烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="烟花模拟器"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMMZ7Qfv1Xv2qvgqSVN7kNhRO_uzfgAAlvAMRtiZKBVrGT1Z6RPiX4BAAMCAANtAAM2BA.png" alt="烟花模拟器"/><span class="back-menu-item-text">烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://pay.totalh.net/" title="三合一收款码"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAM8Z7WNYNdWdrYsas5PPFT8Di3493sAAgLKMRsEtalVDcfaakgTXPkBAAMCAAN4AAM2BA.png" alt="三合一收款码"/><span class="back-menu-item-text">三合一收款码</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 博客文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 全部文章</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 文章分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 所有标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 网站工具</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 图床工具</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="http://greatree.hidns.co"><i class="anzhiyufont anzhiyu-icon-artstation faa-tada" style="font-size: 0.9em;"></i><span> 烟花模拟器</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://suburl.v1.mk"><i class="anzhiyufont anzhiyu-icon-envelope faa-tada" style="font-size: 0.9em;"></i><span> 订阅转换</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><span> 在线简历生成</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于我</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 在线简历</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><i class="anzhiyufont anzhiyu-icon-shoe-prints1 faa-tada" style="font-size: 0.9em;"></i><span> 随便逛逛</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Boolean-filter/" style="font-size: 0.88rem;">Boolean filter<sup>2</sup></a><a href="/tags/DNS%E6%B3%84%E9%9C%B2/" style="font-size: 0.88rem;">DNS泄露<sup>1</sup></a><a href="/tags/Fake-IP/" style="font-size: 0.88rem;">Fake IP<sup>1</sup></a><a href="/tags/JVM%E8%99%9A%E6%8B%9F%E6%9C%BA/" style="font-size: 0.88rem;">JVM虚拟机<sup>1</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>1</sup></a><a href="/tags/JavaSE/" style="font-size: 0.88rem;">JavaSE<sup>11</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 0.88rem;">Java基础<sup>11</sup></a><a href="/tags/Java%E6%A0%B8%E5%BF%83/" style="font-size: 0.88rem;">Java核心<sup>14</sup></a><a href="/tags/Java%E7%89%88%E6%9C%AC%E6%96%B0%E7%89%B9%E6%80%A7/" style="font-size: 0.88rem;">Java版本新特性<sup>2</sup></a><a href="/tags/MQ/" style="font-size: 0.88rem;">MQ<sup>2</sup></a><a href="/tags/OOM/" style="font-size: 0.88rem;">OOM<sup>1</sup></a><a href="/tags/RabbitMQ/" style="font-size: 0.88rem;">RabbitMQ<sup>2</sup></a><a href="/tags/Redis/" style="font-size: 0.88rem;">Redis<sup>5</sup></a><a href="/tags/Redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/" style="font-size: 0.88rem;">Redis内存淘汰策略<sup>1</sup></a><a href="/tags/Redis%E5%8E%9F%E7%90%86/" style="font-size: 0.88rem;">Redis原理<sup>1</sup></a><a href="/tags/Redis%E7%BC%93%E5%AD%98/" style="font-size: 0.88rem;">Redis缓存<sup>1</sup></a><a href="/tags/RocketMQ/" style="font-size: 0.88rem;">RocketMQ<sup>2</sup></a><a href="/tags/SSM/" style="font-size: 0.88rem;">SSM<sup>1</sup></a><a href="/tags/Spring/" style="font-size: 0.88rem;">Spring<sup>1</sup></a><a href="/tags/SpringBoot/" style="font-size: 0.88rem;">SpringBoot<sup>1</sup></a><a href="/tags/kafka/" style="font-size: 0.88rem;">kafka<sup>2</sup></a><a href="/tags/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" style="font-size: 0.88rem;">单例模式<sup>1</sup></a><a href="/tags/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/" style="font-size: 0.88rem;">布隆过滤器<sup>2</sup></a><a href="/tags/%E6%8E%A5%E5%8F%A3%E8%B6%85%E6%97%B6/" style="font-size: 0.88rem;">接口超时<sup>1</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/" style="font-size: 0.88rem;">消息中间件<sup>2</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" style="font-size: 0.88rem;">消息队列<sup>1</sup></a><a href="/tags/%E7%BA%BF%E4%B8%8A%E4%BA%8B%E6%95%85/" style="font-size: 0.88rem;">线上事故<sup>1</sup></a><a href="/tags/%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/" style="font-size: 0.88rem;">缓存雪崩<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96/" style="font-size: 0.88rem;">网络优化<sup>1</sup></a><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 0.88rem;">设计模式<sup>1</sup></a><a href="/tags/%E8%BF%90%E7%BB%B4%E8%B0%83%E4%BC%98/" style="font-size: 0.88rem;">运维调优<sup>3</sup></a><a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" style="font-size: 0.88rem;">高并发<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const init = () => {
+    twikoo.init(Object.assign({
+      el: '#twikoo-wrap',
+      envId: 'https://twikoo-kohl-zeta.vercel.app',
+      region: '',
+      onCommentLoaded: () => {
+        anzhiyu.loadLightbox(document.querySelectorAll('#twikoo .tk-content img:not(.tk-owo-emotion)'))
+      }
+    }, null))
+  }
+
+  const loadTwikoo = () => {
+    if (typeof twikoo === 'object') setTimeout(runFn,0)
+    else getScript('https://unpkg.com/twikoo@1.6.44/dist/twikoo.all.min.js').then(runFn)
+  }
+
+  const getCount = () => {
+    const countELement = document.getElementById('twikoo-count')
+    if(!countELement) return
+    twikoo.getCommentsCount({
+      envId: 'https://twikoo-kohl-zeta.vercel.app',
+      region: '',
+      urls: [window.location.pathname],
+      includeReply: false
+    }).then(res => {
+      countELement.textContent = res[0].count
+    }).catch(err => {
+      console.error(err)
+    })
+  }
+
+  const runFn = () => {
+    init();
+    
+  }
+
+  if ('Twikoo' === 'Twikoo' || !true) {
+    if (true) anzhiyu.loadComment(document.getElementById('twikoo-wrap'), loadTwikoo)
+    else {
+      loadTwikoo()
+    }
+  } else {
+    window.loadOtherComment = loadTwikoo
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getComment = () => {
+    const runTwikoo = () => {
+      twikoo.getRecentComments({
+        envId: 'https://twikoo-kohl-zeta.vercel.app',
+        region: '',
+        pageSize: 6,
+        includeReply: true
+      }).then(function (res) {
+        const twikooArray = res.map(e => {
+          return {
+            'content': changeContent(e.comment),
+            'avatar': e.avatar,
+            'nick': e.nick,
+            'url': e.url + '#' + e.id,
+            'date': new Date(e.created).toISOString()
+          }
+        })
+
+        saveToLocal.set('twikoo-newest-comments', JSON.stringify(twikooArray), 10/(60*24))
+        generateHtml(twikooArray)
+      }).catch(function (err) {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      })
+    }
+
+    if (typeof twikoo === 'object') {
+      runTwikoo()
+    } else {
+      getScript('https://unpkg.com/twikoo@1.6.44/dist/twikoo.all.min.js').then(runTwikoo)
+    }
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'><div class='name'><span>${array[i].nick} </span></div></a>`
+        }
+        
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('twikoo-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","meta[property=\"og:type\"]","meta[property=\"og:site_name\"]","meta[property=\"og:description\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404')
+  }
+})</script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>

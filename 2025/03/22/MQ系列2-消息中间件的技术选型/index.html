@@ -1,0 +1,730 @@
+<!DOCTYPE html><html lang="zh-cn" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>MQ系列2：消息中间件的技术选型 | 数根朽木，</title><meta name="keywords" content="MQ,RabbitMQ,RocketMQ,kafka,消息中间件"><meta name="author" content="dachang"><meta name="copyright" content="dachang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#F9F9F9"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="MQ系列2：消息中间件的技术选型"><meta name="application-name" content="MQ系列2：消息中间件的技术选型"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#F9F9F9"><meta property="og:type" content="article"><meta property="og:title" content="MQ系列2：消息中间件的技术选型"><meta property="og:url" content="https://yeoh.de5.net/2025/03/22/MQ%E7%B3%BB%E5%88%972-%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%9A%84%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B/index.html"><meta property="og:site_name" content="数根朽木，"><meta property="og:description" content="1 背景在高并发、高消息吞吐的互联网场景中，我们经常会使用消息队列（Message Queue）作为基础设施，在服务端架构中担当消息中转、消息削峰、事务异步处理 等职能。 对于那些不需要实时响应的的业务，我们都可以放在消息队列中进行传输。下面是用户在进行系统注册的时候场景，充分体现MQ的作用  可以"><meta property="og:locale" content="zh-cn"><meta property="og:image" content="https://imags-563.pages.dev/file/AgACAgUAAxkDAAOjaUYWvvk2kz21WA9yVsIDspqtE0QAAmcLaxvRfjBWWYLv7Ciw5k0BAAMCAAN3AAM2BA.png"><meta property="article:author" content="dachang"><meta property="article:tag" content="blog, coding, technology, personal"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://imags-563.pages.dev/file/AgACAgUAAxkDAAOjaUYWvvk2kz21WA9yVsIDspqtE0QAAmcLaxvRfjBWWYLv7Ciw5k0BAAMCAAN3AAM2BA.png"><meta name="description" content="1 背景在高并发、高消息吞吐的互联网场景中，我们经常会使用消息队列（Message Queue）作为基础设施，在服务端架构中担当消息中转、消息削峰、事务异步处理 等职能。 对于那些不需要实时响应的的业务，我们都可以放在消息队列中进行传输。下面是用户在进行系统注册的时候场景，充分体现MQ的作用  可以"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="https://yeoh.de5.net/2025/03/22/MQ%E7%B3%BB%E5%88%972-%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%9A%84%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: undefined,
+  diytitle: undefined,
+  LA51: {"enable":true,"ck":null,"LingQueMonitorID":null},
+  greetingBox: undefined,
+  twikooEnvId: 'https://twikoo-kohl-zeta.vercel.app',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: undefined,
+  friends_vue_info: undefined,
+  navMusic: false,
+  mainTone: undefined,
+  authorStatus: undefined,
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"该文章距离上次更新已经过去","messageNext":"天了，文章内容可能已经过时，注意甄别。"},
+  highlight: {"plugin":"highlight.js","highlightCopy":false,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: dachang","link":"链接: ","source":"来源: 数根朽木，","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'mediumZoom',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: true,
+  islazyload: false,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '数根朽木，',
+  title: 'MQ系列2：消息中间件的技术选型',
+  postAI: '',
+  pageFillDescription: '1 背景, 2 消息中间件的组成, 3 消息中间件的模式分类, 4 消息中间件的优势, 5 消息中间件常用协议, 6 丰富强大的消息中间件生态, 6.1 主流MQ介绍, 6.2 主流MQ对比, 6.3 选型建议, 6.3.1 系统建设规模角度, 6.3.2 业务规模角度, 6.3.3 功能性层面选型, 6.3.4 性能层面, 6.3.5 高可用角度, 6.3.6 运维管理层面, 6.3.7 社区力度及生态发展背景在高并发高消息吞吐的互联网场景中我们经常会使用消息队列作为基础设施在服务端架构中担当消息中转消息削峰事务异步处理等职能对于那些不需要实时响应的的业务我们都可以放在消息队列中进行传输下面是用户在进行系统注册的时候场景充分体现的作用可以看到用户注册的过程步骤步骤从请求到响应总共耗时消息消费短信发送的时间比较长从上面看花了多一般让消息队列服务去处理用户静静等待短信送达即可消息队列中间件简称消息中间件是指利用高效可靠的消息传递机制进行与平台无关的数据交流并基于数据通信来进行分布式系统的集成通过提供消息传递和消息排队模型它可以在分布式环境下提供应用解耦弹性伸缩冗余存储流量削峰异步通信数据同步等等功能其作为分布式系统架构中的一个重要组件有着举足轻重的地位消息中间件的组成消息服务器以服务的形式运行在端给各个业务系统提供核心消息数据的中转服务消息生产者业务的发起方负责生产消息传输给消息消费者业务的处理方负责从获取消息并进行业务逻辑处理主题模块发布订阅模式下的消息统一汇集地不同生产者向发送消息由服务器分发到不同的订阅者实现消息的广播队列模式下特定生产者向特定发送消息消费者订阅特定的完成指定消息的接收消息体根据不同通信协议定义的固定格式进行编码的数据包来封装业务数据实现消息的传输这边以为例子这是典型的集群模式通过管理集群配置选举以及在发生变化时进行使用模式将消息发布到使用模式从订阅并消费消息负责生产消息负责消费消息消息服务器提供消息核心的处理工作用于生产者和消费者的注册与发现消息中间件的模式分类点对点使用作为通信载体消息生产者生产消息发送到中然后消息消费者从中取出并且消费消息不可重复消费消息被消费以后中不再存储所以消息消费者不可能消费到已经被消费的消息支持存在多个消费者但是对一个消息而言只会有一个消费者可以消费发布订阅广播使用作为通信载体消息生产者发布将消息发布到中同时有多个消息消费者订阅消费该消息和点对点方式不同发布到的消息会被所有订阅者消费所以从到个订阅者都能得到这个消息的拷贝消息中间件的优势系统解耦交互系统之间没有直接的调用关系只是通过消息传输故系统侵入性不强耦合度低削峰提高系统响应时间例如原来的一套逻辑可将紧急重要需要立刻响应的业务放到该调用方法中响应要求不高的使用消息队列放到队列中供消费者处理业务的有序性处理先来先处理比如一个系统处理某件事需要很长一段时间但是在处理这件事情时候有其他人也发出了请求可以把请求放在消息队里一个一个来处理为大数据处理架构提供服务通过消息作为整合大数据的背景下消息队列还与实时处理架构整合为数据处理提供性能支持消息中间件常用协议协议协议协议协议其他基于自定义的协议丰富强大的消息中间件生态目前开源的消息中间还是很丰富的大家用的比较多的比如等但是每个人的业务场景不一样受限于系统的规模业务的取舍如延迟容忍度死信重试的需求可持久化需求并不是每一款消息中间件都能满足你的需求除了个别大厂会进行自研如阿里的滴滴的之外大部分同学还是要对选型有一些思考的各自都有各自的侧重点选择合适自己扬长避短无疑是最好的方式主流介绍下面基于受众程度对三款主流的做介绍通过各项指标上的对比给出我们在实际应用场景中的建议采用语言实现的协议的消息中间件起源于金融系统广泛应用在分布式系统中承担消息转发的职责发展历史比较久远影响范围比较大被很多开发者认可在可靠性可用性可扩展性功能性方面有着非凡表现阿里开源的消息中间件目前已经捐献给基金会它是由语言开发的具备高吞吐量高可用性适合大规模分布式系统应用等特点并且在阿里的双等重要活动中经受住了考验起初是由公司采用语言开发的一个分布式多分区多副本且基于协调的分布式消息系统现已捐献给基金会它是一种高吞吐量的分布式发布订阅消息系统以可水平扩展和高吞吐率而被广泛使用目前越来越多的开源分布式处理系统如等都支持与集成主流对比特性开发语言支持协议自定义基于自定义消息存储能力内存磁盘支持少量堆积磁盘支持大量堆积内存磁盘数据库支持大量堆积消息事务性支持信道设置事务模式性能有影响支持支持单机吞吐量万级万级万级时效性级级级以内消息重复支持支持支持消息回溯不支持支持指定时间点的回溯支持指定分区位置的回溯消息重试不支持但可以设置未收到确认的会重入队列支持不支持但可以通过消息回溯的方式来实现可用性高主从架构非常高分布式架构非常高分布式架构功能特性说明基于开发所以并发能力很强性能极其好延时很低管理界面较丰富功能比较完备扩展性佳只支持主要的功能像一些消息查询消息回溯等功能支持的不是很强在大数据领域应用广选型建议系统建设规模角度中小型系统建议选用数据量相对较小选型应首选功能比较完备的所以排除是阿里出品如果阿里放弃维护中小型公司一般很难投入人力进行的定制化开发因此不推荐业务规模角度根据具体使用规模在和之间二选一大型业务系统有实际的业务体量需求比如足够大规模的分布式环境以及足够大的数据量这时候和都是的吞吐量都可以在考虑范围内如果你有业务定制需求可以优先选用毕竟是开源的大的业务系统也愿意花精力去优化源码的至于根据业务方向选择类似日志采集功能首选因为他在日志上报监控数据采集方面有着大规模的实践经验这也是他们主打的应用场景具体该选哪个看使用场景引入之后也会有一定的弊端必然一定程度上降低系统可用性增加复杂性功能性层面选型功能项优先级队列不支持支持具有优先被消费的特权建议优先级大小设置在以内否则价值不大延迟队列不支持支持死信队列不支持支持保存无法被正确投递的消息避免消息被无端丢弃重试模式不支持不支持中可以参考延迟队列实现一个重试队列需要再封装一下也不是太难如果要在中实现重试队列首先要实现延迟队列的功能相对比较复杂消费模式拉模式推拉模式广播消费支持对广播消费的支持比较强大支持能力相比较弱一些消息回溯支持可以按照偏移量和时间戳两种维度进行消息回溯不支持消息一旦被确认消费便丢弃消息堆积支持支持内存堆积过大会影响性能如果仅考虑吞吐量因素的堆积效率比总体高很多持久化支持支持消息追踪不支持消息追踪可以通过外部系统来支持但是支持粒度肯定没有内置的细腻支持中可以采用或者插件实现开启插件会大幅度影响性能不建议在生产环境启用使用与外部系统结合的模式来提供更稳健的消息追踪能力消息过滤客户端级别的支持不支持可以定制化封装多租户不支持支持多协议支持只支持自定义协议目前几个主流版本中存在兼容性问题本身就是协议的实现同时支持等协议跨语言支持采用和编写支持多种语言的客户端采用编写支持多种语言的客户端流量控制支持和级别可将流控配置在生产者和消费者层面的流控基于算法是内部被动触发的保护机制仅用于生产者层面消息顺序性支持单分区级别的顺序性在各自的分区中排序顺序性消费的条件比较苛刻需要单线程发送单线程消费这样吞吐量就下来了而且无法使用延迟队列优先队列等一些高级功能所以一般不使用安全机制身份认证和读写权限控制与相似幂等性单个生产者单单会话场景下支持幂等性不支持事务性消息支持支持优先级队列可配置优先级优先级高的消息具备优先被消费的特权这样可以为下游服务提供不同消息级别的保证这种模式只是在生产效率高于消费效率的时候才有效果如果消费者的消费速度大于生产者的速度消息中间件服务器中没有消息堆积就不存在对待消费数据进行优先级排序的需求了延迟队列延迟队列会存储对应的延迟消息延迟消息是指消息被生产后并不马上消费而是等待一定时间后消费者才拿到消息进行消费延迟队列的模式分为两种基于消息的延迟和基于队列的延迟基于消息的延迟是指为每条消息设置不同的延迟时间那么每当队列中有新消息进入的时候就会重新根据延迟时间排序但是这会对性能造成很大的影响基于队列的延迟设置不同延迟级别的队列如等每个队列中消息的延迟时间都是相同的这样不需要消耗大量性能去做延迟时间排序每个消息都有固定的投递时间死信队列由于某些原因消息无法被正确的投递为了确保消息不会被无故的丢弃一般会存储到一个特殊的队列中我们称之为死信队列与此对应的还有一个回退队列的概念试想如果消费者在消费时发生了异常那么就不会对这一次消费进行确认进而发生回滚消息的操作之后消息始终会放在队列的顶部然后不断被处理和回滚导致队列陷入死循环为了解决这个问题可以为每个队列设置一个回退队列它和死信队列都是为异常的处理提供的一种机制保障实际情况下回退队列的角色可以由死信队列和重试队列来扮演重试队列重试队列其实可以看成是一种回退队列具体指消费端消费消息失败时为防止消息无故丢失而重新将消息回滚到中与回退队列不同的是重试队列一般分成多个重试等级每个重试等级一般也会设置重新投递延时重试次数越多投递延时就越大比如第一次重试延迟时间为再次消费失败后延迟重试时间为以此类推重试越多次重新投递的时间就越久为了避免延迟时间被无限放大需要有个重试次数限制超过就写入死信队列这边需要注意延迟队列动作由内部触发重试队列动作由外部消费端触发消费模式消费模式分为推模式和拉模式推模式是指由主动推送消息至消费端实时性较好不过需要保证服务端推送的消息不会严重超过消费端消化能力而拉模式是指消费端定时定量主动向端请求拉取消息虽然实时性较差但是可以根据自身的消费能力来拉取广播消费消息一般有两种发送模式点对点模式和发布订阅模式对于模式而言消息被消费以后队列中不会再存储即使有多个消费者一条消息只会被一个消费者消费而发布订阅模式定义了如何向一个内容节点发布和订阅消息这个内容节点称为主题主题可以认为是消息传递的中介消息发布者将消息发布到某个主题而消息订阅者则从主题中订阅消息主题使得消息的订阅者与消息的发布者互相保持独立不需要进行接触即可保证消息的传递发布订阅模式在消息的一对多广播时采用是一种典型的点对点模式而是一种典型的发布订阅模式消息回溯一般消息在消费完成之后就被处理了之后再也不能消费到该条消息消息回溯正好相反是指消息在消费完成之后还能追溯到之前被消费掉的消息消息堆积持久化进行流量的削峰填谷是消息中间件的一个核心功能实现的能力主要体现在消息堆积能力上消息堆积分内存式堆积和磁盘式堆积是典型的内存式堆积可以通过一些方式持久化到磁盘中但是会降低一些性能是典型的磁盘式堆积所有的消息都存储在磁盘中存储容量是有了很大的提升但是磁盘性能会比内存差很多消息追踪在消息中间件中消息的链路追踪非常重要它可以对生产和消费过的消息进行追踪这样在出现故障的时候就可以快速的定位问题消息过滤消息过滤是指按照既定的过滤规则为下游用户提供指定类别的消息就以而言完全可以将不同类别的消息发送至不同的中由此可以实现某种意义的消息过滤或者还可以根据分区对同一个中的消息进行分类不过更加严格意义上的消息过滤应该是对既定的消息采取一定的方式按照一定的过滤规则进行过滤同样以为例可以通过客户端提供的接口或者的功能进行消息过滤流量控制当生产者和消费者处理速度不均衡问题通过对生产者和消费者的限流来保障两者的均衡通常的流控方法有滑动窗口以及令牌桶等消息顺序性顺序性是指保证消息有序特别是分布式场景下有序的执行是保证一致性的前提消息幂等性对于确保消息在生产者和消费者之间进行传输而言一般有三种传输保障至多一次消息可能丢失但绝不会重复传输至少一次消息绝不会丢但是可能会重复精确一次每条消息肯定会被传输一次且仅一次对于大多数消息中间件而言一般只提供和两种传输保障对于第三种一般很难做到由此消息幂等性也很难保证事务性消息原子性事务中的操作为一个整体要么都做要么都不做即一旦出错就回滚事务事务是由事务开始和事务结束之间执行的全体操作组成和都支持不过仅仅指的是生产者发送消息是一个事务性操作要么发送成功要么发送失败性能层面功能维度是消息中间件选型中的一个重要的参考维度但性能也是考虑的一个重要环节吞吐量角度在开启幂等事务功能的时候会使其性能降低在开启插件的时候也会极大的影响其性能消息中间件的性能一般是指其吞吐量虽然从功能维度上来说的优势要大于但是的吞吐量要比高出至个数量级一般的单机在万级别之内而的单机可以维持在十万级别甚至可以达到百万级时延角度另外一个是时延作为性能维度的一个重要指标却往往在消息中间件领域所被忽视因为一般使用消息中间件的场景对时效性的要求并不是很高如果要求时效性完全可以采用的方式实现消息中间件具备消息堆积的能力是以内是级别的高可用角度高可用角度是指系统的出错概率和无故障运行时长如消息丢失是使用消息中间件时所不得不面对的一个同点其背后消息可靠性也是衡量消息中间件好坏的一个关键因素尤其是在金融支付领域消息可靠性尤为重要然而说到可靠性必然要说到可用性注意这两者之间的区别消息中间件的可靠性是指对消息不丢失的保障程度而消息中间件的可用性是指无故障运行的时间百分比通常用几个来衡量如就是一个不错的指标对应的是通过镜像环形队列实现多副本及强一致性语义的多副本可以保证在节点宕机异常之后可以提升作为新的而继续提供服务来保障可用性运维管理层面消息中间件一个很重要的考虑层面是运维管理比如申请审核监控告警管理容灾部署等对消息中间件的使用从使用接入规范全方位的监控流量统计和分析等方面提供有效的基准数据也可以在检测到异常的情况配合告警以便运维开发人员的迅速介入除了一般的监控项比如硬件等之外对于消息中间件还需要关注端到端时延消息审计消息堆积等方面对于而言最正统的监控管理工具莫过于插件了另外还有等多种优秀的产品丰富的管理工具比如等产品其中还可以提供自动化运维的功能社区力度及生态发展和都有一系列开源的监控管理产品社区活跃产品生态都很不错',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-03-22 22:00:55',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#1F1F1F')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#F9F9F9')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><div class="back-home-button"><i class="anzhiyufont anzhiyu-icon-grip-vertical"></i><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网站项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="个人博客"><img class="back-menu-item-icon" src="/favicon.ico" alt="个人博客"/><span class="back-menu-item-text">个人博客</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线简历"><img class="back-menu-item-icon" src="/favicon.ico" alt="在线简历"/><span class="back-menu-item-text">在线简历</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">建设工具</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线图床"><img class="back-menu-item-icon" src="/img/image.ico" alt="在线图床"/><span class="back-menu-item-text">在线图床</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="在线烟花模拟器"><img class="back-menu-item-icon" src="/img/Clash.Mini.png" alt="在线烟花模拟器"/><span class="back-menu-item-text">在线烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="烟花模拟器"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMMZ7Qfv1Xv2qvgqSVN7kNhRO_uzfgAAlvAMRtiZKBVrGT1Z6RPiX4BAAMCAANtAAM2BA.png" alt="烟花模拟器"/><span class="back-menu-item-text">烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://pay.totalh.net/" title="三合一收款码"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAM8Z7WNYNdWdrYsas5PPFT8Di3493sAAgLKMRsEtalVDcfaakgTXPkBAAMCAAN4AAM2BA.png" alt="三合一收款码"/><span class="back-menu-item-text">三合一收款码</span></a></div></div></div></div><a id="site-name" href="/" accesskey="h"><div class="title">数根朽木，</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a><div id="he-plugin-simple"></div><script>var WIDGET = {
+  "CONFIG": {
+    "modules": "0124",
+    "background": "2",
+    "tmpColor": "FFFFFF",
+    "tmpSize": "16",
+    "cityColor": "FFFFFF",
+    "citySize": "16",
+    "aqiColor": "E8D87B",
+    "aqiSize": "16",
+    "weatherIconSize": "24",
+    "alertIconSize": "18",
+    "padding": "10px 10px 10px 10px",
+    "shadow": "0",
+    "language": "auto",
+    "borderRadius": "20",
+    "fixed": "true",
+    "vertical": "top",
+    "horizontal": "left",
+    "left": "20",
+    "top": "7.1",
+    "key": "df245676fb434a0691ead1c63341cd94"
+  }
+}
+</script><link rel="stylesheet" href="https://widget.qweather.net/simple/static/css/he-simple.css?v=1.4.0"/><script src="https://widget.qweather.net/simple/static/js/he-simple.js?v=1.4.0"></script></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 博客文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 全部文章</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 文章分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 所有标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 网站工具</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 图床工具</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="http://greatree.hidns.co"><i class="anzhiyufont anzhiyu-icon-artstation faa-tada" style="font-size: 0.9em;"></i><span> 烟花模拟器</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://suburl.v1.mk"><i class="anzhiyufont anzhiyu-icon-envelope faa-tada" style="font-size: 0.9em;"></i><span> 订阅转换</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><span> 在线简历生成</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于我</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 在线简历</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><i class="anzhiyufont anzhiyu-icon-shoe-prints1 faa-tada" style="font-size: 0.9em;"></i><span> 随便逛逛</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button only-home" id="travellings_button" title="随机前往一个开往项目网站"><a class="site-page" onclick="anzhiyu.totraveling()" title="随机前往一个开往项目网站" href="javascript:void(0);" rel="external nofollow" data-pjax-state="external"><i class="anzhiyufont anzhiyu-icon-train"></i></a></div><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Boolean-filter/" style="font-size: 1.05rem;">Boolean filter<sup>2</sup></a><a href="/tags/DNS%E6%B3%84%E9%9C%B2/" style="font-size: 1.05rem;">DNS泄露<sup>1</sup></a><a href="/tags/Fake-IP/" style="font-size: 1.05rem;">Fake IP<sup>1</sup></a><a href="/tags/JVM%E8%99%9A%E6%8B%9F%E6%9C%BA/" style="font-size: 1.05rem;">JVM虚拟机<sup>1</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>1</sup></a><a href="/tags/JavaSE/" style="font-size: 1.05rem;">JavaSE<sup>11</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 1.05rem;">Java基础<sup>11</sup></a><a href="/tags/Java%E6%A0%B8%E5%BF%83/" style="font-size: 1.05rem;">Java核心<sup>14</sup></a><a href="/tags/Java%E7%89%88%E6%9C%AC%E6%96%B0%E7%89%B9%E6%80%A7/" style="font-size: 1.05rem;">Java版本新特性<sup>2</sup></a><a href="/tags/MQ/" style="font-size: 1.05rem;">MQ<sup>2</sup></a><a href="/tags/OOM/" style="font-size: 1.05rem;">OOM<sup>1</sup></a><a href="/tags/RabbitMQ/" style="font-size: 1.05rem;">RabbitMQ<sup>2</sup></a><a href="/tags/Redis/" style="font-size: 1.05rem;">Redis<sup>5</sup></a><a href="/tags/Redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/" style="font-size: 1.05rem;">Redis内存淘汰策略<sup>1</sup></a><a href="/tags/Redis%E5%8E%9F%E7%90%86/" style="font-size: 1.05rem;">Redis原理<sup>1</sup></a><a href="/tags/Redis%E7%BC%93%E5%AD%98/" style="font-size: 1.05rem;">Redis缓存<sup>1</sup></a><a href="/tags/RocketMQ/" style="font-size: 1.05rem;">RocketMQ<sup>2</sup></a><a href="/tags/SSM/" style="font-size: 1.05rem;">SSM<sup>1</sup></a><a href="/tags/Spring/" style="font-size: 1.05rem;">Spring<sup>1</sup></a><a href="/tags/SpringBoot/" style="font-size: 1.05rem;">SpringBoot<sup>1</sup></a><a href="/tags/kafka/" style="font-size: 1.05rem;">kafka<sup>2</sup></a><a href="/tags/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" style="font-size: 1.05rem;">单例模式<sup>1</sup></a><a href="/tags/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/" style="font-size: 1.05rem;">布隆过滤器<sup>2</sup></a><a href="/tags/%E6%8E%A5%E5%8F%A3%E8%B6%85%E6%97%B6/" style="font-size: 1.05rem;">接口超时<sup>1</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/" style="font-size: 1.05rem;">消息中间件<sup>2</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" style="font-size: 1.05rem;">消息队列<sup>1</sup></a><a href="/tags/%E7%BA%BF%E4%B8%8A%E4%BA%8B%E6%95%85/" style="font-size: 1.05rem;">线上事故<sup>1</sup></a><a href="/tags/%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/" style="font-size: 1.05rem;">缓存雪崩<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96/" style="font-size: 1.05rem;">网络优化<sup>1</sup></a><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 1.05rem;">设计模式<sup>1</sup></a><a href="/tags/%E8%BF%90%E7%BB%B4%E8%B0%83%E4%BC%98/" style="font-size: 1.05rem;">运维调优<sup>3</sup></a><a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" style="font-size: 1.05rem;">高并发<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/04/"><span class="card-archive-list-date">四月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">7</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/03/"><span class="card-archive-list-date">三月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">11</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/02/"><span class="card-archive-list-date">二月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">10</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/MQ/" itemprop="url">MQ</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/MQ/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>MQ</span></a><a class="article-meta__tags" href="/tags/RabbitMQ/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>RabbitMQ</span></a><a class="article-meta__tags" href="/tags/RocketMQ/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>RocketMQ</span></a><a class="article-meta__tags" href="/tags/kafka/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>kafka</span></a><a class="article-meta__tags" href="/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>消息中间件</span></a></span></div></div><h1 class="post-title" itemprop="name headline">MQ系列2：消息中间件的技术选型</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-03-22T14:00:55.000Z" title="发表于 2025-03-22 22:00:55">2025-03-22</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-03-22T14:00:55.000Z" title="更新于 2025-03-22 22:00:55">2025-03-22</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-wordcount"><i class="anzhiyufont anzhiyu-icon-file-word post-meta-icon" title="文章字数"></i><span class="post-meta-label" title="文章字数">字数总计:</span><span class="word-count" title="文章字数">5.8k</span><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-clock post-meta-icon" title="阅读时长"></i><span class="post-meta-label" title="阅读时长">阅读时长:</span><span>17分钟</span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为深圳"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>深圳</span></div></div></div><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAOjaUYWvvk2kz21WA9yVsIDspqtE0QAAmcLaxvRfjBWWYLv7Ciw5k0BAAMCAAN3AAM2BA.png"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="https://yeoh.de5.net/2025/03/22/MQ%E7%B3%BB%E5%88%972-%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%9A%84%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B/"><header><a class="post-meta-categories" href="/categories/MQ/" itemprop="url">MQ</a><a href="/tags/MQ/" tabindex="-1" itemprop="url">MQ</a><a href="/tags/RabbitMQ/" tabindex="-1" itemprop="url">RabbitMQ</a><a href="/tags/RocketMQ/" tabindex="-1" itemprop="url">RocketMQ</a><a href="/tags/kafka/" tabindex="-1" itemprop="url">kafka</a><a href="/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/" tabindex="-1" itemprop="url">消息中间件</a><h1 id="CrawlerTitle" itemprop="name headline">MQ系列2：消息中间件的技术选型</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">dachang</span><time itemprop="dateCreated datePublished" datetime="2025-03-22T14:00:55.000Z" title="发表于 2025-03-22 22:00:55">2025-03-22</time><time itemprop="dateCreated datePublished" datetime="2025-03-22T14:00:55.000Z" title="更新于 2025-03-22 22:00:55">2025-03-22</time></header><h1 id="1-背景"><a href="#1-背景" class="headerlink" title="1 背景"></a>1 背景</h1><p>在高并发、高消息吞吐的互联网场景中，我们经常会使用消息队列（Message Queue）作为基础设施，在服务端架构中担当消息中转、消息削峰、事务异步处理 等职能。</p>
+<p>对于那些不需要实时响应的的业务，我们都可以放在消息队列中进行传输。下面是用户在进行系统注册的时候场景，充分体现MQ的作用</p>
+<p><img src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAOkaUYXIKdHP4S4Rn-G0tyLfxGu8tsAAmgLaxvRfjBWoOG_jBZSoEABAAMCAAN4AAM2BA.png"></p>
+<p>可以看到用户注册的过程步骤1+步骤2，从请求到响应总共耗时 55 ms。消息消费+短信发送的时间比较长，从上面看花了5s多，一般让消息队列服务去处理，用户静静等待短信送达即可。</p>
+<p>消息队列中间件（简称消息中间件）是指利用高效可靠的消息传递机制进行与平台无关的数据交流，并基于数据通信来进行分布式系统的集成。通过提供消息传递和消息排队模型，它可以在分布式环境下提供应用解耦、</p>
+<p>弹性伸缩、冗余存储、流量削峰、异步通信、数据同步等等功能，其作为分布式系统架构中的一个重要组件，有着举足轻重的地位。</p>
+<h1 id="2-消息中间件的组成"><a href="#2-消息中间件的组成" class="headerlink" title="2 消息中间件的组成"></a>2 消息中间件的组成</h1><ul>
+<li><strong>Broker</strong>：消息服务器，以服务的形式运行在server端，给各个业务系统提供核心消息数据的中转服务。</li>
+<li><strong>Producer</strong>：消息生产者，业务的发起方，负责生产消息传输给broker。</li>
+<li><strong>Consumer</strong>：消息消费者，业务的处理方，负责从broker获取消息并进行业务逻辑处理</li>
+<li><strong>Topic</strong>：主题模块，发布&#x2F;订阅模式下的消息统一汇集地，不同生产者向topic发送消息，由MQ服务器分发到不同的订阅者，实现消息的广播</li>
+<li><strong>Queue</strong>：队列，PTP模式下，特定生产者向特定queue发送消息，消费者订阅特定的queue完成指定消息的接收。</li>
+<li><strong>Message</strong>：消息体，根据不同通信协议定义的固定格式进行编码的数据包，来封装业务数据，实现消息的传输。</li>
+</ul>
+<p><img src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAOlaUYXKjClRSGkqaaP9RxK7q8ZhygAAmkLaxvRfjBWR4AgghyTq_EBAAMCAAN4AAM2BA.png" alt="消息中间件的组成部分"></p>
+<p> 这边以kafka为例子，这是典型的集群模式，Kafka通过Zookeeper管理集群配置，选举leader，以及在Consumer Group发生变化时进行rebalance。Producer使用push模式将消息发布到broker，Consumer使用pull模式从broker订阅并消费消息。</p>
+<ul>
+<li><strong>producer</strong> 负责生产消息</li>
+<li><strong>consumer</strong> 负责消费消息</li>
+<li><strong>broker</strong> 消息服务器，提供消息核心的处理工作</li>
+<li><strong>zookeeper</strong> 用于生产者和消费者的注册与发现</li>
+</ul>
+<h1 id="3-消息中间件的模式分类"><a href="#3-消息中间件的模式分类" class="headerlink" title="3 消息中间件的模式分类"></a>3 消息中间件的模式分类</h1><p>PTP点对点：使用queue作为通信载体 </p>
+<p>消息生产者生产消息发送到queue中，然后消息消费者从queue中取出并且消费消息。 </p>
+<p>不可重复消费，消息被消费以后，queue中不再存储，所以消息消费者不可能消费到已经被消费的消息。 Queue支持存在多个消费者，但是对一个消息而言，只会有一个消费者可以消费。</p>
+<p>Pub&#x2F;Sub发布订阅（广播）：使用topic作为通信载体 </p>
+<p>消息生产者（发布）将消息发布到topic中，同时有多个消息消费者（订阅）消费该消息。和点对点方式不同，发布到topic的消息会被所有订阅者消费，所以从1到N个订阅者都能得到这个消息的拷贝。</p>
+<h1 id="4-消息中间件的优势"><a href="#4-消息中间件的优势" class="headerlink" title="4 消息中间件的优势"></a>4 消息中间件的优势</h1><p>系统解耦：交互系统之间没有直接的调用关系，只是通过消息传输，故系统侵入性不强，耦合度低。</p>
+<p>削峰、提高系统响应时间：例如原来的一套逻辑，可将紧急重要（需要立刻响应）的业务放到该调用方法中，响应要求不高的使用消息队列，放到MQ队列中，供消费者处理。</p>
+<p>业务的有序性处理：先来先处理，比如一个系统处理某件事需要很长一段时间，但是在处理这件事情时候，有其他人也发出了请求，可以把请求放在消息队里，一个一个来处理</p>
+<p>为大数据处理架构提供服务：通过消息作为整合，大数据的背景下，消息队列还与实时处理架构整合，为数据处理提供性能支持。 </p>
+<h1 id="5-消息中间件常用协议"><a href="#5-消息中间件常用协议" class="headerlink" title="5 消息中间件常用协议"></a>5 消息中间件常用协议</h1><p>AMQP协议、MQTT协议、STOMP协议、XMPP协议、其他基于TCP&#x2F;IP自定义的协议。</p>
+<h1 id="6-丰富强大的消息中间件生态"><a href="#6-丰富强大的消息中间件生态" class="headerlink" title="6 丰富强大的消息中间件生态"></a>6 丰富强大的消息中间件生态</h1><p>目前开源的消息中间还是很丰富的，大家用的比较多的比如 ActiveMQ、RabbitMQ、Kafka、RocketMQ、ZeroMQ 等。</p>
+<p>但是每个人的业务场景不一样，受限于系统的规模，业务的取舍（如延迟容忍度，死信、重试的需求，可持久化需求），并不是每一款消息中间件都能满足你的需求。</p>
+<p>除了个别大厂会进行自研（如 阿里的Rocket MQ、滴滴的DD MQ）之外，大部分同学还是要对选型有一些思考的。各自都有各自的侧重点，选择合适自己、扬长避短无疑是最好的方式。</p>
+<h2 id="6-1-主流MQ介绍"><a href="#6-1-主流MQ介绍" class="headerlink" title="6.1 主流MQ介绍"></a>6.1 主流MQ介绍</h2><p>下面基于受众程度，对三款主流的MQ做介绍，通过各项指标上的对比，给出我们在实际应用场景中的建议。</p>
+<p><strong>RabbitMQ：</strong></p>
+<p>采用 Erlang 语言实现的 AMQP 协议的消息中间件，起源于金融系统，广泛应用在分布式系统中，承担消息转发的职责。RabbitMQ 发展历史比较久远，影响范围比较大，被很多开发者认可，在可靠性、可用性、可扩展性、功能性方面有着非凡表现。</p>
+<p><strong>RocketMQ：</strong></p>
+<p>阿里开源的消息中间件，目前已经捐献给 Apache 基金会，它是由 Java 语言开发的，具备高吞吐量、高可用性、适合大规模分布式系统应用等特点。并且在阿里的双11、618等重要活动中经受住了考验。</p>
+<p><strong>Kafka：</strong></p>
+<p>起初是由 LinkedIn 公司采用 Scala 语言开发的一个分布式、多分区、多副本且基于 zookeeper 协调的分布式消息系统，现已捐献给 Apache 基金会。它是一种高吞吐量的分布式发布订阅消息系统，以可水平扩展和高吞吐率而被广泛使用。</p>
+<p>目前越来越多的开源分布式处理系统如 Cloudera、Apache Storm、Spark、Flink 等都支持与 Kafka 集成。</p>
+<h2 id="6-2-主流MQ对比"><a href="#6-2-主流MQ对比" class="headerlink" title="6.2 主流MQ对比"></a>6.2 主流MQ对比</h2><table>
+<thead>
+<tr>
+<th><strong>特性</strong></th>
+<th><strong>RabbitMQ</strong></th>
+<th><strong>RocketMQ</strong></th>
+<th><strong>kafka</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>开发语言</strong></td>
+<td>erlang</td>
+<td>java</td>
+<td>scala</td>
+</tr>
+<tr>
+<td><strong>支持协议</strong></td>
+<td>AMQP</td>
+<td>自定义</td>
+<td>基于TCP 自定义</td>
+</tr>
+<tr>
+<td><strong>消息存储能力</strong></td>
+<td>内存、磁盘。支持少量堆积。</td>
+<td>磁盘。支持大量堆积。</td>
+<td>内存、磁盘、数据库。支持大量堆积。</td>
+</tr>
+<tr>
+<td><strong>消息事务性</strong></td>
+<td>支持（信道设置事务模式，性能有影响）</td>
+<td>支持</td>
+<td>支持</td>
+</tr>
+<tr>
+<td><strong>单机吞吐量</strong></td>
+<td>万级</td>
+<td>10万级+</td>
+<td>10万级+</td>
+</tr>
+<tr>
+<td><strong>时效性</strong></td>
+<td>us级</td>
+<td>ms级</td>
+<td>ms级以内</td>
+</tr>
+<tr>
+<td><strong>消息重复</strong></td>
+<td>支持at least once、at most once</td>
+<td>支持at least once</td>
+<td>支持at least once、at most once</td>
+</tr>
+<tr>
+<td><strong>消息回溯</strong></td>
+<td>不支持</td>
+<td>支持指定时间点的回溯</td>
+<td>支持指定分区offset位置的回溯</td>
+</tr>
+<tr>
+<td><strong>消息重试</strong></td>
+<td>不支持，但可以设置autoACK&#x3D;false,未收到确认的会重入队列</td>
+<td>支持</td>
+<td>不支持，但可以通过消息回溯的方式来实现</td>
+</tr>
+<tr>
+<td><strong>可用性</strong></td>
+<td>高(主从架构)</td>
+<td>非常高(分布式架构)</td>
+<td>非常高(分布式架构)</td>
+</tr>
+<tr>
+<td><strong>功能特性说明</strong></td>
+<td>基于erlang开发，所以并发能力很强，性能极其好，延时很低;管理界面较丰富</td>
+<td>MQ功能比较完备，扩展性佳</td>
+<td>只支持主要的MQ功能，像一些消息查询，消息回溯等功能支持的不是很强，在大数据领域应用广。</td>
+</tr>
+</tbody></table>
+<h2 id="6-3-选型建议"><a href="#6-3-选型建议" class="headerlink" title="6.3 选型建议"></a>6.3 选型建议</h2><h3 id="6-3-1-系统建设规模角度"><a href="#6-3-1-系统建设规模角度" class="headerlink" title="6.3.1 系统建设规模角度"></a>6.3.1 系统建设规模角度</h3><p>中小型系统建议选用RabbitMQ，数据量相对较小，选型应首选功能比较完备的，所以kafka排除。RocketMQ是阿里出品，如果阿里放弃维护，中小型公司一般很难投入人力进行RocketMQ的定制化开发，因此不推荐。</p>
+<h3 id="6-3-2-业务规模角度"><a href="#6-3-2-业务规模角度" class="headerlink" title="6.3.2 业务规模角度"></a>6.3.2 业务规模角度</h3><p>根据具体使用规模在RocketMQ和kafka之间二选一。</p>
+<p>大型业务系统：有实际的业务体量需求，比如足够大规模的分布式环境，以及足够大的数据量。这时候 RocketMQ 和 kafka 都是10w+的吞吐量，都可以在考虑范围内。</p>
+<p>如果你有业务定制需求，可以优先选用RocketMQ，毕竟是开源的，大的业务系统也愿意花精力去优化JAVA源码的。至于kafka，根据业务方向选择，类似日志采集功能，首选kafka，因为他在日志上报、监控数据采集方面有着大规模的实践经验，这也是他们主打的应用场景。</p>
+<p>具体该选哪个，看使用场景。引入MQ之后，也会有一定的弊端，必然一定程度上降低系统可用性，增加复杂性。</p>
+<h3 id="6-3-3-功能性层面选型"><a href="#6-3-3-功能性层面选型" class="headerlink" title="6.3.3 功能性层面选型"></a>6.3.3 功能性层面选型</h3><table>
+<thead>
+<tr>
+<th><strong>功能项</strong></th>
+<th><strong>Kafka（1.1.0+）</strong></th>
+<th><strong>RabbitMQ（3.6.10+）</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>优先级队列</strong></td>
+<td>不支持</td>
+<td>支持：具有优先被消费的特权，建议优先级大小设置在10以内，否则价值不大</td>
+</tr>
+<tr>
+<td><strong>延迟队列</strong></td>
+<td>不支持</td>
+<td>支持</td>
+</tr>
+<tr>
+<td><strong>死信队列</strong></td>
+<td>不支持</td>
+<td>支持：保存无法被正确投递的消息，避免消息被无端丢弃。</td>
+</tr>
+<tr>
+<td><strong>重试模式</strong></td>
+<td>不支持</td>
+<td>不支持：RabbitMQ中可以参考延迟队列实现一个重试队列，需要再封装一下，也不是太难。如果要在kafka中实现重试队列，首先要实现延迟队列的功能，相对比较复杂。</td>
+</tr>
+<tr>
+<td><strong>消费模式</strong></td>
+<td>拉 模式</td>
+<td>推+拉 模式</td>
+</tr>
+<tr>
+<td><strong>广播消费（pub&#x2F;sub）</strong></td>
+<td>支持：kafka对广播消费的支持比较强大</td>
+<td>支持：能力相比较kafka 弱一些</td>
+</tr>
+<tr>
+<td><strong>消息回溯</strong></td>
+<td>支持：kafka可以按照 offset（偏移量）和 timestamp（时间戳） 两种维度进行消息回溯。</td>
+<td>不支持：RabbitMQ消息一旦被确认消费便丢弃</td>
+</tr>
+<tr>
+<td><strong>消息堆积</strong></td>
+<td>支持</td>
+<td>支持：内存堆积过大会影响性能，如果仅考虑吞吐量因素，kafka的堆积效率比RabbitMQ总体高很多。</td>
+</tr>
+<tr>
+<td><strong>持久化</strong></td>
+<td>支持</td>
+<td>支持</td>
+</tr>
+<tr>
+<td><strong>消息追踪</strong></td>
+<td>不支持：消息追踪可以通过外部系统来支持，但是支持粒度肯定没有内置的细腻</td>
+<td>支持：RabbitMQ中可以采用Firehose 或者 rabbitmq_tracing插件实现。开启rabbitmq_tracing插件会大幅度影响性能，不建议在生产环境启用。使用 Firehose 与 外部 trace 系统结合的模式来提供更稳健的消息追踪能力。</td>
+</tr>
+<tr>
+<td><strong>消息过滤</strong></td>
+<td>客户端级别的支持</td>
+<td>不支持，可以定制化封装</td>
+</tr>
+<tr>
+<td><strong>多租户</strong></td>
+<td>不支持</td>
+<td>支持</td>
+</tr>
+<tr>
+<td><strong>多协议支持</strong></td>
+<td>只支持自定义协议，目前几个主流版本中存在兼容性问题。</td>
+<td>RabbitMQ本身就是AMQP协议的实现，同时支持MQTT、STOMP等协议</td>
+</tr>
+<tr>
+<td><strong>跨语言支持</strong></td>
+<td>采用Scala和Java编写，支持多种语言的客户端</td>
+<td>采用Erlang编写，支持多种语言的客户端</td>
+</tr>
+<tr>
+<td><strong>流量控制</strong></td>
+<td>支持client和user级别，可将流控配置在生产者和消费者层面</td>
+<td>RabbitMQ的流控基于 Credit-Based 算法，是内部被动触发的保护机制，仅用于生产者层面。</td>
+</tr>
+<tr>
+<td><strong>消息顺序性</strong></td>
+<td>支持单分区（partition）级别的顺序性，在各自的分区中排序</td>
+<td>顺序性消费的条件比较苛刻，需要单线程发送、单线程消费，这样吞吐量就下来了。而且无法使用延迟队列、优先队列等一些高级功能，所以一般不使用。</td>
+</tr>
+<tr>
+<td><strong>安全机制</strong></td>
+<td>（TLS&#x2F;SSL、SASL）身份认证和（读&#x2F;写）权限控制</td>
+<td>与kafka相似</td>
+</tr>
+<tr>
+<td><strong>幂等性</strong></td>
+<td>单个生产者+单partition + 单会话 场景下，支持幂等性</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td><strong>事务性消息</strong></td>
+<td>支持</td>
+<td>支持</td>
+</tr>
+</tbody></table>
+<ul>
+<li><p>**优先级队列：**可配置优先级，优先级高的消息具备优先被消费的特权，这样可以为下游服务提供不同消息级别的保证。这种模式只是在生产效率高于消费效率的时候才有效果。如果消费者的消费速度大于生产者的速度，消息中间件服务器（Broker）中没有消息堆积，就不存在对待消费数据进行优先级排序的需求了。</p>
+</li>
+<li><p><strong>延迟队列：</strong></p>
+<p>延迟队列会存储对应的延迟消息，延迟消息是指消息被生产后，并不马上消费，而是等待一定时间后，消费者才拿到消息进行消费。延迟队列的模式分为两种，基于消息的延迟和基于队列的延迟。</p>
+<ul>
+<li>基于消息的延迟是指为每条消息设置不同的延迟时间，那么每当队列中有新消息进入的时候就会重新根据延迟时间排序，但是这会对性能造成很大的影响。</li>
+<li>基于队列的延迟，设置不同延迟级别的队列，如 15s、30s、1m、10m 等，每个队列中消息的延迟时间都是相同的，这样不需要消耗大量性能去做延迟时间排序，每个消息都有固定的投递时间。</li>
+</ul>
+</li>
+<li><p>**死信队列：**由于某些原因消息无法被正确的投递，为了确保消息不会被无故的丢弃，一般会存储到一个特殊的队列中，我们称之为死信队列。与此对应的还有一个“回退队列”的概念，试想如果消费者在消费时发生了异常，那么就不会对这一次消费进行确认（Ack）, 进而发生回滚消息的操作之后消息始终会放在队列的顶部，然后不断被处理和回滚，导致队列陷入死循环。为了解决这个问题，可以为每个队列设置一个回退队列，它和死信队列都是为异常的处理提供的一种机制保障。实际情况下，回退队列的角色可以由死信队列和重试队列来扮演。 </p>
+</li>
+<li><p>**重试队列：**重试队列其实可以看成是一种回退队列，具体指消费端消费消息失败时，为防止消息无故丢失而重新将消息回滚到 Broker 中。与回退队列不同的是重试队列一般分成多个重试等级，每个重试等级一般也会设置重新投递延时，重试次数越多投递延时就越大。比如第一次重试延迟时间为5s，再次消费失败后延迟重试时间为10s，以此类推，重试越多次重新投递的时间就越久。为了避免延迟时间被无限放大，需要有个重试次数限制，超过就写入死信队列。这边需要注意：延迟队列动作由内部触发，重试队列动作由外部消费端触发。 </p>
+</li>
+<li><p>**消费模式：**消费模式分为推（push）模式和拉（pull）模式。推模式是指由 Broker 主动推送消息至消费端，实时性较好，不过需要保证服务端推送的消息不会严重超过消费端消化能力。而拉模式是指消费端定时定量主动向 Broker 端请求拉取消息，虽然实时性较差，但是可以根据自身的消费能力来拉取。</p>
+</li>
+<li><p>**广播消费：**消息一般有两种发送模式：</p>
+<ul>
+<li><strong>点对点</strong>（P2P，Point-to-Point）模式和发布&#x2F;订阅（Pub&#x2F;Sub）模式。对于P2P模式而言，消息被消费以后，队列中不会再存储，即使有多个消费者，一条消息只会被一个消费者消费。</li>
+<li>而发布订阅（Pub&#x2F;Sub）模式定义了如何向一个内容节点发布和订阅消息，这个内容节点称为主题（topic），主题可以认为是消息传递的中介，消息发布者将消息发布到某个主题，而消息订阅者则从主题中订阅消息。主题使得消息的订阅者与消息的发布者互相保持独立，不需要进行接触即可保证消息的传递，发布 &#x2F; 订阅模式在消息的一对多广播时采用。RabbitMQ 是一种典型的点对点模式，而 Kafka 是一种典型的发布订阅模式。</li>
+</ul>
+</li>
+<li><p>**消息回溯：**一般消息在消费完成之后就被处理了，之后再也不能消费到该条消息。消息回溯正好相反，是指消息在消费完成之后，还能追溯到之前被消费掉的消息。</p>
+</li>
+<li><p>**消息堆积 + 持久化：**进行流量的削峰填谷是消息中间件的一个核心功能，实现的能力主要体现在消息堆积能力上。消息堆积分内存式堆积和磁盘式堆积。RabbitMQ 是典型的内存式堆积，可以通过一些方式持久化到磁盘中，但是会降低一些性能。Kafka 是典型的磁盘式堆积，所有的消息都存储在磁盘中，存储容量是有了很大的提升，但是磁盘性能会比内存差很多。</p>
+</li>
+<li><p>**消息追踪：**在消息中间件中，消息的链路追踪非常重要，它可以对生产和消费过的消息进行trace追踪。这样，在出现故障的时候，就可以快速的定位问题。</p>
+</li>
+<li><p>**消息过滤：**消息过滤是指按照既定的过滤规则为下游用户提供指定类别的消息。就以 kafka 而言，完全可以将不同类别的消息发送至不同的 topic 中，由此可以实现某种意义的消息过滤，或者 Kafka 还可以根据分区对同一个 topic 中的消息进行分类。不过更加严格意义上的消息过滤应该是对既定的消息采取一定的方式按照一定的过滤规则进行过滤。同样以 Kafka 为例，可以通过客户端提供的 ConsumerInterceptor 接口或者 Kafka Stream 的 filter 功能进行消息过滤。</p>
+</li>
+<li><p>**流量控制：**flow control，当生产者和消费者 处理速度不均衡问题，通过对生产者和消费者的限流，来保障两者的均衡。通常的流控方法有 Stop-and-wait、滑动窗口以及令牌桶等。</p>
+</li>
+<li><p>**消息顺序性：**顺序性是指保证消息有序，特别是分布式场景下，有序的执行，是保证一致性 (Consistency)的前提。</p>
+</li>
+<li><p>**消息幂等性：**对于确保消息在生产者和消费者之间进行传输而言一般有三种传输保障（delivery guarantee）：At most once，至多一次，消息可能丢失，但绝不会重复传输；At least once，至少一次，消息绝不会丢，但是可能会重复；Exactly once，精确一次，每条消息肯定会被传输一次且仅一次。对于大多数消息中间件而言，一般只提供 At most once 和 At least once 两种传输保障，对于第三种一般很难做到，由此消息幂等性也很难保证。</p>
+</li>
+<li><p>**事务性消息：**原子性事务中的操作为一个整体，要么都做，要么都不做。即一旦出错，就回滚事务，事务是由事务开始（Begin Transaction）和事务结束（End Transaction）之间执行的全体操作组成。Kafka 和 RabbitMQ 都支持，不过仅仅指的是生产者发送消息是一个事务性操作，要么发送成功，要么发送失败。</p>
+</li>
+</ul>
+<h3 id="6-3-4-性能层面"><a href="#6-3-4-性能层面" class="headerlink" title="6.3.4 性能层面"></a>6.3.4 性能层面</h3><p>功能维度是消息中间件选型中的一个重要的参考维度，但性能也是考虑的一个重要环节。</p>
+<p>吞吐量角度：Kafka 在开启幂等、事务功能的时候会使其性能降低，RabbitMQ 在开启 rabbitmq_tracing 插件的时候也会极大的影响其性能。消息中间件的性能一般是指其吞吐量，虽然从功能维度上来说，RabbitMQ 的优势要大于 Kafka，但是 Kafka 的吞吐量要比 RabbitMQ 高出 1 至 2 个数量级，一般 RabbitMQ 的单机 QPS 在万级别之内，而 Kafka 的单机 QPS 可以维持在十万级别，甚至可以达到百万级。</p>
+<p>时延角度：另外一个是时延，作为性能维度的一个重要指标，却往往在消息中间件领域所被忽视，因为一般使用消息中间件的场景对时效性的要求并不是很高，如果要求时效性完全可以采用 RPC 的方式实现。消息中间件具备消息堆积的能力。Kafka是ms以内，RabbitMQ是us级别的。 </p>
+<h3 id="6-3-5-高可用角度"><a href="#6-3-5-高可用角度" class="headerlink" title="6.3.5 高可用角度"></a>6.3.5 高可用角度</h3><p>高可用角度是指系统的出错概率和无故障运行时长。</p>
+<p>如消息丢失，是使用消息中间件时所不得不面对的一个同点，其背后消息可靠性也是衡量消息中间件好坏的一个关键因素。尤其是在金融支付领域，消息可靠性尤为重要。然而说到可靠性必然要说到可用性，注意这两者之间的区别，消息中间件的可靠性是指对消息不丢失的保障程度；</p>
+<p>而消息中间件的可用性是指无故障运行的时间百分比，通常用几个 9 来衡量，如 99.99% 就是一个不错的指标。</p>
+<p>对应的 RabbitMQ 是通过镜像环形队列实现多副本及强一致性语义的。多副本可以保证在 master 节点宕机异常之后可以提升 slave 作为新的 master 而继续提供服务来保障可用性。</p>
+<h3 id="6-3-6-运维管理层面"><a href="#6-3-6-运维管理层面" class="headerlink" title="6.3.6 运维管理层面"></a>6.3.6 运维管理层面</h3><p>消息中间件一个很重要的考虑层面是运维管理，比如：申请、审核、监控、告警、管理、容灾、部署等。</p>
+<p>对消息中间件的使用 从使用、接入规范、全方位的监控、流量统计和分析等方面，提供有效的基准数据，也可以在检测到异常的情况配合告警，以便运维、开发人员的迅速介入。除了一般的监控项（比如硬件、GC 等）之外，对于消息中间件还需要关注端到端时延、消息审计、消息堆积等方面。</p>
+<p>对于 RabbitMQ 而言，最正统的监控管理工具莫过于 rabbitmq_management 插件了，另外还有 AppDynamics, Collectd, DataDog, Ganglia 等多种优秀的产品。</p>
+<p>Kafka 丰富的管理工具，比如：Kafka Manager, Kafka Monitor, Kafka Offset Monitor 等产品，其中 Cruise 还可以提供自动化运维的功能。</p>
+<h3 id="6-3-7-社区力度及生态发展"><a href="#6-3-7-社区力度及生态发展" class="headerlink" title="6.3.7 社区力度及生态发展"></a>6.3.7 社区力度及生态发展</h3><p>Kafka 和 RabbitMQ 都有一系列开源的监控管理产品，社区活跃，产品生态都很不错。</p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMCZ7HaLpZxDj_zG1XxJmHwfbAThfQAAqTEMRuvMJFV9E-PLlimPicBAAMCAAN4AAM2BA.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMCZ7HaLpZxDj_zG1XxJmHwfbAThfQAAqTEMRuvMJFV9E-PLlimPicBAAMCAAN4AAM2BA.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">dachang</div><div class="post-copyright__author_desc">感谢你选择与我一起虚度时光。</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="https://yeoh.de5.net/2025/03/22/MQ%E7%B3%BB%E5%88%972-%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%9A%84%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('https://yeoh.de5.net/2025/03/22/MQ%E7%B3%BB%E5%88%972-%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%9A%84%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B/')">MQ系列2：消息中间件的技术选型</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg" target="_blank"><img class="post-qr-code-img" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMEZ7HheDSuPHt4eDeH2L1Y4ORfslsAArXEMRuvMJFVZbGWT1spGtgBAAMCAAN4AAM2BA.jpg" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg" target="_blank"><img class="post-qr-code-img" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMFZ7Hh6gSTlGPMvEOEIQjcnW85WsUAArfEMRuvMJFV1ctnAAFzfhv0AQADAgADeAADNgQ.jpg" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="https://yeoh.de5.net/2025/03/22/MQ%E7%B3%BB%E5%88%972-%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%9A%84%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=MQ系列2：消息中间件的技术选型&amp;url=https://yeoh.de5.net/2025/03/22/MQ%E7%B3%BB%E5%88%972-%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%9A%84%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B/&amp;pic=https://imags-563.pages.dev/file/AgACAgUAAxkDAAOjaUYWvvk2kz21WA9yVsIDspqtE0QAAmcLaxvRfjBWWYLv7Ciw5k0BAAMCAAN3AAM2BA.png" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://yeoh.de5.net" target="_blank">数根朽木，</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__category-list"><a class="post-meta__box__categoryes" href="/categories/MQ/"><span class="categoryes-punctuation"> <i class="anzhiyufont anzhiyu-icon-inbox"></i></span>MQ<span class="categoryesPageCount">2</span></a></div><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/MQ/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>MQ<span class="tagsPageCount">2</span></a><a class="post-meta__box__tags" href="/tags/RabbitMQ/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>RabbitMQ<span class="tagsPageCount">2</span></a><a class="post-meta__box__tags" href="/tags/RocketMQ/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>RocketMQ<span class="tagsPageCount">2</span></a><a class="post-meta__box__tags" href="/tags/kafka/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>kafka<span class="tagsPageCount">2</span></a><a class="post-meta__box__tags" href="/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>消息中间件<span class="tagsPageCount">2</span></a></div></div><div class="post_share"><div class="social-share" data-image="https://imags-563.pages.dev/file/AgACAgUAAxkDAAPQaUetiv4xao864OZFnrxs3CgvkQIAAvMLaxunpzhWq55FdPk-m8gBAAMCAAN4AAM2BA.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/03/20/Redis%E7%B3%BB%E5%88%97-%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/"><img class="prev-cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAOVaUNssHJpyoSvULXJ3mpEoLYGqToAAogLaxvvjBhWKAb4Q2NXvCABAAMCAAN3AAM2BA.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Redis系列：聊聊布隆过滤器</div></div></a></div><div class="next-post pull-right"><a href="/2025/03/22/MQ%E7%B3%BB%E5%88%971-%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%89%A7%E8%A1%8C%E5%8E%9F%E7%90%86/"><img class="next-cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAOaaUYDAXW0BAp2siQqvXyoKYO_KhAAAkMLaxvRfjBWTC0AAWBATgJfAQADAgADeAADNgQ.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">MQ系列1：消息中间件执行原理</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/03/22/MQ%E7%B3%BB%E5%88%971-%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%89%A7%E8%A1%8C%E5%8E%9F%E7%90%86/" title="MQ系列1：消息中间件执行原理"><img class="cover" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAOaaUYDAXW0BAp2siQqvXyoKYO_KhAAAkMLaxvRfjBWTC0AAWBATgJfAQADAgADeAADNgQ.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-03-22</div><div class="title">MQ系列1：消息中间件执行原理</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div><div class="comment-tips" id="comment-tips"><span>✅ 你无需删除空行，直接评论以获取最佳展示效果</span></div></div><div class="comment-wrap"><div><div id="twikoo-wrap"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">1 背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%9A%84%E7%BB%84%E6%88%90"><span class="toc-number">2.</span> <span class="toc-text">2 消息中间件的组成</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%9A%84%E6%A8%A1%E5%BC%8F%E5%88%86%E7%B1%BB"><span class="toc-number">3.</span> <span class="toc-text">3 消息中间件的模式分类</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%9A%84%E4%BC%98%E5%8A%BF"><span class="toc-number">4.</span> <span class="toc-text">4 消息中间件的优势</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E5%B8%B8%E7%94%A8%E5%8D%8F%E8%AE%AE"><span class="toc-number">5.</span> <span class="toc-text">5 消息中间件常用协议</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6-%E4%B8%B0%E5%AF%8C%E5%BC%BA%E5%A4%A7%E7%9A%84%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%94%9F%E6%80%81"><span class="toc-number">6.</span> <span class="toc-text">6 丰富强大的消息中间件生态</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#6-1-%E4%B8%BB%E6%B5%81MQ%E4%BB%8B%E7%BB%8D"><span class="toc-number">6.1.</span> <span class="toc-text">6.1 主流MQ介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-2-%E4%B8%BB%E6%B5%81MQ%E5%AF%B9%E6%AF%94"><span class="toc-number">6.2.</span> <span class="toc-text">6.2 主流MQ对比</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-3-%E9%80%89%E5%9E%8B%E5%BB%BA%E8%AE%AE"><span class="toc-number">6.3.</span> <span class="toc-text">6.3 选型建议</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-1-%E7%B3%BB%E7%BB%9F%E5%BB%BA%E8%AE%BE%E8%A7%84%E6%A8%A1%E8%A7%92%E5%BA%A6"><span class="toc-number">6.3.1.</span> <span class="toc-text">6.3.1 系统建设规模角度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-2-%E4%B8%9A%E5%8A%A1%E8%A7%84%E6%A8%A1%E8%A7%92%E5%BA%A6"><span class="toc-number">6.3.2.</span> <span class="toc-text">6.3.2 业务规模角度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-3-%E5%8A%9F%E8%83%BD%E6%80%A7%E5%B1%82%E9%9D%A2%E9%80%89%E5%9E%8B"><span class="toc-number">6.3.3.</span> <span class="toc-text">6.3.3 功能性层面选型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-4-%E6%80%A7%E8%83%BD%E5%B1%82%E9%9D%A2"><span class="toc-number">6.3.4.</span> <span class="toc-text">6.3.4 性能层面</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-5-%E9%AB%98%E5%8F%AF%E7%94%A8%E8%A7%92%E5%BA%A6"><span class="toc-number">6.3.5.</span> <span class="toc-text">6.3.5 高可用角度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-6-%E8%BF%90%E7%BB%B4%E7%AE%A1%E7%90%86%E5%B1%82%E9%9D%A2"><span class="toc-number">6.3.6.</span> <span class="toc-text">6.3.6 运维管理层面</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-7-%E7%A4%BE%E5%8C%BA%E5%8A%9B%E5%BA%A6%E5%8F%8A%E7%94%9F%E6%80%81%E5%8F%91%E5%B1%95"><span class="toc-number">6.3.7.</span> <span class="toc-text">6.3.7 社区力度及生态发展</span></a></li></ol></li></ol></li></ol></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div id="footer_deal"><a class="deal_link" href="mailto:youngyang0220@gmail.com" title="email"><i class="anzhiyufont anzhiyu-icon-envelope"></i></a><img class="footer_mini_logo" title="返回顶部" alt="返回顶部" onclick="anzhiyu.scrollToDest(0, 500)" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMCZ7HaLpZxDj_zG1XxJmHwfbAThfQAAqTEMRuvMJFV9E-PLlimPicBAAMCAAN4AAM2BA.jpg" size="50px"/><a class="deal_link" target="_blank" rel="noopener" href="https://github.com/dachang007" title="Github"><i class="anzhiyufont anzhiyu-icon-github"></i></a></div><div id="anzhiyu-footer"><div class="footer-group"><div class="footer-title">服务</div><div class="footer-links"><a class="footer-item" title="51la统计" target="_blank" rel="noopener" href="https://v6.51.la/">51la统计</a><a class="footer-item" title="十年之约" target="_blank" rel="noopener" href="https://www.foreverblog.cn/">十年之约</a><a class="footer-item" title="开往" target="_blank" rel="noopener" href="https://github.com/travellings-link/travellings">开往</a></div></div><div class="footer-group"><div class="footer-title">主题</div><div class="footer-links"><a class="footer-item" title="文档" target="_blank" rel="noopener" href="https://docs.anheyu.com/">文档</a><a class="footer-item" title="源码" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu">源码</a><a class="footer-item" title="更新日志" href="/update/">更新日志</a></div></div><div class="footer-group"><div class="footer-title">导航</div><div class="footer-links"><a class="footer-item" title="图床工具" target="_blank" rel="noopener" href="https://imags-563.pages.dev">图床工具</a><a class="footer-item" title="在线烟花模拟器" target="_blank" rel="noopener" href="http://greatree.hidns.co">在线烟花模拟器</a><a class="footer-item" title="订阅转换" target="_blank" rel="noopener" href="https://suburl.v1.mk">订阅转换</a><a class="footer-item" title="在线简历生成" target="_blank" rel="noopener" href="https://imags-563.pages.dev">在线简历生成</a></div></div><div class="footer-group"><div class="footer-title-group"><div class="footer-title">友链</div><a class="random-friends-btn" id="footer-random-friends-btn" href="javascript:addFriendLinksInFooter();" title="换一批友情链接"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right"></i></a></div><div class="footer-links" id="friend-links-in-footer"></div></div></div><p id="ghbdages"><a class="github-badge" target="_blank" href="https://hexo.io/" style="margin-inline:5px" data-title="博客框架为Hexo_v5.4.0" title="博客框架为Hexo_v5.4.0"><img src="https://npm.elemecdn.com/anzhiyu-blog@2.1.5/img/badge/Frame-Hexo.svg" alt="博客框架为Hexo_v5.4.0"/></a><a class="github-badge" target="_blank" href="https://blog.anheyu.com/" style="margin-inline:5px" data-title="本站使用AnZhiYu主题" title="本站使用AnZhiYu主题"><img src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.9/img/Theme-AnZhiYu-2E67D3.svg" alt="本站使用AnZhiYu主题"/></a><a class="github-badge" target="_blank" href="https://www.Cloudflare.com/" style="margin-inline:5px" data-title="本站使用CloudFlare为静态资源提供CDN加速" title="本站使用CloudFlare为静态资源提供CDN加速"><img src="https://img.shields.io/badge/%E2%98%81CDN-CloudFlare-yellow" alt="本站使用CloudFlare为静态资源提供CDN加速"/></a><a class="github-badge" target="_blank" href="https://github.com/" style="margin-inline:5px" data-title="本站项目由Github托管" title="本站项目由Github托管"><img src="https://npm.elemecdn.com/anzhiyu-blog@2.1.5/img/badge/Source-Github.svg" alt="本站项目由Github托管"/></a><a class="github-badge" target="_blank" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" style="margin-inline:5px" data-title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可" title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"><img src="https://npm.elemecdn.com/anzhiyu-blog@2.2.0/img/badge/Copyright-BY-NC-SA.svg" alt="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"/></a></p></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2022 - 2025 By <a class="footer-bar-link" href="/" title="dachang" target="_blank">dachang</a></div></div><div id="footer-type-tips"></div><div class="js-pjax"><script>function subtitleType () {
+  fetch('https://v1.hitokoto.cn')
+    .then(response => response.json())
+    .then(data => {
+      if (false) {
+        const from = '出自 ' + data.from
+        const sub = []
+        sub.unshift(data.hitokoto, from)
+        window.typed = new Typed('#footer-type-tips', {
+          strings: sub,
+          startDelay: 300,
+          typeSpeed: 150,
+          loop: false,
+          backSpeed: 50,
+        })
+      } else {
+        document.getElementById('footer-type-tips').innerHTML = data.hitokoto
+      }
+    })
+}
+
+if (false) {
+  if (typeof Typed === 'function') {
+    subtitleType()
+  } else {
+    getScript('https://cdn.cbd.int/typed.js@2.1.0/dist/typed.umd.js').then(subtitleType)
+  }
+} else {
+  subtitleType()
+}
+</script></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">28</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">32</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">7</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网站项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="个人博客"><img class="back-menu-item-icon" src="/favicon.ico" alt="个人博客"/><span class="back-menu-item-text">个人博客</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线简历"><img class="back-menu-item-icon" src="/favicon.ico" alt="在线简历"/><span class="back-menu-item-text">在线简历</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">建设工具</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://imags-563.pages.dev" title="在线图床"><img class="back-menu-item-icon" src="/img/image.ico" alt="在线图床"/><span class="back-menu-item-text">在线图床</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="在线烟花模拟器"><img class="back-menu-item-icon" src="/img/Clash.Mini.png" alt="在线烟花模拟器"/><span class="back-menu-item-text">在线烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://greatree.hidns.co" title="烟花模拟器"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAMMZ7Qfv1Xv2qvgqSVN7kNhRO_uzfgAAlvAMRtiZKBVrGT1Z6RPiX4BAAMCAANtAAM2BA.png" alt="烟花模拟器"/><span class="back-menu-item-text">烟花模拟器</span></a><a class="back-menu-item" target="_blank" rel="noopener" href="http://pay.totalh.net/" title="三合一收款码"><img class="back-menu-item-icon" src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAM8Z7WNYNdWdrYsas5PPFT8Di3493sAAgLKMRsEtalVDcfaakgTXPkBAAMCAAN4AAM2BA.png" alt="三合一收款码"/><span class="back-menu-item-text">三合一收款码</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 博客文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 全部文章</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 文章分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 所有标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 网站工具</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 图床工具</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="http://greatree.hidns.co"><i class="anzhiyufont anzhiyu-icon-artstation faa-tada" style="font-size: 0.9em;"></i><span> 烟花模拟器</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://suburl.v1.mk"><i class="anzhiyufont anzhiyu-icon-envelope faa-tada" style="font-size: 0.9em;"></i><span> 订阅转换</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><span> 在线简历生成</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于我</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://imags-563.pages.dev"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 在线简历</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><i class="anzhiyufont anzhiyu-icon-shoe-prints1 faa-tada" style="font-size: 0.9em;"></i><span> 随便逛逛</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Boolean-filter/" style="font-size: 0.88rem;">Boolean filter<sup>2</sup></a><a href="/tags/DNS%E6%B3%84%E9%9C%B2/" style="font-size: 0.88rem;">DNS泄露<sup>1</sup></a><a href="/tags/Fake-IP/" style="font-size: 0.88rem;">Fake IP<sup>1</sup></a><a href="/tags/JVM%E8%99%9A%E6%8B%9F%E6%9C%BA/" style="font-size: 0.88rem;">JVM虚拟机<sup>1</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>1</sup></a><a href="/tags/JavaSE/" style="font-size: 0.88rem;">JavaSE<sup>11</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 0.88rem;">Java基础<sup>11</sup></a><a href="/tags/Java%E6%A0%B8%E5%BF%83/" style="font-size: 0.88rem;">Java核心<sup>14</sup></a><a href="/tags/Java%E7%89%88%E6%9C%AC%E6%96%B0%E7%89%B9%E6%80%A7/" style="font-size: 0.88rem;">Java版本新特性<sup>2</sup></a><a href="/tags/MQ/" style="font-size: 0.88rem;">MQ<sup>2</sup></a><a href="/tags/OOM/" style="font-size: 0.88rem;">OOM<sup>1</sup></a><a href="/tags/RabbitMQ/" style="font-size: 0.88rem;">RabbitMQ<sup>2</sup></a><a href="/tags/Redis/" style="font-size: 0.88rem;">Redis<sup>5</sup></a><a href="/tags/Redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/" style="font-size: 0.88rem;">Redis内存淘汰策略<sup>1</sup></a><a href="/tags/Redis%E5%8E%9F%E7%90%86/" style="font-size: 0.88rem;">Redis原理<sup>1</sup></a><a href="/tags/Redis%E7%BC%93%E5%AD%98/" style="font-size: 0.88rem;">Redis缓存<sup>1</sup></a><a href="/tags/RocketMQ/" style="font-size: 0.88rem;">RocketMQ<sup>2</sup></a><a href="/tags/SSM/" style="font-size: 0.88rem;">SSM<sup>1</sup></a><a href="/tags/Spring/" style="font-size: 0.88rem;">Spring<sup>1</sup></a><a href="/tags/SpringBoot/" style="font-size: 0.88rem;">SpringBoot<sup>1</sup></a><a href="/tags/kafka/" style="font-size: 0.88rem;">kafka<sup>2</sup></a><a href="/tags/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" style="font-size: 0.88rem;">单例模式<sup>1</sup></a><a href="/tags/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/" style="font-size: 0.88rem;">布隆过滤器<sup>2</sup></a><a href="/tags/%E6%8E%A5%E5%8F%A3%E8%B6%85%E6%97%B6/" style="font-size: 0.88rem;">接口超时<sup>1</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/" style="font-size: 0.88rem;">消息中间件<sup>2</sup></a><a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" style="font-size: 0.88rem;">消息队列<sup>1</sup></a><a href="/tags/%E7%BA%BF%E4%B8%8A%E4%BA%8B%E6%95%85/" style="font-size: 0.88rem;">线上事故<sup>1</sup></a><a href="/tags/%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/" style="font-size: 0.88rem;">缓存雪崩<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96/" style="font-size: 0.88rem;">网络优化<sup>1</sup></a><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 0.88rem;">设计模式<sup>1</sup></a><a href="/tags/%E8%BF%90%E7%BB%B4%E8%B0%83%E4%BC%98/" style="font-size: 0.88rem;">运维调优<sup>3</sup></a><a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" style="font-size: 0.88rem;">高并发<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const init = () => {
+    twikoo.init(Object.assign({
+      el: '#twikoo-wrap',
+      envId: 'https://twikoo-kohl-zeta.vercel.app',
+      region: '',
+      onCommentLoaded: () => {
+        anzhiyu.loadLightbox(document.querySelectorAll('#twikoo .tk-content img:not(.tk-owo-emotion)'))
+      }
+    }, null))
+  }
+
+  const loadTwikoo = () => {
+    if (typeof twikoo === 'object') setTimeout(runFn,0)
+    else getScript('https://unpkg.com/twikoo@1.6.44/dist/twikoo.all.min.js').then(runFn)
+  }
+
+  const getCount = () => {
+    const countELement = document.getElementById('twikoo-count')
+    if(!countELement) return
+    twikoo.getCommentsCount({
+      envId: 'https://twikoo-kohl-zeta.vercel.app',
+      region: '',
+      urls: [window.location.pathname],
+      includeReply: false
+    }).then(res => {
+      countELement.textContent = res[0].count
+    }).catch(err => {
+      console.error(err)
+    })
+  }
+
+  const runFn = () => {
+    init();
+    
+  }
+
+  if ('Twikoo' === 'Twikoo' || !true) {
+    if (true) anzhiyu.loadComment(document.getElementById('twikoo-wrap'), loadTwikoo)
+    else {
+      loadTwikoo()
+    }
+  } else {
+    window.loadOtherComment = loadTwikoo
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getComment = () => {
+    const runTwikoo = () => {
+      twikoo.getRecentComments({
+        envId: 'https://twikoo-kohl-zeta.vercel.app',
+        region: '',
+        pageSize: 6,
+        includeReply: true
+      }).then(function (res) {
+        const twikooArray = res.map(e => {
+          return {
+            'content': changeContent(e.comment),
+            'avatar': e.avatar,
+            'nick': e.nick,
+            'url': e.url + '#' + e.id,
+            'date': new Date(e.created).toISOString()
+          }
+        })
+
+        saveToLocal.set('twikoo-newest-comments', JSON.stringify(twikooArray), 10/(60*24))
+        generateHtml(twikooArray)
+      }).catch(function (err) {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      })
+    }
+
+    if (typeof twikoo === 'object') {
+      runTwikoo()
+    } else {
+      getScript('https://unpkg.com/twikoo@1.6.44/dist/twikoo.all.min.js').then(runTwikoo)
+    }
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'><div class='name'><span>${array[i].nick} </span></div></a>`
+        }
+        
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('twikoo-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","meta[property=\"og:type\"]","meta[property=\"og:site_name\"]","meta[property=\"og:description\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404')
+  }
+})</script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>
