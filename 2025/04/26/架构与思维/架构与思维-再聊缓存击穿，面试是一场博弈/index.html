@@ -219,15 +219,17 @@
 <li>一个核心的应用或者服务（比如微信、钉钉、百度APP），高峰QPS是百万甚至是千万</li>
 </ul>
 <hr>
-<p>★ 分析：上述类型的应用具有很明显的峰值 高斯分布的特征，就是9~10点是用户早高峰。微信是，百度APP是，钉钉也是，钉钉一般给政企、教学等使用，通用是10点左右峰值期，每天的峰值如下：<br><img src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAIBEmlIuRCM4JBQZHj9PoY3d6vSh0guAAJZDGsbp6dAVi5JVrusEjMXAQADAgADdwADNgQ.png"></p>
-<hr>
+<blockquote>
+<p>★ 分析：上述类型的应用具有很明显的峰值 高斯分布的特征，就是9~10点是用户早高峰。微信是，百度APP是，钉钉也是，钉钉一般给政企、教学等使用，通用是10点左右峰值期，每天的峰值如下：</p>
+</blockquote>
+<p><img src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAIBEmlIuRCM4JBQZHj9PoY3d6vSh0guAAJZDGsbp6dAVi5JVrusEjMXAQADAgADdwADNgQ.png"></p>
 <ul>
 <li>应用缓存了用户的基本信息，如（姓名、性别、职业、地址等），假设以为用户Id为Cache的key，那每个用户都有一个基础信息的缓存。</li>
 <li>因为不知名的原因，导致缓存都丢了（可能是缓存集体过期、故障导致缓存失效、程序bug导致缓存误删、服务器重启导致内存清理）。</li>
 <li>恰巧是访问高峰期（比如9点早高峰），千百万的请求狂奔而来，查不到缓存，透过缓存层直接投入数据库。</li>
 <li>基于磁盘的数据库的访问效率，性能，抗击打能力远逊于高速缓存，数据库很容易被打垮，造成服务雪崩。</li>
 </ul>
-<h1 id="4-候选人的各种答案（综合整理）"><a href="#4-候选人的各种答案（综合整理）" class="headerlink" title="4 候选人的各种答案（综合整理）"></a>4 候选人的各种答案（综合整理）</h1><h2 id="4-1-缓存预热"><a href="#4-1-缓存预热" class="headerlink" title="4.1 缓存预热"></a>4.1 缓存预热</h2><p>既然是可预见的峰值期，那么缓存预热是一个好办法，比如在9 ~ 10点是高峰期，在7 ~ 9点这两个小时中，可以均匀的把部分缓存做上。<br><img src="https://img2023.cnblogs.com/blog/167509/202212/167509-20221203171638611-1566747048.png" alt="image"></p>
+<h1 id="4-候选人的各种答案（综合整理）"><a href="#4-候选人的各种答案（综合整理）" class="headerlink" title="4 候选人的各种答案（综合整理）"></a>4 候选人的各种答案（综合整理）</h1><h2 id="4-1-缓存预热"><a href="#4-1-缓存预热" class="headerlink" title="4.1 缓存预热"></a>4.1 缓存预热</h2><p>既然是可预见的峰值期，那么缓存预热是一个好办法，比如在9 ~ 10点是高峰期，在7 ~ 9点这两个小时中，可以均匀的把部分缓存做上。<br><img src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAIBI2lLaU_1EEtXA7igv8sfmt-pCVp6AAKeC2sbUDlYVkHpvOlO0wyEAQADAgADdwADNgQ.png"></p>
 <p>缺点：这种仅仅只能解决可预见的缓存失效情况。如果是突发缓存失效情况，假设在10点高峰期因为某些原因（比如上面说的 故障导致缓存失效、程序bug导致缓存误删、服务器重启导致内存清理）是没有效果的。</p>
 <h2 id="4-2-非一致的过期时间"><a href="#4-2-非一致的过期时间" class="headerlink" title="4.2 非一致的过期时间"></a>4.2 非一致的过期时间</h2><p>缓存既然大部分是在高峰期（9~10点）创建的（假设Cache的Expire Time都一样，比如8h），那很有可能失效时间会很接近。几乎同一时间一起失效，这样确实也会引起群起创建的情况，也会导致上面说的击穿的情况发生。</p>
 <p>我们在创建同一类型的批次缓存的时候，会采用3-4-3 分布原则。比如一个缓存的Expire Time 是 10H，<br>那么就是3H + 4H * random() + 3h ,来进行错开！<br><img src="https://imags-563.pages.dev/file/AgACAgUAAxkDAAIBE2lIuUP299AsOMgnCYm3s98t4NKVAAJaDGsbp6dAVslhFQ3NZtIoAQADAgADeQADNgQ.png"></p>
